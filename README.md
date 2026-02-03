@@ -20,4 +20,4 @@ Jean C. Chamoun
 - Add Course Page
 - Check/Edit course page(with remove course button)
 - Excel sheet page(with button export to excel)
-- Enter numbers page
+
