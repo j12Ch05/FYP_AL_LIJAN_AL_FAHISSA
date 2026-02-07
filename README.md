@@ -9,15 +9,14 @@ Jean C. Chamoun
 
 ### Charbel's part:
 
-- Log In Page
+- Log In Page(Check with the supervisor)
 - Admin Check professor information page(with remove professor button)
 - Insert Correctors(with delete Correctors button)
 - Edit information page(With confirm button)
 
 ### Jean's part:
 
-- Register Page
+- Register Page(Check with the team)
 - Add Course Page
 - Check/Edit course page(with remove course button)
 - Excel sheet page(with button export to excel)
-
