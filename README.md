@@ -16,7 +16,7 @@ Jean C. Chamoun
 
 ### Jean's part:
 
-- Register Page(Check with the team)
+- Register Page(Check with the supervisor)
 - Add Course Page
 - Check/Edit course page(with remove course button)
 - Excel sheet page(with button export to excel)
