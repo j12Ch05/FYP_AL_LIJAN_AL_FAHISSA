@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up Page</title>
     <link rel="icon" href="ULFS.ico">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
+    <div class="box-container">
         <h1>Sign Up</h1>
         <form id="signUpForm" action="signUp.php" method="post">
             <div class="form-group">
@@ -110,7 +110,10 @@
                 >
                 <div class="error-message" id="passwordError">Password is required</div>
             </div>
-            <button type="submit" class="login-btn" name="signUp">Sign Up</button>
+            <button type="submit" class="submit-btn" name="signUp">Sign Up</button>
+            <div class="back">
+                <a href="login.html">Back to Login</a>
+            </div>
         </form>
     </div>
     
