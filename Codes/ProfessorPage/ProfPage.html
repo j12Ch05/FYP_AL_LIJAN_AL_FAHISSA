@@ -3,81 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prof info Page</title>
+    <title>Professor Page</title>
     <link rel="stylesheet" href="ProfPage.css">
     <link rel="icon" href="ULFS.ico">
-
 </head>
 <body>
-    <div class="box-container">
-        <h1>View Page</h1>
-        <form id="ProfessorForm" action="professorPage.php" method="post">
-            <div class="form-group">
-                <label for="professorID">Personal Information</label>
-                <tc>
-                    <tr>
-                        <div
-                            type="text"
-                            id="professorID"
-                            name="professorID"
-                            > Professor ID:   
-                        </div>
-                    </tr>
-</tc><tc>
-                    <tr>
-                        <div
-                            type="text"
-                            id="professorName"
-                            name="professorName"
-                            > Professor Name:  
-                        </div>
-                    </tr>
-</tc><tc>
-                    <tr>
-                        <div
-                            type="text" 
-                            id="BirthDate"
-                            name="BirthDate"
-                            >Birth Date: 
-                        </div>
-                    </tr>
-</tc><tc>
-                    <tr>
-                        <div
-                            type="text"
-                            id ="professorAddress"
-                            name="professorAddress"
-                            > Address: 
-                        </div>  
-                    </tr>
-</tc><tc>
-                    <tr>
-                        <div
-                            type="text"
-                            id="professorPhone"
-                            name="professorPhone"
-                            > Phone Number: 
-                        </div>
-                    </tr>
-</tc><tc>
-                    <tr>
-                        <div
-                            type="text"
-                            id="professorDepartement"
-                            name="professorDepartement" 
-                            > professorDepartement: 
-                        </div>
-                    </tr>
-        </tc>
+
+    <input type="radio" name="nav" id="tab-profile" checked>
+    <input type="radio" name="nav" id="tab-courses">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <h2>Lebanese University</h2>
+            <p>Faculty of Science II</p>
+        </div>
+        
+        <nav>
+            <label for="tab-profile" class="nav-item label-profile">
+                <span class="icon">👤</span> Profile
+            </label>
+            <label for="tab-courses" class="nav-item label-courses">
+                <span class="icon">📚</span> My Courses
+            </label>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="welcome-header">
+            Welcome Dr. <span>Ahmad Hassan</span>
+        </header>
+
+        <section id="content-profile" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Profile Information</h3>
+                    <button type="submit" form="profile-form" class="btn">Edit Information</button>
+                </div>
                 
-                
+                <form id="profile-form" action="process_profile.php" method="POST" class="profile-grid">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="Ahmad">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="Hassan">
+                    </div>
+                    <div class="form-group">
+                        <label>Birth Date</label>
+                        <input type="text" name="birth_date" value="15-May-1980">
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" name="address" value="Beirut, Lebanon">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="phone" value="03 123 456">
+                    </div>
+                    <div class="form-group">
+                        <label>File Number</label>
+                        <input type="text" name="file_number" value="PR20241001" readonly class="readonly-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select name="department">
+                            <option value="math">Math</option>
+                            <option value="css" selected>Computer Science and Statistics</option>
+                            <option value="pe">Physics and Electronics</option>
+                            <option value="bio">Biology</option>
+                            <option value="bioch">Biochemistry</option>
+                            <option value="chem">Chemistry</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="ahmad.hassan@ul.edu.lb">
+                    </div>
+                </form>
             </div>
+        </section>
 
-            <button type="submit" class="submit-btn" name="save changes">Save Changes</button>
-
-        </form>
-    </div>
-
+        <section id="content-courses" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3>My Courses</h3>
+                    <button class="btn btn-secondary">Excel Export</button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Semester</th>
+                                <th>Credits</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="#" class="code-link">I2204</a></td>
+                                <td>Data Structures and Algorithms</td>
+                                <td>Fall 2024</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="code-link">I2207</a></td>
+                                <td>Database Management Systems</td>
+                                <td>Spring 2024</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="code-link">I2201</a></td>
+                                <td>Object-Oriented Programming</td>
+                                <td>Fall 2024</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="code-link">I3305</a></td>
+                                <td>Software Engineering</td>
+                                <td>Spring 2024</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="code-link">I3308</a></td>
+                                <td>Web Development</td>
+                                <td>Fall 2024</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td><a href="#" class="code-link">I2205</a></td>
+                                <td>Computer Networks</td>
+                                <td>Spring 2025</td>
+                                <td>3</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
 
 </body>
 </html>
