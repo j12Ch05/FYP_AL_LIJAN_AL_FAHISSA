@@ -10,13 +10,13 @@ Jean C. Chamoun
 ### Charbel's part:
 
 - Log In Page(Checked)
-- Admin Check professor information page(with remove professor button)
-- Insert Correctors(with button export to excel and with delete Correctors button)
+- Admin Check professor information page(with remove professor button)(Check the new item about this page with the team)
+- Insert Correctors(with button export to excel and with delete Correctors button)(Check the new item about this page with the team)
 - Professor profile page(with edit profile button)(Check with the team)
 
 ### Jean's part:
 
 - Register Page(Checked)
-- Add Course Page/Check/Edit course page(with remove course button)
+- Add Course Page/Check/Edit course page(with remove course button)(Check the new item about this page with the team)
 - Professor Courses Pages(with export to excel)(Check with the team)
 - Forgot password page(with enter code and change password pages)(Checked)

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="AdminPage.css">
+    <link rel="icon" href="ULFS.ico">
+</head>
+<body>
+
+    <input type="radio" name="nav" id="tab-professors" checked>
+    <input type="radio" name="nav" id="tab-courses">
+    <input type="radio" name="nav" id="tab-correctors">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <h2>Lebanese University</h2>
+            <p>Faculty of Science II</p>
+            <h2>الجامعة اللبنانية</h2>
+            <p>كلية العلوم - الفرع الثاني</p>
+        </div>
+        
+        <nav>
+            <label for="tab-professors" class="nav-item label-professors">
+                <span class="icon">🧑‍🏫</span> Professors/الاساتذة
+            </label>
+            <label for="tab-courses" class="nav-item label-courses">
+                <span class="icon">📚</span> Courses/مقررات
+            </label>
+            <label for="tab-correctors" class="nav-item label-correctors">
+                <span class="icon">✍️</span> Correctors/الليجان الفاحصة
+            </label>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="welcome-header">
+            Welcome Admin
+        </header>
+
+        <section id="content-professors" class="tab-content">
+            <h1>Professors</h1>
+        </section>
+
+        <section id="content-courses" class="tab-content">
+            <h1>Courses</h1>
+        </section>
+
+        <section id="content-correctors" class="tab-content">
+            <h1>Correctors</h1>
+        </section>
+    </main>
+
+</body>
+</html>

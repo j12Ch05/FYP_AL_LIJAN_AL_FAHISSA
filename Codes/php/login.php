@@ -2,7 +2,7 @@
     session_start();
      if(isset($_POST["login"])){
         if(isset($_POST["asAdmin"])){
-            header("Location: charbel.php");
+            header("Location: AdminPage.html");
         }
         else{
             header("Location: ProfPage.html");
