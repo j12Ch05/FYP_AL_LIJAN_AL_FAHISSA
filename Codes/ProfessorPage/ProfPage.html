@@ -16,16 +16,14 @@
         <div class="logo-section">
             <h2>Lebanese University</h2>
             <p>Faculty of Science II</p>
-            <h2>الجامعة اللبنانية</h2>
-            <p>كلية العلوم - الفرع الثاني</p>
         </div>
         
         <nav>
             <label for="tab-profile" class="nav-item label-profile">
-                <span class="icon">👤</span> Profile/حساب تعريفي
+                <span class="icon">👤</span> Profile
             </label>
             <label for="tab-courses" class="nav-item label-courses">
-                <span class="icon">📚</span> My Courses/مقررات
+                <span class="icon">📚</span> My Courses
             </label>
         </nav>
     </aside>
@@ -44,42 +42,42 @@
                 
                 <form id="profile-form" action="prof_profile.php" method="POST" class="profile-grid">
                     <div class="form-group">
-                        <label>First Name/الاسم</label>
+                        <label>First Name</label>
                         <input type="text" name="first_name" value="Ahmad">
                     </div>
                     <div class="form-group">
-                        <label>Last Name/الشهرة</label>
+                        <label>Last Name</label>
                         <input type="text" name="last_name" value="Hassan">
                     </div>
                     <div class="form-group">
-                        <label>Birth Date/تاريخ الولادة</label>
+                        <label>Birth Date</label>
                         <input type="text" name="birth_date" value="15-May-1980">
                     </div>
                     <div class="form-group">
-                        <label>Address/العنوان</label>
+                        <label>Address</label>
                         <input type="text" name="address" value="Beirut, Lebanon">
                     </div>
                     <div class="form-group">
-                        <label>Phone/رقم الهاتف</label>
+                        <label>Phone</label>
                         <input type="text" name="phone" value="03 123 456">
                     </div>
                     <div class="form-group">
-                        <label>File Number/رقم الملف</label>
+                        <label>File Number</label>
                         <input type="text" name="file_number" value="PR20241001" readonly class="readonly-input">
                     </div>
                     <div class="form-group">
-                        <label>Department/القسم</label>
+                        <label>Department</label>
                         <select name="department">
-                            <option value="math">Math/الرياضيات</option>
-                            <option value="css" selected>Computer Science and Statistics/معلوماتية والإحصاء</option>
-                            <option value="pe">Physics and Electronics/الفيزياء والإلكترونيات</option>
-                            <option value="bio">Biology/علم الأحياء</option>
-                            <option value="bioch">Biochemistry/الكيمياء الحيوية</option>
-                            <option value="chem">Chemistry/كيمياء</option>
+                              <option value="math">Math</option>
+                    <option value="css">Computer Science and Statistics</option>
+                    <option value="pe">Physics and Electronics</option>
+                    <option value="bio">Biology</option>
+                    <option value="bioch">Biochemistry</option>
+                    <option value="chem">Chemistry</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Email Address/البريد الإلكتروني</label>
+                        <label>Email Address</label>
                         <input type="email" name="email" value="ahmad.hassan@ul.edu.lb">
                     </div>
                 </form>
@@ -97,10 +95,11 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Course Code/رقم المقرر</th>
-                                <th>Course Name/اسم المقرر</th>
-                                <th>Semester/الفصل</th>
-                                <th>Language/اللغة</th>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Semester</th>
+                                <th>Language</th>
+                                <th>Major</th>
                                 <th>Credits</th>
                             </tr>
                         </thead>
@@ -110,6 +109,7 @@
                                 <td>Data Structures and Algorithms</td>
                                 <td>Fall 2024</td>
                                 <td>E</td>
+                                <td>Computer Science</td>
                                 <td>3</td>
                             </tr>
                             <tr>
@@ -117,6 +117,7 @@
                                 <td>Database Management Systems</td>
                                 <td>Spring 2024</td>
                                 <td>F</td>
+                                <td>Computer Science</td>
                                 <td>3</td>
                             </tr>
                             <tr>
@@ -124,13 +125,15 @@
                                 <td>Object-Oriented Programming</td>
                                 <td>Fall 2024</td>
                                 <td>F</td>
+                                <td>Computer Science</td>
                                 <td>4</td>
                             </tr>
                             <tr>
                                 <td><a href="#" class="code-link">I3305</a></td>
                                 <td>Software Engineering</td>
                                 <td>Spring 2024</td>
-                                <td>E</td>
+                                <td>E</td>                               
+                                <td>Computer Science</td>
                                 <td>3</td>
                             </tr>
                             <tr>
@@ -138,13 +141,15 @@
                                 <td>Web Development</td>
                                 <td>Fall 2024</td>
                                 <td>E</td>
+                                <td>Computer Science</td>
                                 <td>3</td>
                             </tr>
                             <tr>
                                 <td><a href="#" class="code-link">I2205</a></td>
                                 <td>Computer Networks</td>
                                 <td>Spring 2025</td>
-                                <td>F</td>
+                                <td>F</td>                                
+                                <td>Computer Science</td>
                                 <td>3</td>
                             </tr>
                         </tbody>
