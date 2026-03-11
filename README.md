@@ -21,8 +21,7 @@ Jean C. Chamoun
 - Professor Courses Pages(with export to excel)(Checked)
 - Forgot password page(with enter code and change password pages)(Checked)
 
-
-## Data-Base: on phpMyAdmin ---> Jean
+## Data-Base: on phpMyAdmin (Created on jean's device check the code with the team)
 
 ## Back-End:
 
