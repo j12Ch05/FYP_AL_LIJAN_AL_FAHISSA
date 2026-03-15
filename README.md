@@ -17,7 +17,7 @@ Jean C. Chamoun
 ### Jean's part:
 
 - Register Page(Checked)
-- Add Course Page/Check/Edit course page(with remove course button)
+- Add Course Page/Check/Edit course page(with remove course button)(Check with the team)
 - Professor Courses Pages(with export to excel)(Checked)
 - Forgot password page(with enter code and change password pages)(Checked)
 

@@ -43,6 +43,62 @@
 
         <section id="content-courses" class="tab-content">
             <h1>Courses</h1>
+            <details class="dropdown-menu">
+                <summary>Add Course</summary>
+                    <div class="dropdown-content">
+                        <form id="addCourse" action="addCourse.php" method="post">
+                            <div class="form-group">
+                                <label for="courseCode">Enter the code of the course</label>
+                                <input type="text" id="courseCode" name="courseCode" placeholder="I3341,M2250,P1101..."><br>
+                                <label for="courseName">Enter the name of the course</label>
+                                <input type="text" id="courseName" name="courseName" placeholder="Enter the name"><br>
+                                <label for="courseProfNb">Enter the file number of the professor</label>
+                                <input type="text" id="courseProfNb" name="courseProfNb" placeholder="Enter the file number"><br>
+                                <label for="courseProfFname">Enter the first name of the professor</label>
+                                <input type="text" id="courseProfFname" name="courseProfFname" placeholder="Enter the name in arabic"><br>
+                                <label for="courseProfLname">Enter the last name of the professor</label>
+                                <input type="text" id="courseProfLname" name="courseProfLname" placeholder="Enter the name in arabic"><br>
+                                <label for="courseMajor">Enter the major</label>
+                                <input type="text" id="courseMajor" name="courseMajor" placeholder="Math,Computer Science,..."><br>
+                                <label for="courseLevel">Enter the level</label>
+                                <select id="courseLevel" name="courseLevel">
+                                    <option value="L1">L1</option>
+                                    <option value="L2">L2</option>
+                                    <option value="L3">L3</option>
+                                    <option value="M1">M1</option>
+                                </select>
+                            </div>
+                            
+                            <input type="button" name="submitCourse" class="btn" value="Submit">
+                            <input type="reset" name="cancelCourse" class="btn" value="Cancel">
+                        </form>
+                    </div>
+                </details>
+                <details class="dropdown-menu">
+                    <summary>Search Course</summary>
+                    <form id="searchCourse" action="searchCourse.php" method="post">
+                        <div class="dropdown-content">
+                        <div class="form-group">
+                            <label for="courseCode">Enter the code</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="courseCode" name="courseCode" placeholder="Enter the code" style="width: 200px;">
+                                <input type="button"  id="searchCode" name="searchCode" value="Search">
+                            </div><br>
+                            <!--The course information need to fetched from the backend-->
+                            <p>Course Code: </p><br>
+                            <p>Course Name: </p><br>
+                            <p>Course Level: </p><br>
+                            <p>Course Major: </p><br>
+                            <p>Course French Professor: </p><br>
+                            <p>Course English Professor: </p><br>
+                            <p>Number Of Enrolled Students: </p><br>
+                        </div>
+                        <input type="button" id="edit" name="editCourse" class="btn" value="Edit Course">
+                        <input type="button" id="disable" name="disableCourse" class="btn" value="Disable Course">
+                        <input type="reset" id="cancel" name="cancelSearch" class="btn" value="Cancel">
+                        </div>
+                    </form>
+                </details>
         </section>
 
         <section id="content-correctors" class="tab-content">

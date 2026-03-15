@@ -13,3 +13,7 @@ foreign key(major_id) references major(major_id);
 alter table correctors
 add constraint fk_correctors_teaching
 foreign key (course_code,course_lang,prof_file_nb) references teaching(course_code,course_lang,prof_file_nb);
+
+alter table major
+add constraint fk_major_dep
+foreign key (dep_id) references department(dep_id);

@@ -126,6 +126,7 @@ body {
     color: #444;
 }
 
+
 .readonly-input {
     background-color: #f1f5f9 !important;
     cursor: not-allowed;
@@ -197,8 +198,53 @@ input[type="radio"] {
     display: block;
 }
 
-#tab-profile:checked ~ .sidebar .label-profile,
-#tab-courses:checked ~ .sidebar .label-courses {
+#tab-professors:checked ~ .sidebar .label-professors,
+#tab-courses:checked ~ .sidebar .label-courses,
+#tab-correctors:checked ~ .sidebar .label-correctors {
     background: rgba(255, 255, 255, 0.2);
     border-left: 4px solid white;
+}
+
+
+
+
+/* Dropdown menu styles */
+.dropdown-menu {
+    margin-top: 20px;
+}
+
+.dropdown-menu summary {
+    cursor: pointer;
+    padding: 15px;
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    display: block;
+}
+
+.dropdown-menu summary:hover {
+    background-color: #4f67bc;
+}
+
+/* Stop hover when dropdown is open */
+.dropdown-menu:has(details[open]) summary:hover {
+    background-color: var(--white);
+}
+
+.dropdown-content {
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--white);
+    margin-top: 5px;
+}
+
+.dropdown-content .form-group {
+    margin-bottom: 15px;
+}
+
+.dropdown-content .btn {
+    margin-right: 10px;
 }
