@@ -11,7 +11,7 @@ Jean C. Chamoun
 
 - Log In Page(Checked)
 - Admin Check professor information page(with remove professor button)(Charbel needs to add a search by filter in this section)
-- Insert Correctors(with button export to excel and with delete Correctors button)(Charbel needs to add the insert 2nd corrector dropdwon menu)
+- Insert Correctors(with button export to excel and with delete Correctors button)(Charbel needs to add the insert 2nd corrector dropdwon menu w kmn export to excel button to different model )
 - Professor profile page(with edit profile button)(Checked)
 
 ### Jean's part:
