@@ -82,6 +82,11 @@
                                 <input type="text" id="courseCode" name="courseCode" placeholder="I3341,M2250,P1101..."><br>
                                 <label for="courseName">Enter the name of the course</label>
                                 <input type="text" id="courseName" name="courseName" placeholder="Enter the name"><br>
+                                <label for="courseCredit">Enter the credits of the course</label>
+                                <input type="number" min="3" max="6" name="courseCredit" id="courseCredit"><br>
+                                <label for="courseLang">Enter the language of the course</label>
+                                <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
+                                <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
                                 <label for="courseProfNb">Enter the file number of the professor</label>
                                 <input type="text" id="courseProfNb" name="courseProfNb" placeholder="Enter the file number"><br>
                                 <label for="courseProfFname">Enter the first name of the professor</label>
@@ -96,7 +101,8 @@
                                     <option value="L2">L2</option>
                                     <option value="L3">L3</option>
                                     <option value="M1">M1</option>
-                                </select>
+                                </select><br>
+
                             </div>
                             
                             <input type="button" name="submitCourse" class="btn" value="Submit">
@@ -117,6 +123,7 @@
                             <!--The course information need to fetched from the backend-->
                             <p>Course Code: </p><br>
                             <p>Course Name: </p><br>
+                            <p>Course Credits: </p><br>
                             <p>Course Level: </p><br>
                             <p>Course Major: </p><br>
                             <p>Course French Professor: </p><br>
@@ -126,6 +133,64 @@
                         <input type="button" id="edit" name="editCourse" class="btn" value="Edit Course">
                         <input type="button" id="disable" name="disableCourse" class="btn" value="Disable Course">
                         <input type="reset" id="cancel" name="cancelSearch" class="btn" value="Cancel">
+                        </div>
+                    </form>
+                </details>
+                <details class="dropdown-menu">
+                    <summary>View Courses of The Major</summary>
+                    <form id="viewMajorCourses" action="viewMajorCourses" method="post">
+                        <div class="dropdown-content">
+                            <div class="form-group">
+                                <search>
+                                <label for="majorName">Major Name</label>
+                                <select id="majorName" name="majorName">
+                                    <option value=""></option>
+                                    <option value="opt1">Option 1</option>
+                                    <option value="opt2">Option 2</option>
+                                </select>
+                                <label for="majorLevel">Major Level</label>
+                                <select id="majorLevel" name="majorLevel">
+                                    <option value="L1">L1</option>
+                                    <option value="L2">L2</option>
+                                    <option value="L3">L3</option>
+                                    <option value="M1">M1</option>
+                                </select> 
+                                <label for="majorSemester">Semester</label>
+                                <select id="majorSemester" name="majorSemester">
+                                    <option value="fall">Fall</option>
+                                    <option value="Spring">Spring</option>
+                                </select>
+                                <label for="majorLang">Major Language</label>
+                                <select id="majorLang" name="majorLang">
+                                    <option value="E">English</option>
+                                    <option value="F">French</option>
+                                </select>
+                                </search>
+                            </div>
+                            <input type="button" id="findButton" class="btn" name="findButton" value="Find">
+                            <input type="reset" id="deleteButton" class="btn" name="deleteButton" value="Delete"><br>
+                            <br><div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>Course Category</th>
+                                            <th>Credits</th>
+                                            <th>Professor name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="#" class="code-link">I2204</a></td>
+                                            <td>Imperative Programming</td>
+                                            <td>Mandatory</td>
+                                            <td>3</td>
+                                            <td>Ibitssam Constantin</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </form>
                 </details>
@@ -148,12 +213,14 @@
                                 <p>Corrector1 Name: </p><br>
                                 <p>Corrector2 ID: </p><br>
                                 <p>Corrector2 Name: </p><br>
+                                </div>
                         <input type="button" id="edit" name="editCorrectors" class="btn" value="Edit Correctors">
+                        </form>
+                </details>
         </section>
 
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
-            like you can add or remove admins here to give privileges to other people to access the admin page
                 <details class="dropdown-menu">
                     <summary>Search Professor</summary>
                         <form id="searchProfessor" action="searchProfessor.php" method="post">

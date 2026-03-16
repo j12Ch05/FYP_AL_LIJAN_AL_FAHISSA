@@ -59,6 +59,14 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+#tab-professors:checked ~ .sidebar .label-professors,
+#tab-courses:checked ~ .sidebar .label-courses,
+#tab-correctors:checked ~ .sidebar .label-correctors,
+#tab-edit-admins:checked ~ .sidebar .label-edit-admins {
+    background: white;
+    color: var(--primary-purple);
+}
+
 .nav-item .icon {
     margin-right: 10px;
 }
@@ -126,6 +134,20 @@ body {
     color: #444;
 }
 
+.form-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-purple);
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.form-group label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
 
 .readonly-input {
     background-color: #f1f5f9 !important;
@@ -191,10 +213,10 @@ input[type="radio"] {
     display: none;
 }
 
-#tab-professors:checked ~ .main-content #content-professors,
-#tab-courses:checked ~ .main-content #content-courses,
-#tab-correctors:checked ~ .main-content #content-correctors,
-#tab-edit-admins:checked ~ .main-content #content-edit-admins
+#tab-professors:checked ~ aside ~ .main-content #content-professors,
+#tab-courses:checked ~ aside ~ .main-content #content-courses,
+#tab-correctors:checked ~ aside ~ .main-content #content-correctors,
+#tab-edit-admins:checked ~ aside ~ .main-content #content-edit-admins
  {
     display: block;
 }
@@ -202,7 +224,7 @@ input[type="radio"] {
 #tab-professors:checked ~ .sidebar .label-professors,
 #tab-courses:checked ~ .sidebar .label-courses,
 #tab-correctors:checked ~ .sidebar .label-correctors,
-#tab-edit-admins:checked ~ .sidebar .label-edit-admin {
+#tab-edit-admins:checked ~ .sidebar .label-edit-admins {
     background: rgba(255, 255, 255, 0.2);
     border-left: 4px solid white;
 }
