@@ -193,14 +193,16 @@ input[type="radio"] {
 
 #tab-professors:checked ~ .main-content #content-professors,
 #tab-courses:checked ~ .main-content #content-courses,
-#tab-correctors:checked ~ .main-content #content-correctors
+#tab-correctors:checked ~ .main-content #content-correctors,
+#tab-edit-admins:checked ~ .main-content #content-edit-admins
  {
     display: block;
 }
 
 #tab-professors:checked ~ .sidebar .label-professors,
 #tab-courses:checked ~ .sidebar .label-courses,
-#tab-correctors:checked ~ .sidebar .label-correctors {
+#tab-correctors:checked ~ .sidebar .label-correctors,
+#tab-edit-admins:checked ~ .sidebar .label-edit-admin {
     background: rgba(255, 255, 255, 0.2);
     border-left: 4px solid white;
 }
