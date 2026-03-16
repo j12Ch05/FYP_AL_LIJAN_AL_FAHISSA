@@ -44,6 +44,31 @@
 
         <section id="content-professors" class="tab-content">
             <h1>Professors</h1>
+            <details class="dropdown-menu">
+                    <summary>Search Professor</summary>
+                    <form id="searchProfessor" action="searchProfessor.php" method="post">
+                        <div class="dropdown-content">
+                        <div class="form-group">
+                            <label for="professorId">Enter the ID</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="text" id="profID" name="courseCode" placeholder="Enter the professor ID" style="width: 200px;">
+                                <input type="button"  id="searchID" name="searchID" value="Search">
+                            </div><br>
+                            <!--The professor information need to fetched from the backend-->
+                            <p>Professor ID: </p><br>
+                            <p>Professor Name: </p><br>
+                            <p>Courses Taught(with language): </p><br>
+                            <p>Professor Department: </p><br>
+                            <p>Professor Birth Date: </p><br>
+                            <p>Professor Email: </p><br>
+                            <p>Professor Phone: </p><br>
+                            <p>Professor Rank(admin or not): </p><br>
+                        </div>
+                        <input type="button" id="assign" name="assignProfessor" class="btn" value="Assign As Corrector">
+                        <input type="button" id="remove" name="removeProfessor" class="btn" value="remove Professor">
+                        </div>
+                    </form>
+                </details>
         </section>
 
         <section id="content-courses" class="tab-content">
@@ -108,11 +133,46 @@
 
         <section id="content-correctors" class="tab-content">
             <h1>Correctors</h1>
+                <details class="dropdown-menu">
+                        <summary>View Correctors by the course id</summary>
+                        <form id="searchCorrector" action="searchCorrector.php" method="post">
+                            <div class="dropdown-content">
+                            <div class="form-group">
+                                <label for="courseId">Enter the course ID</label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;">
+                                    <input type="button"  id="searchID" name="searchID" value="Search">
+                                </div><br>
+                                <!--The corrector information need to fetched from the backend-->
+                                <p>Corrector1 ID: </p><br>
+                                <p>Corrector1 Name: </p><br>
+                                <p>Corrector2 ID: </p><br>
+                                <p>Corrector2 Name: </p><br>
+                        <input type="button" id="edit" name="editCorrectors" class="btn" value="Edit Correctors">
         </section>
 
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
             like you can add or remove admins here to give privileges to other people to access the admin page
+                <details class="dropdown-menu">
+                    <summary>Search Professor</summary>
+                        <form id="searchProfessor" action="searchProfessor.php" method="post">
+                            <div class="dropdown-content">
+                                <div class="form-group">
+                                    <label for="professorId">Enter the ID</label>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="text" id="professorId" name="professorId" placeholder="Enter the professor ID" style="width: 200px;">
+                                        <input type="button"  id="searchID" name="searchID" value="Search">
+                                        </div><br>
+                                        <!--The professor information need to fetched from the backend-->
+                                        <p>Professor ID: </p><br>
+                                        <p>Professor Name: </p><br>
+                                </div>
+                                <input type="button" id="makeAdmin" name="makeAdmin" class="btn" value="Make Admin">
+                                <input type="button" id="removeAdmin" name="removeAdmin" class="btn" value="Remove Admin">
+                            </div>
+                        </form>
+                </details>
         </section>
 
     </main>
