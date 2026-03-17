@@ -93,21 +93,33 @@
                         <div id="assignCorrectorSection" style="display: none; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 15px;">
                             <h3>Assign Professor as Corrector</h3>
                             <label for="assignCourse">Select course</label>
-                            <select id="assignCourse" name="assignCourse" style="width: 220px; margin-bottom: 10px;">
+                            <search>
+                                <select id="assignCourse" name="assignCourse" style="padding: 12px 15px;
+                            border: 1px solid var(--border);
+                            border-radius: 8px;
+                            background: #fbfbfb;
+                            font-size: 0.95rem;
+                            color: #444;">
                                 <option value="">-- choose course --</option>
                                 <option value="I2204">I2204 - Imperative Programming</option>
                                 <option value="M2250">M2250 - Discrete Math</option>
                                 <option value="P1101">P1101 - Physics I</option>
                                 <option value="I3341">I3341 - Data Structures</option>
-                            </select><br>
+                            </select>
+                            </search><br>
 
                             <label for="correctorRole">Select corrector role</label>
-                            <select id="correctorRole" name="assignCourse" style="width: 220px; margin-bottom: 10px;">
-                                <option value="">-- choose course --</option>
-                                <option value="first">First corrector</option>
+                            <select id="correctorRole" name="assignCorrector" style="padding: 12px 15px;
+                                                                border: 1px solid var(--border);
+                                                                border-radius: 8px;
+                                                                background: #fbfbfb;
+                                                                font-size: 0.95rem;
+                                                                color: #444;">
+                                <option value="">-- choose position --</option>
                                 <option value="second">Second Corrector</option>
+                                <option value="third">Third Corrector</option>
                                 
-                            </select><br>
+                            </select><br><br>
 
                             <input type="button" id="assignCorrectorConfirm" class="btn" value="Confirm Assignment" onclick="confirmCorrectorAssignment()">
                             <input type="button" class="btn" value="Cancel" onclick="hideAssignCorrectorForm()">
@@ -268,6 +280,11 @@
                                 <label for="courseId">Enter the course ID</label>
                                 <div style="display: flex; gap: 10px; align-items: center;">
                                     <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;">
+                                    <label for="correctorLang">Language</label>
+                                    <select id="correctorLang">
+                                        <option value="corrEng">E</option>
+                                        <option value="corrFr">F</option>
+                                    </select>
                                     <input type="button"  id="searchID" name="searchID" value="Search">
                                 </div><br>
                                 <!--The corrector information need to fetched from the backend-->
@@ -277,9 +294,43 @@
                                 <p>Corrector2 Name: </p><br>
                                 </div>
                         <input type="button" id="edit" name="editCorrectors" class="btn" value="Edit Correctors">
-                        <input tybe="button" id="export" name="exportCorrectors" class="btn" value="Export to excel">
                         </div>
                         </form>
+                </details>
+                <details class="dropdown-menu">
+                    <summary>Excel Format</summary>
+                    <form id="exportExcel" action="exportExcel.php" method="post">
+                        <div class="dropdown-content">
+                            <div class="form-group">
+                                <search>
+                                    <label for="session">Session</label>
+                                    <select id="session" name="sessionId">
+                                        <option value="sem1">Semester 1</option>
+                                        <option value="sem2">Semester 2</option>
+                                        <option value="sess2">Session 2</option>
+                                    </select>
+                                    <label for="excelMajor">Major</label>
+                                    <select id="excelMajor" name="excelMajor">
+                                        <option value="all">All</option>
+                                        <option value="opt1">Option1</option>
+                                        <option value="opt2">Option2</option>
+                                    </select>
+                                    <label for="excelLevel">Level</label>
+                                    <select name="excelLevel" id="excelLevel">
+                                        <option value="all">All</option>
+                                        <option value="L1">L1</option>
+                                        <option value="L2">L2</option>
+                                        <option value="L3">L3</option>
+                                        <option value="M1">M1</option>
+                                    </select>
+                                </search>
+                            </div>
+                            <label for="format">Choose the format</label>
+                            <input type="button" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
+                            <input type="button" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
+                            <input type="button" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
+                        </div>
+                    </form>
                 </details>
         </section>
 
