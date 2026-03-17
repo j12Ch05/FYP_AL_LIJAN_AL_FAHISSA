@@ -36,7 +36,6 @@ CREATE TABLE course (
   course_semester_nb INT NOT NULL,
   course_level ENUM('L1','L2','L3','M1') NOT NULL,
   course_category ENUM('common','optional','mandatory') NOT NULL,
-  course_student_nb INT NOT NULL,
   major_id VARCHAR(6) NOT NULL,
   isActive BOOLEAN DEFAULT TRUE,
   PRIMARY KEY (course_code, course_lang)
@@ -55,11 +54,8 @@ CREATE TABLE teaching (
 CREATE TABLE correctors (
   course_code VARCHAR(6) NOT NULL,
   prof_file_nb INT NOT NULL,
-  second_corrector_file_nb INT NOT NULL,
+  second_corrector_file_nb INT DEFAULT NULL,
   third_corrector_file_nb INT DEFAULT NULL,
-  session_number ENUM('P1','F1','P2','F2','S2') NOT NULL,
-  total_copies_nb INT UNSIGNED NOT NULL,
-  start_date DATE DEFAULT NULL,
-  end_date DATE DEFAULT NULL,
+  session_nb ENUM('sem1','sem2','sess2') NOT NULL,
   course_lang ENUM('E','F') NOT NULL
 );

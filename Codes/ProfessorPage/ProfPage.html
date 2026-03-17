@@ -37,29 +37,30 @@
             <div class="card">
                 <div class="card-header">
                     <h3>Profile Information</h3>
-                    <button type="submit" form="profile-form" class="btn">Edit Information</button>
+                    <button type="button" id="editProfile" class="btn">Edit Information</button>
+                    <button type="submit" form="profile-form" id="applyProfileChanges" class="btn" style="display: none;">Apply Changes</button>
                 </div>
                 
                 <form id="profile-form" action="prof_profile.php" method="POST" class="profile-grid">
                     <div class="form-group">
                         <label>First Name</label>
-                        <input type="text" name="first_name" value="Ahmad">
+                        <input type="text" name="first_name" value="Ahmad" disabled class="profileInput">
                     </div>
                     <div class="form-group">
                         <label>Last Name</label>
-                        <input type="text" name="last_name" value="Hassan">
+                        <input type="text" name="last_name" value="Hassan" disabled class="profileInput">
                     </div>
                     <div class="form-group">
                         <label>Birth Date</label>
-                        <input type="text" name="birth_date" value="15-May-1980">
+                        <input type="text" name="birth_date" value="15-May-1980" disabled class="profileInput">
                     </div>
                     <div class="form-group">
                         <label>Address</label>
-                        <input type="text" name="address" value="Beirut, Lebanon">
+                        <input type="text" name="address" value="Beirut, Lebanon" disabled class="profileInput">
                     </div>
                     <div class="form-group">
                         <label>Phone</label>
-                        <input type="text" name="phone" value="03 123 456">
+                        <input type="text" name="phone" value="03 123 456" disabled class="profileInput">
                     </div>
                     <div class="form-group">
                         <label>File Number</label>
@@ -67,7 +68,7 @@
                     </div>
                     <div class="form-group">
                         <label>Department</label>
-                        <select name="department">
+                        <select name="department" disabled class="profileInput">
                         <option value="math">Math</option>
                     <option value="css">Computer Science and Statistics</option>
                     <option value="pe">Physics and Electronics</option>
@@ -78,7 +79,7 @@
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" name="email" value="ahmad.hassan@ul.edu.lb">
+                        <input type="email" name="email" value="ahmad.hassan@ul.edu.lb" disabled class="profileInput">
                     </div>
                 </form>
             </div>
@@ -158,6 +159,43 @@
             </div>
         </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Handle Edit Information button click
+            const editBtn = document.querySelector('#editProfile');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    const profileForm = document.querySelector('#profile-form');
+                    if (profileForm) {
+                        const profileInputs = profileForm.querySelectorAll('.profileInput');
+                        profileInputs.forEach(input => {
+                            input.disabled = false;
+                        });
+                        // Show Apply Changes button
+                        const applyBtn = document.querySelector('#applyProfileChanges');
+                        if (applyBtn) applyBtn.style.display = 'inline-block';
+                    }
+                });
+            }
+
+            // Handle Apply Changes button click
+            const applyBtn = document.querySelector('#applyProfileChanges');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    const profileForm = document.querySelector('#profile-form');
+                    if (profileForm) {
+                        const profileInputs = profileForm.querySelectorAll('.profileInput');
+                        profileInputs.forEach(input => {
+                            input.disabled = true;
+                        });
+                        // Hide Apply Changes button
+                        applyBtn.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
 </html>

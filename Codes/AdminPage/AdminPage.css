@@ -164,6 +164,10 @@ table {
     border-collapse: collapse;
 }
 
+.table-container  select{
+    padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: #fbfbfb; font-size: 0.95rem; color: #444;
+}
+
 th {
     background: var(--primary-purple);
     color: white;

@@ -5,19 +5,19 @@
 Charbel E. Outayek
 Jean C. Chamoun
 
-## Front-End
+## Front-End(Last Check)
 
 ### Charbel's part:
 
 - Log In Page(Checked)
-- Admin Check professor information page(with remove professor button)(added a search by filter in this section)(check with supervisor)
-- Insert Correctors(with button export to excel and with delete Correctors button)(Check  with supervisor)
+- Admin Check professor information page(with remove professor button)(added a search by filter in this section)(Checked)
+- Insert Correctors(with button export to excel and with delete Correctors button)(Checked)
 - Professor profile page(with edit profile button)(Checked)
 
 ### Jean's part:
 
 - Register Page(Checked)
-- Add Course Page/Check/Edit course page(with remove course button)(Check with the team)
+- Add Course Page/Check/Edit course page(with remove course button)(Checked)
 - Professor Courses Pages(with export to excel)(Checked)
 - Forgot password page(with enter code and change password pages)(Checked)
 

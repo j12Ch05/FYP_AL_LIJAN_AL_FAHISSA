@@ -53,7 +53,6 @@
                                 <option value="">-- choose filter --</option>
                                 <option value="all">All</option>
                                 <option value="department">Department</option>
-                                <option value="name">Name</option>
                                 <option value="course taught">Course</option>
                             </select>
                     </div>
@@ -68,7 +67,6 @@
                             <select id="professorSearchBy" name="professorSearchBy" style="width: 220px; margin-bottom: 10px;">
                                 <option value="">-- choose filter --</option>
                                 <option value="id">ID</option>
-                                <option value="department">Department</option>
                                 <option value="name">Name</option>
                                 <option value="course">Course</option>
                             </select>
@@ -87,44 +85,9 @@
                             <p>Professor Phone: </p><br>
                             <p>Professor Rank(admin or not): </p><br>
                         </div>
-                        <input type="button" id="assign" name="assignProfessor" class="btn" value="Assign As Corrector" onclick="showAssignCorrectorForm()">
                         <input type="button" id="remove" name="removeProfessor" class="btn" value="remove Professor">
 
-                        <div id="assignCorrectorSection" style="display: none; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 15px;">
-                            <h3>Assign Professor as Corrector</h3>
-                            <label for="assignCourse">Select course</label>
-                            <search>
-                                <select id="assignCourse" name="assignCourse" style="padding: 12px 15px;
-                            border: 1px solid var(--border);
-                            border-radius: 8px;
-                            background: #fbfbfb;
-                            font-size: 0.95rem;
-                            color: #444;">
-                                <option value="">-- choose course --</option>
-                                <option value="I2204">I2204 - Imperative Programming</option>
-                                <option value="M2250">M2250 - Discrete Math</option>
-                                <option value="P1101">P1101 - Physics I</option>
-                                <option value="I3341">I3341 - Data Structures</option>
-                            </select>
-                            </search><br>
-
-                            <label for="correctorRole">Select corrector role</label>
-                            <select id="correctorRole" name="assignCorrector" style="padding: 12px 15px;
-                                                                border: 1px solid var(--border);
-                                                                border-radius: 8px;
-                                                                background: #fbfbfb;
-                                                                font-size: 0.95rem;
-                                                                color: #444;">
-                                <option value="">-- choose position --</option>
-                                <option value="second">Second Corrector</option>
-                                <option value="third">Third Corrector</option>
-                                
-                            </select><br><br>
-
-                            <input type="button" id="assignCorrectorConfirm" class="btn" value="Confirm Assignment" onclick="confirmCorrectorAssignment()">
-                            <input type="button" class="btn" value="Cancel" onclick="hideAssignCorrectorForm()">
-
-                            <p id="assignCorrectorMessage" style="color: green; margin-top: 8px; display: none;"></p>
+                        
                         </div>
                         </div>
                     </form>
@@ -147,14 +110,20 @@
                                 <label for="courseLang">Enter the language of the course</label>
                                 <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
                                 <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
-                                <label for="courseProfNb">Enter the file number of the professor</label>
-                                <input type="text" id="courseProfNb" name="courseProfNb" placeholder="Enter the file number"><br>
-                                <label for="courseProfFname">Enter the first name of the professor</label>
-                                <input type="text" id="courseProfFname" name="courseProfFname" placeholder="Enter the name in arabic"><br>
-                                <label for="courseProfLname">Enter the last name of the professor</label>
-                                <input type="text" id="courseProfLname" name="courseProfLname" placeholder="Enter the name in arabic"><br>
-                                <label for="courseMajor">Enter the major</label>
-                                <input type="text" id="courseMajor" name="courseMajor" placeholder="Math,Computer Science,..."><br>
+                                <label for="courseProf">Choose the professor of the course</label>
+                                <select name="courseProf" id="courseProf">
+                                    <option value=""></option>
+                                    <option value="prof1">Professor 1</option>
+                                    <option value="prof2">Professor 2</option>
+                                    <option value="prof3">Professor 3</option>
+                                    <option value="prof4">Professor 4</option>
+                                </select><br>
+                                <label for="courseMajor">Choose the major</label>
+                                <select name="courseMajor" id="courseMajor">
+                                    <option value=""></option>
+                                    <option value="opt1">Option 1</option>
+                                    <option value="opt2">Option 2</option>
+                                </select><br>
                                 <label for="courseLevel">Enter the level</label>
                                 <select id="courseLevel" name="courseLevel">
                                     <option value="L1">L1</option>
@@ -188,7 +157,7 @@
                             <p>Course Major: </p><br>
                             <p>Course French Professor: </p><br>
                             <p>Course English Professor: </p><br>
-                            <p>Number Of Enrolled Students: </p><br>
+                            <p>Course Category: </p><br>
                         </div>
                         <input type="button" id="edit" name="editCourse" class="btn" value="Edit Course">
                         <input type="button" id="disable" name="disableCourse" class="btn" value="Disable Course">
@@ -229,7 +198,7 @@
                             </div>
                             <input type="button" id="findButton" class="btn" name="findButton" value="Find">
                             <input type="reset" id="deleteButton" class="btn" name="deleteButton" value="Delete"><br>
-                            <br><div class="table-container">
+                            <br><div class="table-container" style="display: none;">
                                 <table>
                                     <thead>
                                         <tr>
@@ -260,16 +229,101 @@
             <h1>Correctors</h1>
 
 <details class="dropdown-menu">
-                <summary>View All Correctors</summary>
+                <summary>Insert Correctors</summary>
                     <div class="dropdown-content">
                          <div class="form-group">
-                            <label for="CorrectorSearchBy">Filter by</label>
-                            <select id="CorrectorSearchBy" name="CorrectorSearchBy" style="width: 220px; margin-bottom: 10px;">
-                                <option value="">-- choose filter --</option>
-                                <option value="all">All</option>
-                                <option value="course taught">Course</option>
-                            </select>
+                            <search>
+                                <label for="corrSession">Session</label>
+                                <select name="corrSession" id="corrSession">
+                                    <option value="sem1">Semester 1</option>
+                                        <option value="sem2">Semester 2</option>
+                                        <option value="sess2">Session 2</option>
+                                </select>
+                                <label for="corrMajor">Major</label>
+                                <select name="corrMajor" id="corrMajor">
+                                    <option value=""></option>
+                                    <option value="opt1">Option 1</option>
+                                    <option value="opt2">Option 2</option>
+                                </select>
+                                <label for="corrLevel">Level</label>
+                                <select name="corrLevel" id="corrLevel">
+                                    <option value="L1">L1</option>
+                                    <option value="L2">L2</option>
+                                    <option value="L3">L3</option>
+                                    <option value="M1">M1</option>
+                                </select>
+                                <label for="corrLang">Language</label>
+                                <select name="corrLang" id="corrLang">
+                                    <option value="corrEng">E</option>
+                                    <option value="corrFr">F</option>
+                                </select>
+                            </search><br>
                     </div>
+                    
+                    <input type="button" id="findButton" name="findBtn" class="btn" value="Find">
+                    <input type="reset" id="cancelButton" name="cancelBtn" class="btn" value="Cancel"><br><br>
+
+                     <div class="table-container" style="display: none;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>First Corrector</th>
+                                            <th>Second Corrector</th>
+                                            <th>Third Corrector</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>I3350</td>
+                                            <td>Mobile</td>
+                                            <td>Ziad El-balaa</td>
+                                            <td>
+                                                <select name="secondCorr" class="correctorSelect" disabled>
+                                                    <option value=""></option>
+                                                    <option value="o1">Ralph El khoury</option>
+                                                    <option value="o2">Bernadette Wakim</option>
+                                                    <option value="o3">Joseph Constantin</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select name="thirdCorr" class="correctorSelect" disabled>
+                                                    <option value=""></option>
+                                                    <option value="o1">Ralph El khoury</option>
+                                                    <option value="o2">Bernadette Wakim</option>
+                                                    <option value="o3">Joseph Constantin</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>I3306</td>
+                                            <td>Database</td>
+                                            <td>Bernadette Wakim</td>
+                                            <td>
+                                                <select name="secondCorr" class="correctorSelect" disabled>
+                                                    <option value=""></option>
+                                                    <option value="o1">Ralph El khoury</option>
+                                                    <option value="o2">Ziad El balaa</option>
+                                                    <option value="o3">Joseph Constantin</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select name="thirdCorr" class="correctorSelect" disabled>
+                                                    <option value=""></option>
+                                                    <option value="o1">Ralph El khoury</option>
+                                                    <option value="o2">Bernadette Wakim</option>
+                                                    <option value="o3">Joseph Constantin</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div><br>
+                            <input type="button" id="editCorr" class="btn" name="editCorr" value="Edit Correctors" style="display: none;">
+                            <input type="reset" id="deleteCorr" class="btn" name="deleteCorr" value="Delete Correctors" style="display: none;">
+                            <input type="reset" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
+                </div>
                 </details>
 
                 <details class="dropdown-menu">
@@ -282,8 +336,8 @@
                                     <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;">
                                     <label for="correctorLang">Language</label>
                                     <select id="correctorLang">
-                                        <option value="corrEng">E</option>
-                                        <option value="corrFr">F</option>
+                                        <option value="correctorEng">E</option>
+                                        <option value="correctorFr">F</option>
                                     </select>
                                     <input type="button"  id="searchID" name="searchID" value="Search">
                                 </div><br>
@@ -360,37 +414,97 @@
     </main>
 
     <script>
-        function showAssignCorrectorForm() {
-            var section = document.getElementById('assignCorrectorSection');
-            if (section) section.style.display = 'block';
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const findButtons = document.querySelectorAll('input[type="button"][value="Find"]');
+            findButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const dropdown = button.closest('.dropdown-content');
+                    const table = dropdown?.querySelector('.table-container');
+                    if (table) {
+                        table.style.display = 'block';
+                    }
 
-        function hideAssignCorrectorForm() {
-            var section = document.getElementById('assignCorrectorSection');
-            if (section) section.style.display = 'none';
-            var message = document.getElementById('assignCorrectorMessage');
-            if (message) {
-                message.style.display = 'none';
-                message.textContent = '';
+                    // If this Find button belongs to the Correctors section, show the edit/delete buttons
+                    const correctorsSection = button.closest('#content-correctors');
+                    if (correctorsSection) {
+                        const editBtn = correctorsSection.querySelector('#editCorr');
+                        const deleteBtn = correctorsSection.querySelector('#deleteCorr');
+                        if (editBtn) editBtn.style.display = 'inline-block';
+                        if (deleteBtn) deleteBtn.style.display = 'inline-block';
+                    }
+                });
+            });
+
+            // Handle Edit Correctors button click
+            const editBtn = document.querySelector('#editCorr');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    const correctorsSection = editBtn.closest('#content-correctors');
+                    if (correctorsSection) {
+                        const selectElements = correctorsSection.querySelectorAll('.correctorSelect');
+                        selectElements.forEach(select => {
+                            select.disabled = false;
+                        });
+                        // Show Apply Changes button
+                        const applyBtn = correctorsSection.querySelector('#applyCorr');
+                        if (applyBtn) applyBtn.style.display = 'inline-block';
+                    }
+                });
             }
-        }
 
-        function confirmCorrectorAssignment() {
-            var select = document.getElementById('assignCourse');
-            var role = document.querySelector('input[name="correctorRole"]:checked');
-            var message = document.getElementById('assignCorrectorMessage');
-            if (!select || !role || !select.value) {
-                alert('Please choose a course and corrector role first.');
-                return;
+            // Handle Apply Changes button click
+            const applyBtn = document.querySelector('#applyCorr');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => {
+                    const correctorsSection = applyBtn.closest('#content-correctors');
+                    if (correctorsSection) {
+                        const selectElements = correctorsSection.querySelectorAll('.correctorSelect');
+                        selectElements.forEach(select => {
+                            select.disabled = true;
+                        });
+                        // Hide Apply Changes button
+                        applyBtn.style.display = 'none';
+                    }
+                });
             }
 
-            if (message) {
-                message.textContent = 'Assigned as ' + role.value + ' corrector for ' + select.value + '. (Submit to backend separately)';
-                message.style.display = 'block';
+            // Handle Cancel button click
+            const cancelBtn = document.querySelector('#cancelButton');
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    const correctorsSection = cancelBtn.closest('#content-correctors');
+                    if (correctorsSection) {
+                        const table = correctorsSection.querySelector('.table-container');
+                        const editBtn = correctorsSection.querySelector('#editCorr');
+                        const deleteBtn = correctorsSection.querySelector('#deleteCorr');
+                        const applyBtn = correctorsSection.querySelector('#applyCorr');
+                        if (table) table.style.display = 'none';
+                        if (editBtn) editBtn.style.display = 'none';
+                        if (deleteBtn) deleteBtn.style.display = 'none';
+                        if (applyBtn) applyBtn.style.display = 'none';
+                    }
+                });
             }
 
-            // TODO: integrate with backend post or AJAX submission for real assignment.
-        }
+            // Handle Delete Correctors button click
+            const deleteBtn = document.querySelector('#deleteCorr');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    const correctorsSection = deleteBtn.closest('#content-correctors');
+                    if (correctorsSection) {
+                        const secondCorrSelects = correctorsSection.querySelectorAll('select[name="secondCorr"]');
+                        const thirdCorrSelects = correctorsSection.querySelectorAll('select[name="thirdCorr"]');
+                        secondCorrSelects.forEach(select => {
+                            select.value = '';
+                        });
+                        thirdCorrSelects.forEach(select => {
+                            select.value = '';
+                        });
+                    }
+                });
+            }
+        });
     </script>
+
 </body>
 </html>
