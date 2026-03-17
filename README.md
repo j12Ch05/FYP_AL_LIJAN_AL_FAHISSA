@@ -10,8 +10,8 @@ Jean C. Chamoun
 ### Charbel's part:
 
 - Log In Page(Checked)
-- Admin Check professor information page(with remove professor button)(added a search by filter in this section)(check with team)
-- Insert Correctors(with button export to excel and with delete Correctors button)(Check  with team)
+- Admin Check professor information page(with remove professor button)(added a search by filter in this section)(check with supervisor)
+- Insert Correctors(with button export to excel and with delete Correctors button)(Check  with supervisor)
 - Professor profile page(with edit profile button)(Checked)
 
 ### Jean's part:
@@ -21,7 +21,7 @@ Jean C. Chamoun
 - Professor Courses Pages(with export to excel)(Checked)
 - Forgot password page(with enter code and change password pages)(Checked)
 
-## Data-Base: 
+## Data-Base:
 
 - Creating the database(Check with the supervisor)
 - Creating the tables(Check with the supervisor)
