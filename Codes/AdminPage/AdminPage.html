@@ -45,13 +45,36 @@
         <section id="content-professors" class="tab-content">
             <h1>Professors</h1>
             <details class="dropdown-menu">
+                <summary>View All Professor</summary>
+                    <div class="dropdown-content">
+                         <div class="form-group">
+                            <label for="professorSearchBy">Filter by</label>
+                            <select id="professorSearchBy" name="professorSearchBy" style="width: 220px; margin-bottom: 10px;">
+                                <option value="">-- choose filter --</option>
+                                <option value="all">All</option>
+                                <option value="department">Department</option>
+                                <option value="name">Name</option>
+                                <option value="course taught">Course</option>
+                            </select>
+                    </div>
+                </details>
+
+            <details class="dropdown-menu">
                     <summary>Search Professor</summary>
                     <form id="searchProfessor" action="searchProfessor.php" method="post">
                         <div class="dropdown-content">
                         <div class="form-group">
-                            <label for="professorId">Enter the ID</label>
+                            <label for="professorSearchBy">Filter by</label>
+                            <select id="professorSearchBy" name="professorSearchBy" style="width: 220px; margin-bottom: 10px;">
+                                <option value="">-- choose filter --</option>
+                                <option value="id">ID</option>
+                                <option value="department">Department</option>
+                                <option value="name">Name</option>
+                                <option value="course">Course</option>
+                            </select>
+                            <label for="professorQuery">Enter the search term</label>
                             <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="text" id="profID" name="courseCode" placeholder="Enter the professor ID" style="width: 200px;">
+                                <input type="text" id="professorQuery" name="professorQuery" placeholder="Enter department, name, or course" style="width: 200px;">
                                 <input type="button"  id="searchID" name="searchID" value="Search">
                             </div><br>
                             <!--The professor information need to fetched from the backend-->
@@ -64,8 +87,33 @@
                             <p>Professor Phone: </p><br>
                             <p>Professor Rank(admin or not): </p><br>
                         </div>
-                        <input type="button" id="assign" name="assignProfessor" class="btn" value="Assign As Corrector">
+                        <input type="button" id="assign" name="assignProfessor" class="btn" value="Assign As Corrector" onclick="showAssignCorrectorForm()">
                         <input type="button" id="remove" name="removeProfessor" class="btn" value="remove Professor">
+
+                        <div id="assignCorrectorSection" style="display: none; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 15px;">
+                            <h3>Assign Professor as Corrector</h3>
+                            <label for="assignCourse">Select course</label>
+                            <select id="assignCourse" name="assignCourse" style="width: 220px; margin-bottom: 10px;">
+                                <option value="">-- choose course --</option>
+                                <option value="I2204">I2204 - Imperative Programming</option>
+                                <option value="M2250">M2250 - Discrete Math</option>
+                                <option value="P1101">P1101 - Physics I</option>
+                                <option value="I3341">I3341 - Data Structures</option>
+                            </select><br>
+
+                            <label for="correctorRole">Select corrector role</label>
+                            <select id="correctorRole" name="assignCourse" style="width: 220px; margin-bottom: 10px;">
+                                <option value="">-- choose course --</option>
+                                <option value="first">First corrector</option>
+                                <option value="second">Second Corrector</option>
+                                
+                            </select><br>
+
+                            <input type="button" id="assignCorrectorConfirm" class="btn" value="Confirm Assignment" onclick="confirmCorrectorAssignment()">
+                            <input type="button" class="btn" value="Cancel" onclick="hideAssignCorrectorForm()">
+
+                            <p id="assignCorrectorMessage" style="color: green; margin-top: 8px; display: none;"></p>
+                        </div>
                         </div>
                     </form>
                 </details>
@@ -198,6 +246,20 @@
 
         <section id="content-correctors" class="tab-content">
             <h1>Correctors</h1>
+
+<details class="dropdown-menu">
+                <summary>View All Correctors</summary>
+                    <div class="dropdown-content">
+                         <div class="form-group">
+                            <label for="CorrectorSearchBy">Filter by</label>
+                            <select id="CorrectorSearchBy" name="CorrectorSearchBy" style="width: 220px; margin-bottom: 10px;">
+                                <option value="">-- choose filter --</option>
+                                <option value="all">All</option>
+                                <option value="course taught">Course</option>
+                            </select>
+                    </div>
+                </details>
+
                 <details class="dropdown-menu">
                         <summary>View Correctors by the course id</summary>
                         <form id="searchCorrector" action="searchCorrector.php" method="post">
@@ -215,6 +277,8 @@
                                 <p>Corrector2 Name: </p><br>
                                 </div>
                         <input type="button" id="edit" name="editCorrectors" class="btn" value="Edit Correctors">
+                        <input tybe="button" id="export" name="exportCorrectors" class="btn" value="Export to excel">
+                        </div>
                         </form>
                 </details>
         </section>
@@ -244,5 +308,38 @@
 
     </main>
 
+    <script>
+        function showAssignCorrectorForm() {
+            var section = document.getElementById('assignCorrectorSection');
+            if (section) section.style.display = 'block';
+        }
+
+        function hideAssignCorrectorForm() {
+            var section = document.getElementById('assignCorrectorSection');
+            if (section) section.style.display = 'none';
+            var message = document.getElementById('assignCorrectorMessage');
+            if (message) {
+                message.style.display = 'none';
+                message.textContent = '';
+            }
+        }
+
+        function confirmCorrectorAssignment() {
+            var select = document.getElementById('assignCourse');
+            var role = document.querySelector('input[name="correctorRole"]:checked');
+            var message = document.getElementById('assignCorrectorMessage');
+            if (!select || !role || !select.value) {
+                alert('Please choose a course and corrector role first.');
+                return;
+            }
+
+            if (message) {
+                message.textContent = 'Assigned as ' + role.value + ' corrector for ' + select.value + '. (Submit to backend separately)';
+                message.style.display = 'block';
+            }
+
+            // TODO: integrate with backend post or AJAX submission for real assignment.
+        }
+    </script>
 </body>
 </html>
