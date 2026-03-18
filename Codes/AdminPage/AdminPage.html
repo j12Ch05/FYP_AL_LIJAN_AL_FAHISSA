@@ -144,11 +144,16 @@
                     <form id="searchCourse" action="searchCourse.php" method="post">
                         <div class="dropdown-content">
                         <div class="form-group">
-                            <label for="courseCode">Enter the code</label>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="text" id="courseCode" name="courseCode" placeholder="Enter the code" style="width: 200px;">
-                                <input type="button"  id="searchCode" name="searchCode" value="Search">
-                            </div><br>
+                            <search>
+                                <label for="courseCode">Course Code</label>
+                                <input type="text" id="courseCode" name="courseCode" placeholder="I3350,P1100....">
+                                <label for="courseLang">Course Language</label>
+                                <select name="courseLang" id="courseLang">
+                                    <option value="courseEng">E</option>
+                                    <option value="courseFr">F</option>
+                                </select>
+                                <input type="button" id="searchbtn" name="searchBtn" class="btn" value="Search">
+                            </search><br>
                             <!--The course information need to fetched from the backend-->
                             <p>Course Code: </p><br>
                             <p>Course Name: </p><br>
