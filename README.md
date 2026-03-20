@@ -31,19 +31,27 @@ Jean C. Chamoun
 ## Back-End:
 
 - Establish the connection with the database
+
+### Charbel's part:
+
 - Log in Page backend
+- Professor profile page(fetch data,edit data)
+- Professor Courses Page(fetch data,export to excel format4 li mech 7ateta bl excel format see in the modele)
+- Admin Professors Page(fetching data from a specific query)
+- Admin Correctors Page(excel Format: na2e format(1,2,3))
+- Edit Admin Page
+
+### Jean's part:
+
 - Sign up Page backend
 - Forgot Password backend(Send Code,verify Code , reset Password)
-- Professor profile page(fetch data,edit data)
-- Professor Courses Page(fetch data,export to excel)
-- Admin Professors Page(fetching data from a specific query)
 - Admin Courses Page
+
   * Add Course (send data , check existance)
   * Search Course (fetch data using code)
   * view Courses(fetch all possible data using a specific query)
 - Admin Correctors Page (fetch data and send data)
-- Edit Admin Page(fetch data and send data\)
 
-### Charbel's part:
-
-### Jean's part:
+  * Insert Correctors
+  * View Correctors
+  * Excel format(format1,format2,format3)
