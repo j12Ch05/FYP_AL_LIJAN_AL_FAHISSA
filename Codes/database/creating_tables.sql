@@ -9,7 +9,7 @@ CREATE TABLE professor (
   prof_password VARCHAR(40) NOT NULL,
   dep_id ENUM('math','css','pe','bio','bioch','chem') NOT NULL,
   isAdmin BOOLEAN DEFAULT FALSE,
-  prof_category ENUM('Tenured/لملاك','Full_time/متفرغ','Part_time/متعاقد بالساعة') NOT NULL,
+  prof_category ENUM('Tenured/لملاك','Full_time/متفرغ','Part_time/متعاقد بالساعة') DEFAULT NULL,
   PRIMARY KEY (prof_file_nb)
 );
 

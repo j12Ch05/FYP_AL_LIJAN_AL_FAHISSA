@@ -36,14 +36,14 @@ Jean C. Chamoun
 
 - Log in Page backend
 - Professor profile page(fetch data,edit data)
-- Professor Courses Page(fetch data,export to excel format4 li mech 7ateta bl excel format see in the modele)
+- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)
 - Admin Professors Page(fetching data from a specific query)
-- Admin Correctors Page(excel Format: na2e format(1,2,3))
+- Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
 - Edit Admin Page
 
 ### Jean's part:
 
-- Sign up Page backend
+- Sign up Page backend(did some of the work)
 - Forgot Password backend(Send Code,verify Code , reset Password)
 - Admin Courses Page
 
@@ -54,4 +54,4 @@ Jean C. Chamoun
 
   * Insert Correctors
   * View Correctors
-  * Excel format(format1,format2,format3)
+  * Excel format(format2,format3)
