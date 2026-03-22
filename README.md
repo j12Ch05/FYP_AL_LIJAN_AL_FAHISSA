@@ -30,7 +30,7 @@ Jean C. Chamoun
 
 ## Back-End:
 
-- Establish the connection with the database
+- Establish the connection with the database(Wo)
 
 ### Charbel's part:
 
@@ -43,7 +43,7 @@ Jean C. Chamoun
 
 ### Jean's part:
 
-- Sign up Page backend(did some of the work)
+- Sign up Page backend(Finished this part sends the data into php and modified db)(Check with the team)
 - Forgot Password backend(Send Code,verify Code , reset Password)
 - Admin Courses Page
 

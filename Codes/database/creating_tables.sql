@@ -5,16 +5,18 @@ CREATE TABLE professor (
   prof_birth_date DATE NOT NULL,
   prof_address VARCHAR(40) DEFAULT NULL,
   prof_phone VARCHAR(10) DEFAULT NULL,
-  prof_email VARCHAR(40) NOT NULL,
-  prof_password VARCHAR(40) NOT NULL,
-  dep_id ENUM('math','css','pe','bio','bioch','chem') NOT NULL,
+  prof_email VARCHAR(40) NOT NULL unique,
+  prof_password VARCHAR(255) NOT NULL,
+  dep_id VARCHAR(7) NOT NULL,
   isAdmin BOOLEAN DEFAULT FALSE,
-  prof_category ENUM('Tenured/لملاك','Full_time/متفرغ','Part_time/متعاقد بالساعة') DEFAULT NULL,
+  prof_category varchar(30) DEFAULT 'متعاقد بالساعة',
+  reset_token_hash varchar(64) unique DEFAULT NULL,
+  reset_token_expires_at datetime DEFAULT NULL,
   PRIMARY KEY (prof_file_nb)
 );
 
 CREATE TABLE department (
-  dep_id ENUM('math','css','pe','bio','bioch','chem') NOT NULL,
+  dep_id VARCHAR(7) NOT NULL,
   dep_name VARCHAR(30) NOT NULL,
   chair_person_file_nb INT NOT NULL,
   PRIMARY KEY (dep_id)
@@ -23,7 +25,7 @@ CREATE TABLE department (
 CREATE TABLE major (
   major_id VARCHAR(6) NOT NULL,
   major_name VARCHAR(15) NOT NULL,
-  dep_id ENUM('math','css','pe','bio','bioch','chem') NOT NULL,
+  dep_id VARCHAR(7) NOT NULL,
   PRIMARY KEY (major_id)
 );
 
@@ -32,9 +34,9 @@ CREATE TABLE course (
   course_name VARCHAR(40) NOT NULL,
   course_credit_nb INT NOT NULL,
   course_hours_nb INT NOT NULL,
-  course_lang ENUM('E','F') NOT NULL,
+  course_lang VARCHAR(2) NOT NULL,
   course_semester_nb INT NOT NULL,
-  course_level ENUM('L1','L2','L3','M1') NOT NULL,
+  course_level varchar(3) NOT NULL,
   course_category ENUM('common','optional','mandatory') NOT NULL,
   major_id VARCHAR(6) NOT NULL,
   isActive BOOLEAN DEFAULT TRUE,
@@ -43,7 +45,7 @@ CREATE TABLE course (
 
 CREATE TABLE teaching (
   course_code VARCHAR(6) NOT NULL,
-  course_lang ENUM('E','F') NOT NULL,
+  course_lang varchar(2) NOT NULL,
   prof_file_nb INT NOT NULL,
   uni_year VARCHAR(6) NOT NULL,
   PRIMARY KEY (course_code, course_lang, prof_file_nb),
@@ -56,6 +58,6 @@ CREATE TABLE correctors (
   prof_file_nb INT NOT NULL,
   second_corrector_file_nb INT DEFAULT NULL,
   third_corrector_file_nb INT DEFAULT NULL,
-  session_nb ENUM('sem1','sem2','sess2') NOT NULL,
-  course_lang ENUM('E','F') NOT NULL
+  session_nb varchar(7) NOT NULL,
+  course_lang varchar(2) NOT NULL
 );

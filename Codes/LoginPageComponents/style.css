@@ -182,3 +182,26 @@ body {
     border-color: #007bff;
     outline: none;
 }
+
+.password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+}
+
+.password-wrapper input {
+            width: 100%;
+            padding-right: 50px; /* Space for the button */
+}
+
+.toggle-btn {
+                position: absolute;
+                right: 10px;
+                background: none;
+                border: none;
+                color: #007bff;
+                cursor: pointer;
+                font-size: 0.8rem;
+                font-weight: bold;
+                padding: 5px;
+}

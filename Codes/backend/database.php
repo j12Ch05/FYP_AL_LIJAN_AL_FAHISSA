@@ -10,8 +10,6 @@
     die("Connection failed: " . mysqli_connect_error());
 }
 
-echo "Connected successfully using Procedural style";
+  
 
-// Close connection
-mysqli_close($conn);
 ?>

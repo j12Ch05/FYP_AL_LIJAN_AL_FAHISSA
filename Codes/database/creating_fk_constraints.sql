@@ -1,3 +1,4 @@
+/*Do not run this code before inserting some data*/
 alter table professor
 add constraint fk_prof_to_dep
 foreign key (dep_id) references department(dep_id);

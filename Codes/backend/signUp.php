@@ -1,11 +1,24 @@
 <?php
     session_start();
-
+    include("database.php");
 
     $ulDomain = "ul.edu.lb";
     $arabicPattern = "/^[\x{0600}-\x{06FF}\s]+$/u";
     $passwordFormat = "/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
     $minDate = strtotime('-26 years');
+
+
+    
+    //Creating a function to verify if the file number or the email or phone is already taken 
+    function value_exists($conn,$col,$value){
+        $sql_query = "select $col from professor where $col = ?";
+        $stmt = mysqli_prepare($conn,$sql_query);
+        mysqli_stmt_bind_param($stmt,"s",$value);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        return mysqli_num_rows($result) > 0;
+    }
 
 
     if(isset($_POST["signUp"])){
@@ -15,6 +28,7 @@
         $lastName = trim($_POST["lastName"]);
         $birthDate = $_POST["birthDate"];
         $d = strtotime($birthDate);
+        $phone = $_POST["phone"];
         $fileNumber = $_POST["fileNumber"];
         $email = trim($_POST["email"]);
         $password = $_POST["password"];
@@ -32,14 +46,24 @@
             $errors[] = "You must be at least 26 years old to register";
         }
 
+        if(value_exists($conn,"prof_phone",$phone)){
+            $errors[] = "Phone is already taken";
+        }
+
         //Checking the file number
         if (empty($fileNumber) || !filter_var($fileNumber, FILTER_VALIDATE_INT)) {
-            $errors[] = "File number is required and must be an integer.";
+            $errors[] = "File number is required and must be a number.";
+        }
+        if(value_exists($conn,"prof_file_nb",$fileNumber)){
+            $errors[] = "This file number is already used";
         }
 
         //Checking the email
         if(!filter_var($email,FILTER_VALIDATE_EMAIL) || substr($email, -strlen($ulDomain)) != $ulDomain){
             $errors[] = "Invalid email format";
+        }
+        if(value_exists($conn,"prof_email",$email)){
+            $errors[] = "This email is already used";
         }
 
         //Checking the password
@@ -48,18 +72,22 @@
         }
 
         if(empty($errors)){
-            $date = date("d-m-Y",$d);
+            $date = new DateTime($birthDate);
+            $mysqlFormat = $date->format('Y-m-d');
+
             $_SESSION["firstName"]   = $firstName;
             $_SESSION["lastName"]    = $lastName;
             $_SESSION["birthDate"]   = $date;
             $_SESSION["address"]     = $_POST["address"];
-            $_SESSION["phone"]       = $_POST["phone"];
+            $_SESSION["phone"]       = $phone;
             $_SESSION["fileNumber"]  = (int)$fileNumber;
             $_SESSION["department"]  = $_POST["department"];
-            $_SESSION["email"]       = $email;
+            $_SESSION["category"] = $_POST["category"];
+            $_SESSION["email"]   = $email;
             $_SESSION["password"]    = $password;
 
-            //header("Location: login.php");
+            header("Location: signUpData.php");
+            
             exit();
         }
         else{
@@ -68,6 +96,7 @@
 
         
     }
+    mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -89,7 +118,7 @@
             }
         ?>
         <h1>Sign Up</h1>
-        <form id="signUpForm" action="signUp.php" method="post">
+        <form id="signUpForm" action="" method="post">
             <div class="form-group">
                 <label for="fname">First Name</label>
                 <input type="text" id="fname" name="firstName" placeholder="Enter your first name in arabic" maxlength="20" required />
@@ -129,7 +158,16 @@
                     <option value="pe">Physics and Electronics</option>
                     <option value="bio">Biology</option>
                     <option value="bioch">Biochemistry</option>
-                    <option value="chem">Chemistry</option>
+                    <option value="che">Chemistry</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="prof_category">Category</label>
+                <select name="category" id="prof_category" class="dropdown-select">
+                    <option value="متعاقد بالساعة">متعاقد بالساعة</option>
+                    <option value="متفرغ">متفرغ</option>
+                    <option value="الملاك"> الملاك</option>
                 </select>
             </div>
 
