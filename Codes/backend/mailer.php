@@ -15,7 +15,7 @@
     $mail->Port = 587; 
 
     $mail->Username = "fypalaf@gmail.com";
-    $mail->Password = "dyio bzct mygc tjyq";
+    $mail->Password = "smtp-password";
 
     $mail->isHTML(true);
 
