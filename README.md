@@ -44,7 +44,7 @@ Jean C. Chamoun
 ### Jean's part:
 
 - Sign up Page backend(Finished this part sends the data into php and modified db)(Check with the team)
-- Forgot Password backend(Send Code,verify Code , reset Password)
+- Forgot Password backend(Finished this part sends the data to a receiver from my creation for an ul account yet smtp gmail)(Check with the team)
 - Admin Courses Page
 
   * Add Course (send data , check existance)

@@ -152,7 +152,6 @@
             <div class="form-group">
                 <label for="department">Department</label>
                 <select class="dropdown-select" name="department" id="department" >
-                    <option value="">-- Select your department --</option>
                     <option value="math">Math</option>
                     <option value="css">Computer Science and Statistics</option>
                     <option value="pe">Physics and Electronics</option>
@@ -186,7 +185,7 @@
 
             <button type="submit" class="submit-btn" name="signUp">Sign Up</button>
             <div class="back">
-                <a href="login.html">Back to Login</a>
+                <a href="login.php">Back to Login</a>
             </div>
         </form>
     </div>

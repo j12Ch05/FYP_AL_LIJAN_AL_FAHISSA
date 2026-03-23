@@ -30,7 +30,7 @@
             $_SESSION["email"] = $email;
 
 
-            header("location: enterCode.php");
+            header("location: generateCode.php");
             exit();
         }
         else{
@@ -77,7 +77,7 @@
             <div class="error-message" id="emailError">Please enter a valid email</div><br>
             <button type="submit" class="submit-btn" name="sendCode">Send Code</button>
             <div class="back">
-                <a href="login.html">Back to Login</a>
+                <a href="login.php">Back to Login</a>
             </div>
         </form>
     </div>
