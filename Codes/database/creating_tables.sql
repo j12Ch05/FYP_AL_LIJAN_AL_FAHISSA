@@ -24,14 +24,14 @@ CREATE TABLE department (
 
 CREATE TABLE major (
   major_id VARCHAR(6) NOT NULL,
-  major_name VARCHAR(15) NOT NULL,
+  major_name VARCHAR(60) NOT NULL,
   dep_id VARCHAR(7) NOT NULL,
   PRIMARY KEY (major_id)
 );
 
 CREATE TABLE course (
   course_code VARCHAR(6) NOT NULL,
-  course_name VARCHAR(40) NOT NULL,
+  course_name VARCHAR(255) NOT NULL,
   course_credit_nb INT NOT NULL,
   course_hours_nb INT NOT NULL,
   course_lang VARCHAR(2) NOT NULL,

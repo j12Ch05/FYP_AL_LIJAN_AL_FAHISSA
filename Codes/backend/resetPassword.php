@@ -1,6 +1,7 @@
 <?php
     session_start();
     include("database.php");
+    $passwordFormat = "/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
 
     $email = $_SESSION["email"];
 
@@ -8,7 +9,8 @@
         $newPassword = $_POST["newPassword"];
         $confirmPassword = $_POST["confirmPassword"];
 
-        if($newPassword == $confirmPassword){
+       if(preg_match($passwordFormat,$confirmPassword)){
+         if($newPassword == $confirmPassword){
             $sql_change = "UPDATE professor
                             SET prof_password = ?
                             WHERE prof_email = ?";
@@ -35,13 +37,18 @@
                 }
 
                 mysqli_stmt_close($stmt);
-            } else {
+            } 
+            else {
                 echo "Preparation failed: " . mysqli_error($conn);
             }
         }
         else{
-            $_SESSION["error"] = "The Passwords are not similar";
+            $_SESSION["error"] = "The Passwords are not similar.";
         }
+       }
+       else{
+             $_SESSION["error"] = "Password must be at least 8 characters, include 1 uppercase letter, 1 number, and 1 special character.";
+       }
     }
 
     
@@ -75,14 +82,14 @@
             <div class="form-group">
                 <label for="password">New Password</label>
                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Enter your new password" required>
+                    <input type="password" id="password" name="newPassword" placeholder="Enter your new password" required>
                     <button type="button" id="togglePassword" class="toggle-btn">Show</button>
                 </div>
             </div>
             <div class="form-group">
                 <label for="confirm">Confirm Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Confirm your password" required>
+                    <input type="password" id="confirm" name="confirmPassword" placeholder="Confirm your password" required>
                     <button type="button" id="togglePassword" class="toggle-btn">Show</button>
                 </div>
             </div>

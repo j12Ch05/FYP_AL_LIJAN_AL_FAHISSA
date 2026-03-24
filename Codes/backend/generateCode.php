@@ -43,7 +43,7 @@
                 $mail->Body = <<<END
 
                 To reset your password please enter this code on the website
-                <div><h2>{$d1}</h2> <h2>{$d2}</h2> <h2>{$d3}</h2> <h2>{$d4}</h2> <h2>{$d5}</h2> <h2>{$d6}</h2></div>
+                <div><h1>{$d1} {$d2} {$d3} {$d4} {$d5} {$d6}</h1></div>
 
                 END;
 
