@@ -2,22 +2,10 @@
     session_start();
     include("database.php");
 
-    //Creating a function to verify if the file number or the email is already taken 
-    function value_exists($conn,$col,$value){
-        $sql_query = "select $col from professor where $col = ?";
-        $stmt = mysqli_prepare($conn,$sql_query);
-        mysqli_stmt_bind_param($stmt,"s",$value);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        
-        return mysqli_num_rows($result) > 0;
-    }
+    
 
     
     $fileNumber = (int)$_SESSION["fileNumber"];
-    $sql_file = 'select prof_file_nb from professor where prof_file_nb = ?';
-
-
     $firstName = mysqli_real_escape_string($conn, $_SESSION["firstName"]);
     $lastName  = mysqli_real_escape_string($conn, $_SESSION["lastName"]);
     $birth  = $_SESSION["birthDate"];

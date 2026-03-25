@@ -47,7 +47,7 @@ Jean C. Chamoun
 - Forgot Password backend(Finished this part sends the data to a receiver from my creation for an ul account yet smtp gmail)(Check with the team)
 - Admin Courses Page
 
-  * Add Course (send data , check existance)(Started with the fetching data for the drop down list and with the others tasks)
+  * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Check with the team)
   * Search Course (fetch data using code)
   * view Courses(fetch all possible data using a specific query)
 - Admin Correctors Page (fetch data and send data)

@@ -3,26 +3,26 @@
     include("database.php");
 
     
-    $sql_professors = "SELECT prof_first_name, prof_last_name FROM professor WHERE dep_id = 'css'";
+    $sql_professors = "SELECT prof_file_nb,prof_first_name, prof_last_name FROM professor WHERE dep_id = 'css'";
     $stmt_p = mysqli_prepare($conn, $sql_professors);
     mysqli_stmt_execute($stmt_p);
     $res_p = mysqli_stmt_get_result($stmt_p);
 
     $professors = [];
     while($row = mysqli_fetch_assoc($res_p)){
-        $professors[] = $row["prof_first_name"] . " " . $row["prof_last_name"];
+        $professors[$row["prof_file_nb"]] = $row["prof_first_name"] . " " . $row["prof_last_name"];
     }
     mysqli_stmt_close($stmt_p); 
 
     
-    $sql_majors = "SELECT major_name FROM major WHERE dep_id = 'css'";
+    $sql_majors = "SELECT major_id,major_name FROM major WHERE dep_id = 'css'";
     $stmt_m = mysqli_prepare($conn, $sql_majors);
     mysqli_stmt_execute($stmt_m);
     $res_m = mysqli_stmt_get_result($stmt_m);
 
     $majors = [];
     while($row = mysqli_fetch_assoc($res_m)){
-        $majors[] = $row["major_name"];
+        $majors[$row["major_id"]] = $row["major_name"];
     }
     mysqli_stmt_close($stmt_m); 
 
@@ -135,48 +135,16 @@
                 <summary>Add Course</summary>
                     <div class="dropdown-content">
 
-
-                    <?php 
-                        include("database.php");
-                        
-                        //Check if the course code was already taken
-                        function course_exists($conn,$code,$lang){
-                            $sql_query = "SELECT course_code from course where course_code = ? and course_lang = ?";
-                            $stmt = mysqli_prepare($conn,$sql_query);
-                            mysqli_stmt_bind_param($stmt,"ss",$code,$lang);
-                            mysqli_stmt_execute($stmt);
-                            $result = mysqli_stmt_get_result($stmt);
-                            
-                            return mysqli_num_rows($result) > 0;
-                        }
-
-                        if(isset($_POST["submitCourse"])){
-                            $errors = [];
-
-                            $courseCode = trim($_POST["courseCode"]);
-                            $courseEng = isset($_POST["courseEng"]) ? "E":"";
-                            $courseFr = isset($_POST["courseFr"]) ? "F":"";
-                            
-
-                            if(empty($courseEng) && empty($courseFr)){
-                                $errors[] = "You must select a language for the course";
-                            }
-                            else{
-                                
-                                $courseName = trim($_POST["courseName"]);
-                                $courseCredit = $_POST["courseCredit"];
-                                $courseProf = $_POST["courseProf"];
-                                $courseMajor = $_POST["courseMajor"];
-                                $courseLevel = $_POST["courseLevel"];
-                            }
-                        }
-                    
-                        mysqli_close($conn);
-                    ?>
-
-
                         <form id="addCourse" action="addCourse.php" method="post">
                             <div class="form-group">
+                                 <?php 
+                                    if (isset($_SESSION["error"])) {
+                                        
+                                        echo '<p style="color: red; font-weight: bold;">' . $_SESSION["error"] . '</p>';
+                                        
+                                        unset($_SESSION["error"]);
+                                    }
+                                ?>
                                 <label for="courseCode">Enter the code of the course</label>
                                 <input type="text" id="courseCode" name="courseCode" placeholder="I3341,M2250,P1101..."><br>
                                 <label for="courseName">Enter the name of the course</label>
@@ -190,8 +158,8 @@
                                 <select name="courseProf" id="courseProf">
                                    <?php
                                         //Preparing the dropdown list for choosing the name of the professor
-                                        foreach($_SESSION["professors"] as $professor){
-                                            echo "<option value='$professor'>$professor</option>";
+                                        foreach($_SESSION["professors"] as $file=>$name){
+                                            echo "<option value='$file'>$name</option>";
                                         }
                 
                                    ?>
@@ -199,22 +167,34 @@
                                 <label for="courseMajor">Choose the major</label>
                                 <select name="courseMajor" id="courseMajor">
                                     <?php
-                                        foreach($_SESSION["majors"] as $major){
-                                            echo "<option value='$major'>$major</option>";
+                                        foreach($_SESSION["majors"] as $id=>$name){
+                                            echo "<option value='$id'>$name</option>";
                                         }
                                     ?>
                                 </select><br>
-                                <label for="courseLevel">Enter the level</label>
+                                <label for="courseLevel">Choose the level</label>
                                 <select id="courseLevel" name="courseLevel">
                                     <option value="L1">L1</option>
                                     <option value="L2">L2</option>
                                     <option value="L3">L3</option>
                                     <option value="M1">M1</option>
                                 </select><br>
+                                <label for="courseSemester">Choose the semester</label>
+                                <select name="courseSemester" id="courseSemester">
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                </select>
+                                <br>
+                                <label for="courseCategory">Choose the category</label>
+                                <select name="courseCategory" id="courseCategory">
+                                    <option value="mandatory">Mandatory</option>
+                                    <option value="optional">Optional</option>
+                                    <option value="common">Common</option>
+                                </select><br>
 
                             </div>
                             
-                            <input type="button" name="submitCourse" class="btn" value="Submit">
+                            <input type="submit" name="submitCourse" class="btn" value="Submit">
                             <input type="reset" name="cancelCourse" class="btn" value="Cancel">
                         </form>
                     </div>
@@ -226,7 +206,7 @@
                         <div class="form-group">
                             <search>
                                 <label for="courseCode">Course Code</label>
-                                <input type="text" id="courseCode" name="courseCode" placeholder="I3350,P1100....">
+                                <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100....">
                                 <label for="courseLang">Course Language</label>
                                 <select name="courseLang" id="courseLang">
                                     <option value="courseEng">E</option>
@@ -235,17 +215,48 @@
                                 <input type="button" id="searchbtn" name="searchBtn" class="btn" value="Search">
                             </search><br>
                             <!--The course information need to fetched from the backend-->
-                            <p>Course Code: </p><br>
-                            <p>Course Name: </p><br>
-                            <p>Course Credits: </p><br>
-                            <p>Course Level: </p><br>
-                            <p>Course Major: </p><br>
-                            <p>Course Professor:</p><br>
-                            <p>Course Category: </p><br>
+                            <search><label for="courseCode">Course Code: </label><input type="text" id="courseCode" name="courseCode" value="I3305"></search><br>
+                            <search><label for="courseName">Course Name: </label><input type="text" id="courseName" name="courseName" value="I3305"></search><br>
+                            <search><label for="courseCredit">Course Credits: </label><input type="number" id="courseCredit" min="3" max="6" name="courseCredit" value="I3305"></search><br>
+                            <search><label for="courseCode">Course Level: </label>
+                            <select id="courseLevel" name="courseLevel">
+                                    <option value="L1">L1</option>
+                                    <option value="L2">L2</option>
+                                    <option value="L3">L3</option>
+                                    <option value="M1">M1</option>
+                                </select>
+                            </search><br>
+                            <search><label for="courseMajor">Course Major: </label>
+                                <select name="courseMajor" id="courseMajor">
+                                    <?php
+                                        foreach($_SESSION["majors"] as $id=>$name){
+                                            echo "<option value='$id'>$name</option>";
+                                        }
+                                    ?>
+                                </select></search><br>
+                            <search>
+                                <label for="courseProf">Course Professor: </label>
+                                <select name="courseProf" id="courseProf">
+                                   <?php
+                                        //Preparing the dropdown list for choosing the name of the professor
+                                        foreach($_SESSION["professors"] as $file=>$name){
+                                            echo "<option value='$file'>$name</option>";
+                                        }
+                
+                                   ?>
+                                </select></search><br>
+                            <search><label for="courseCategory">Course Category</label>
+                                <select name="courseCategory" id="courseCategory">
+                                    <option value="mandatory">Mandatory</option>
+                                    <option value="optional">Optional</option>
+                                    <option value="common">Common</option>
+                                </select></search><br>
+                            
                         </div>
-                        <input type="button" id="edit" name="editCourse" class="btn" value="Edit Course">
-                        <input type="button" id="disable" name="disableCourse" class="btn" value="Disable Course">
-                        <input type="reset" id="cancel" name="cancelSearch" class="btn" value="Cancel">
+                        <input type="button" id="editCourse" name="editCourse" class="btn" value="Edit Course">
+                        <input type="button" id="confirmCourse" name="confirmCourse" style="display: none;" class="btn" value="Confirm Course">
+                        <input type="button" id="disableCourse" name="disableCourse" class="btn" value="Disable Course">
+                        <input type="reset" id="cancelSearch" name="cancelSearch" class="btn" value="Cancel">
                         </div>
                     </form>
                 </details>
@@ -497,98 +508,11 @@
 
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const findButtons = document.querySelectorAll('input[type="button"][value="Find"]');
-            findButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const dropdown = button.closest('.dropdown-content');
-                    const table = dropdown?.querySelector('.table-container');
-                    if (table) {
-                        table.style.display = 'block';
-                    }
-
-                    // If this Find button belongs to the Correctors section, show the edit/delete buttons
-                    const correctorsSection = button.closest('#content-correctors');
-                    if (correctorsSection) {
-                        const editBtn = correctorsSection.querySelector('#editCorr');
-                        const deleteBtn = correctorsSection.querySelector('#deleteCorr');
-                        if (editBtn) editBtn.style.display = 'inline-block';
-                        if (deleteBtn) deleteBtn.style.display = 'inline-block';
-                    }
-                });
-            });
-
-            // Handle Edit Correctors button click
-            const editBtn = document.querySelector('#editCorr');
-            if (editBtn) {
-                editBtn.addEventListener('click', () => {
-                    const correctorsSection = editBtn.closest('#content-correctors');
-                    if (correctorsSection) {
-                        const selectElements = correctorsSection.querySelectorAll('.correctorSelect');
-                        selectElements.forEach(select => {
-                            select.disabled = false;
-                        });
-                        // Show Apply Changes button
-                        const applyBtn = correctorsSection.querySelector('#applyCorr');
-                        if (applyBtn) applyBtn.style.display = 'inline-block';
-                    }
-                });
-            }
-
-            // Handle Apply Changes button click
-            const applyBtn = document.querySelector('#applyCorr');
-            if (applyBtn) {
-                applyBtn.addEventListener('click', () => {
-                    const correctorsSection = applyBtn.closest('#content-correctors');
-                    if (correctorsSection) {
-                        const selectElements = correctorsSection.querySelectorAll('.correctorSelect');
-                        selectElements.forEach(select => {
-                            select.disabled = true;
-                        });
-                        // Hide Apply Changes button
-                        applyBtn.style.display = 'none';
-                    }
-                });
-            }
-
-            // Handle Cancel button click
-            const cancelBtn = document.querySelector('#cancelButton');
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', () => {
-                    const correctorsSection = cancelBtn.closest('#content-correctors');
-                    if (correctorsSection) {
-                        const table = correctorsSection.querySelector('.table-container');
-                        const editBtn = correctorsSection.querySelector('#editCorr');
-                        const deleteBtn = correctorsSection.querySelector('#deleteCorr');
-                        const applyBtn = correctorsSection.querySelector('#applyCorr');
-                        if (table) table.style.display = 'none';
-                        if (editBtn) editBtn.style.display = 'none';
-                        if (deleteBtn) deleteBtn.style.display = 'none';
-                        if (applyBtn) applyBtn.style.display = 'none';
-                    }
-                });
-            }
-
-            // Handle Delete Correctors button click
-            const deleteBtn = document.querySelector('#deleteCorr');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => {
-                    const correctorsSection = deleteBtn.closest('#content-correctors');
-                    if (correctorsSection) {
-                        const secondCorrSelects = correctorsSection.querySelectorAll('select[name="secondCorr"]');
-                        const thirdCorrSelects = correctorsSection.querySelectorAll('select[name="thirdCorr"]');
-                        secondCorrSelects.forEach(select => {
-                            select.value = '';
-                        });
-                        thirdCorrSelects.forEach(select => {
-                            select.value = '';
-                        });
-                    }
-                });
-            }
-        });
+    <script src="AdminPage.js">  
     </script>
 
 </body>
 </html>
+<?php 
+    exit();
+?>

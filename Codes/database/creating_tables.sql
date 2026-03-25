@@ -47,7 +47,7 @@ CREATE TABLE teaching (
   course_code VARCHAR(6) NOT NULL,
   course_lang varchar(2) NOT NULL,
   prof_file_nb INT NOT NULL,
-  uni_year VARCHAR(6) NOT NULL,
+  uni_year VARCHAR(15) NOT NULL,
   PRIMARY KEY (course_code, course_lang, prof_file_nb),
   CONSTRAINT fk_teaching_course FOREIGN KEY (course_code, course_lang) REFERENCES course (course_code, course_lang) ON DELETE CASCADE,
   CONSTRAINT fk_teaching_prof FOREIGN KEY (prof_file_nb) REFERENCES professor (prof_file_nb) ON DELETE CASCADE
