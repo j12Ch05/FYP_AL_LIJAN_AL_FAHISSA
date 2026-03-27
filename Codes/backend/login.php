@@ -2,6 +2,8 @@
     session_start();
     include("database.php");
 
+    //always define the error variable at the beginning of the code
+    $error = "";
     //if email inserted is really in the database 
     function value_exists($conn,$col,$value){
         $sql_query = "select $col from professor where $col = ?";
@@ -14,8 +16,7 @@
     }
 
     if(isset($_POST["login"])){
-        $error = "";
-
+       
         $email = $_POST["email"];
         $password = $_POST["password"];
         $admin = isset($_POST["asAdmin"]);
@@ -24,7 +25,7 @@
             $error = "This email do not exists. Please sign up";
         }
         else{
-            $sql_query = "select prof_password from professor where prof_email = ?";
+            $sql_query = "select prof_password,isAdmin from professor where prof_email = ?";
             $stmt = mysqli_prepare($conn,$sql_query);
             mysqli_stmt_bind_param($stmt,"s",$email);
             mysqli_stmt_execute($stmt);
@@ -34,32 +35,26 @@
             if(!password_verify($password,$row["prof_password"])){
                 $error = "Incorrect password. Please try again.";
             }
-        }
 
-        if(empty($error)){
-            $_SESSION["email"] = $email;
-        }
-
-            header("location: ProfessorPage.php");
-            exit();
-        }
-        else{
-            $_SESSION["error"] = $error;
-        }
-
-        if(isset($_POST["login"])){
-        if(isset($_POST["asAdmin"])){
-            if($admin){
-            header("Location: AdminPage.html");
+            //check if someone is an admin or not
+            if($admin && !$row["isAdmin"]){
+                $error = "You cannot login as an admin";
+            }
+            if(empty($error)){
+                $_SESSION["email"] = $email;
+                if($admin){
+                    header("location: AdminPage.php");
+                }
+                else{
+                    header("location: ProfPage.html");
+                }
             }
             else{
-                header("Location: ProfPage.html");
+                $_SESSION["error"] = $error;
             }
-        }
-    
-        $_SESSION["asAdmin"] = $admin;
-    }
 
+        }
+    }
     mysqli_close($conn);
 ?>
 
@@ -75,6 +70,14 @@
 </head>
 <body>
     <div class="box-container">
+         <?php 
+         //Displaying  the error in red
+            if (isset($_SESSION['error'])) {
+                
+                    echo '<p style="color: red; font-weight: bold;">' . $_SESSION['error'] . '</p>';
+                unset($_SESSION['error']);
+            }
+        ?>
         <h1>Login</h1>
         <form id="loginForm" action="login.php" method="post">
             <div class="form-group">
@@ -106,13 +109,13 @@
                     <input type="checkbox" name="asAdmin">
                     Login as admin
                 </label>
-                <a href="forgotPassword.html">Forgot Password?</a>
+                <a href="forgotPassword.php">Forgot Password?</a>
             </div>
 
             <button type="submit" class="submit-btn" name="login">Login</button>
 
             <div class="signup-link">
-                Don't have an account? <a href="signUp.html">Sign up here</a>
+                Don't have an account? <a href="signUp.php">Sign up here</a>
             </div>
         </form>
     </div>
