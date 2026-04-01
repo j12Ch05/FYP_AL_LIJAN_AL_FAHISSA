@@ -5,7 +5,7 @@
 Charbel E. Outayek
 Jean C. Chamoun
 
-## Front-End(Last Check)
+## Front-End
 
 ### Charbel's part:
 
@@ -34,7 +34,7 @@ Jean C. Chamoun
 
 ### Charbel's part:
 
-- Log in Page backend
+- Log in Page backend(Checked)
 - Professor profile page(fetch data,edit data)
 - Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)
 - Admin Professors Page(fetching data from a specific query)
@@ -43,11 +43,11 @@ Jean C. Chamoun
 
 ### Jean's part:
 
-- Sign up Page backend(Finished this part sends the data into php and modified db)(Check with the team)
-- Forgot Password backend(Finished this part sends the data to a receiver from my creation for an ul account yet smtp gmail)(Check with the team)
+- Sign up Page backend(Finished this part sends the data into php and modified db)(Checked)
+- Forgot Password backend(Finished this part sends the data to a receiver from my creation for an ul account yet smtp gmail)(Checked)
 - Admin Courses Page
 
-  * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Check with the team)
+  * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Checked)
   * Search Course (fetch data using code)
   * view Courses(fetch all possible data using a specific query)
 - Admin Correctors Page (fetch data and send data)

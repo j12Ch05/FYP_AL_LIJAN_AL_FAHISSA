@@ -38,6 +38,7 @@
 
     
     if (mysqli_query($conn, $sql_insert)) {
+        header("location: login.php");
         echo "Registration successful!";
     } else {
         echo "Error: " . mysqli_error($conn); 

@@ -10,8 +10,7 @@ CREATE TABLE professor (
   dep_id VARCHAR(7) NOT NULL,
   isAdmin BOOLEAN DEFAULT FALSE,
   prof_category varchar(30) DEFAULT 'متعاقد بالساعة',
-  reset_token_hash varchar(64) unique DEFAULT NULL,
-  reset_token_expires_at datetime DEFAULT NULL,
+  reset_date datetime DEFAULT NULL,
   PRIMARY KEY (prof_file_nb)
 );
 
@@ -30,7 +29,7 @@ CREATE TABLE major (
 );
 
 CREATE TABLE course (
-  course_code VARCHAR(6) NOT NULL,
+  course_code VARCHAR(30) NOT NULL,
   course_name VARCHAR(255) NOT NULL,
   course_credit_nb INT NOT NULL,
   course_hours_nb INT NOT NULL,

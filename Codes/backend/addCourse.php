@@ -2,20 +2,7 @@
     session_start();
     include("database.php");
 
-    function getAcademicYear() {
-    $currentYear = date('Y');
-    $currentMonth = date('n'); 
-
-    if ($currentMonth >= 9) {
-        $academicYear = $currentYear . "-" . ($currentYear + 1);
-    } else {
-       
-        $academicYear = ($currentYear - 1) . "-" . $currentYear;
-    }
-    return $academicYear;
-    }
-
-$uniYear = getAcademicYear(); // Outputs something like "2025-2026"
+    
 
     function course_exists($conn, $code, $lang) {
         if (empty($lang)) return false; 
@@ -42,9 +29,9 @@ $uniYear = getAcademicYear(); // Outputs something like "2025-2026"
         $courseLevel = mysqli_real_escape_string($conn, $_POST["courseLevel"]);
         $courseSemester = (int)$_POST["courseSemester"];
         $courseCategory = mysqli_real_escape_string($conn, $_POST["courseCategory"]);
-        $courseHours = (int)$courseCredit * 12;
+        $courseHours = mysqli_real_escape_string($conn, $_POST["courseHours"]);
 
-        $uniYear = getAcademicYear();
+        $uniYear = mysqli_real_escape_string($conn, $_POST["courseYear"]);;
 
         if(empty($courseEng) && empty($courseFr)) {
             $error = "You must select at least a language for the course";
@@ -91,11 +78,26 @@ $uniYear = getAcademicYear(); // Outputs something like "2025-2026"
                 } else {
                     echo "French Error: " . mysqli_error($conn);
                 }
+                
             }
         } else {
             $_SESSION["error"] = $error;
         }
     }
+
+    unset(
+    $_POST['courseCode'],
+    $_POST['courseEng'],
+    $_POST['courseFr'],
+    $_POST['courseName'],
+    $_POST['courseCredit'],
+    $_POST['courseProf'],
+    $_POST['courseMajor'],
+    $_POST['courseLevel'],
+    $_POST['courseSemester'],
+    $_POST['courseCategory']
+    );
+    
 
     mysqli_close($conn);
 ?>

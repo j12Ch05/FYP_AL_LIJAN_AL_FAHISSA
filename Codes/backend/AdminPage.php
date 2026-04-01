@@ -1,10 +1,11 @@
 <?php
     session_start();
     include("database.php");
-
+    $email = $_SESSION["email"];
     
-    $sql_professors = "SELECT prof_file_nb,prof_first_name, prof_last_name FROM professor WHERE dep_id = 'css'";
+    $sql_professors = "SELECT p.prof_file_nb,p.prof_first_name,p.prof_last_name FROM professor p Join professor a on a.dep_id = p.dep_id where a.prof_email= ?";
     $stmt_p = mysqli_prepare($conn, $sql_professors);
+    mysqli_stmt_bind_param($stmt_p,"s",$email);
     mysqli_stmt_execute($stmt_p);
     $res_p = mysqli_stmt_get_result($stmt_p);
 
@@ -14,9 +15,9 @@
     }
     mysqli_stmt_close($stmt_p); 
 
-    
-    $sql_majors = "SELECT major_id,major_name FROM major WHERE dep_id = 'css'";
+    $sql_majors = "SELECT m.major_id, m.major_name FROM major m Join professor a on a.dep_id = m.dep_id where a.prof_email=? ";
     $stmt_m = mysqli_prepare($conn, $sql_majors);
+    mysqli_stmt_bind_param($stmt_m,"s",$email);
     mysqli_stmt_execute($stmt_m);
     $res_m = mysqli_stmt_get_result($stmt_m);
 
@@ -26,10 +27,10 @@
     }
     mysqli_stmt_close($stmt_m); 
 
-
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
 
+    
     mysqli_close($conn);
 ?>
 
@@ -110,7 +111,6 @@
                                 <input type="text" id="professorQuery" name="professorQuery" placeholder="Enter department, name, or course" style="width: 200px;">
                                 <input type="button"  id="searchID" name="searchID" value="Search">
                             </div><br>
-                            <!--The professor information need to fetched from the backend-->
                             <p>Professor ID: </p><br>
                             <p>Professor Name: </p><br>
                             <p>Courses Taught(with language): </p><br>
@@ -146,11 +146,13 @@
                                     }
                                 ?>
                                 <label for="courseCode">Enter the code of the course</label>
-                                <input type="text" id="courseCode" name="courseCode" placeholder="I3341,M2250,P1101..."><br>
+                                <input type="text" id="courseCode" name="courseCode" maxlength="7" placeholder="I3341,M2250,P1101..."><br>
                                 <label for="courseName">Enter the name of the course</label>
                                 <input type="text" id="courseName" name="courseName" placeholder="Enter the name"><br>
                                 <label for="courseCredit">Enter the credits of the course</label>
                                 <input type="number" min="3" max="6" name="courseCredit" id="courseCredit"><br>
+                                <label for="courseHours">Enter the hours of the course</label>
+                                <input type="number" min="36" max="72" name="courseHours" id="courseHours"><br>
                                 <label for="courseLang">Enter the language of the course</label>
                                 <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
                                 <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
@@ -185,6 +187,8 @@
                                     <option value="2">Semester 2</option>
                                 </select>
                                 <br>
+                                <label for="courseYear">Enter the university year</label>
+                                <input type="text" id="courseYear" name="courseYear" maxlength="15"><br>
                                 <label for="courseCategory">Choose the category</label>
                                 <select name="courseCategory" id="courseCategory">
                                     <option value="mandatory">Mandatory</option>
@@ -200,66 +204,67 @@
                     </div>
                 </details>
                 <details class="dropdown-menu">
-                    <summary>Search Course</summary>
-                    <form id="searchCourse" action="searchCourse.php" method="post">
-                        <div class="dropdown-content">
+                <summary>Search Course</summary>
+                <form id="searchCourse" action="searchCourse.php" method="post"> <div class="dropdown-content">
                         <div class="form-group">
-                            <search>
-                                <label for="courseCode">Course Code</label>
+                            <div>
+                                <label for="searchCode">Course Code</label>
                                 <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100....">
                                 <label for="courseLang">Course Language</label>
                                 <select name="courseLang" id="courseLang">
-                                    <option value="courseEng">E</option>
-                                    <option value="courseFr">F</option>
+                                    <option value="E">E</option>
+                                    <option value="F">F</option>
                                 </select>
-                                <input type="button" id="searchbtn" name="searchBtn" class="btn" value="Search">
-                            </search><br>
-                            <!--The course information need to fetched from the backend-->
-                            <search><label for="courseCode">Course Code: </label><input type="text" id="courseCode" name="courseCode" value="I3305"></search><br>
-                            <search><label for="courseName">Course Name: </label><input type="text" id="courseName" name="courseName" value="I3305"></search><br>
-                            <search><label for="courseCredit">Course Credits: </label><input type="number" id="courseCredit" min="3" max="6" name="courseCredit" value="I3305"></search><br>
-                            <search><label for="courseCode">Course Level: </label>
-                            <select id="courseLevel" name="courseLevel">
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
-                                    <option value="L3">L3</option>
-                                    <option value="M1">M1</option>
-                                </select>
-                            </search><br>
-                            <search><label for="courseMajor">Course Major: </label>
-                                <select name="courseMajor" id="courseMajor">
-                                    <?php
-                                        foreach($_SESSION["majors"] as $id=>$name){
-                                            echo "<option value='$id'>$name</option>";
-                                        }
-                                    ?>
-                                </select></search><br>
-                            <search>
-                                <label for="courseProf">Course Professor: </label>
-                                <select name="courseProf" id="courseProf">
-                                   <?php
-                                        //Preparing the dropdown list for choosing the name of the professor
-                                        foreach($_SESSION["professors"] as $file=>$name){
-                                            echo "<option value='$file'>$name</option>";
-                                        }
-                
-                                   ?>
-                                </select></search><br>
-                            <search><label for="courseCategory">Course Category</label>
-                                <select name="courseCategory" id="courseCategory">
-                                    <option value="mandatory">Mandatory</option>
-                                    <option value="optional">Optional</option>
-                                    <option value="common">Common</option>
-                                </select></search><br>
+                                <input type="submit" id="SearchBtn" name="searchBtn" class="btn" value="Search">
+                            </div><br>
                             
+                            <label for="resCourseCode">Course Code: </label>
+                            <input type="text" id="resCourseCode" name="resCourseCode" value="">
+                            <br>
+                            <label for="resCourseName">Course Name: </label>
+                            <input type="text" id="resCourseName" name="courseName" value="">
+                            <br>
+                            <label for="resCourseCredit">Course Credits: </label>
+                            <input type="number" id="resCourseCredit" min="3" max="6" name="courseCredit" value="">
+                            <br>
+                            <label for="resCourseLevel">Course Level: </label>
+                            <select id="resCourseLevel" name="courseLevel">
+                                <option value="L1">L1</option>
+                                <option value="L2">L2</option>
+                                <option value="L3">L3</option>
+                                <option value="M1">M1</option>
+                            </select>
+                            <br>
+                            <label for="resCourseSemester">Course Semester:</label>
+                            <select name="courseSemester" id="resCourseSemester">
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                            </select>
+                            <br>
+                            <label for="resCourseMajor">Course Major: </label>
+                            <select name="courseMajor" id="resCourseMajor">
+                                <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
+                            </select>
+                            <br>
+                            <label for="resCourseProf">Course Professor: </label>
+                            <select name="courseProf" id="resCourseProf">
+                                <?php foreach($_SESSION["professors"] as $file=>$name){ echo "<option value='$file'>$name</option>"; } ?>
+                            </select>
+                            <br>
+                            <label for="resCourseCategory">Course Category</label>
+                            <select name="courseCategory" id="resCourseCategory">
+                                <option value="mandatory">Mandatory</option>
+                                <option value="optional">Optional</option>
+                                <option value="common">Common</option>
+                            </select>
                         </div>
-                        <input type="button" id="editCourse" name="editCourse" class="btn" value="Edit Course">
-                        <input type="button" id="confirmCourse" name="confirmCourse" style="display: none;" class="btn" value="Confirm Course">
-                        <input type="button" id="disableCourse" name="disableCourse" class="btn" value="Disable Course">
-                        <input type="reset" id="cancelSearch" name="cancelSearch" class="btn" value="Cancel">
-                        </div>
-                    </form>
-                </details>
+                        <input type="button" id="resEditCourse" class="btn" value="Edit Course">
+                        <input type="button" id="resConfirmCourse" style="display: none;" class="btn" value="Confirm Course">
+                        <input type="button" id="resDisableCourse" class="btn" value="Disable Course">
+                        <input type="reset" id="resCancelSearch" class="btn" value="Cancel">
+                    </div>
+                </form>
+            </details>
                 <details class="dropdown-menu">
                     <summary>View Courses of The Major</summary>
                     <form id="viewMajorCourses" action="viewMajorCourses" method="post">
@@ -436,7 +441,6 @@
                                     </select>
                                     <input type="button"  id="searchID" name="searchID" value="Search">
                                 </div><br>
-                                <!--The corrector information need to fetched from the backend-->
                                 <p>Corrector1 ID: </p><br>
                                 <p>Corrector1 Name: </p><br>
                                 <p>Corrector2 ID: </p><br>
@@ -495,7 +499,6 @@
                                         <input type="text" id="professorId" name="professorId" placeholder="Enter the professor ID" style="width: 200px;">
                                         <input type="button"  id="searchID" name="searchID" value="Search">
                                         </div><br>
-                                        <!--The professor information need to fetched from the backend-->
                                         <p>Professor ID: </p><br>
                                         <p>Professor Name: </p><br>
                                 </div>
@@ -513,6 +516,3 @@
 
 </body>
 </html>
-<?php 
-    exit();
-?>
