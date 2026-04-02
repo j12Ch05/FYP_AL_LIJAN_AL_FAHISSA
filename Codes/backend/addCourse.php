@@ -42,21 +42,22 @@
         }
 
         if(empty($error)) {
+            $ok = true;
+
             if(!empty($courseEng)) {
                 $sql_1 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`) 
                           VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','E','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1')";
-                
-                if(mysqli_query($conn, $sql_1)) {
-                    echo "The course is available in English\n ";
-                } else {
+
+                if(!mysqli_query($conn, $sql_1)) {
+                    $ok = false;
                     echo "English Error: " . mysqli_error($conn);
                 }
 
                 $t1 = "INSERT INTO `teaching`(`course_code`, `course_lang`, `prof_file_nb`, `uni_year`) 
                         VALUES ('$courseCode','E','$courseProf','$uniYear')";
 
-                if(mysqli_query($conn, $t1)) {
-                } else {
+                if($ok && !mysqli_query($conn, $t1)) {
+                    $ok = false;
                     echo "English Error: " . mysqli_error($conn);
                 }
             }
@@ -64,21 +65,23 @@
             if(!empty($courseFr)) {
                 $sql_2 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`) 
                           VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','F','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1')";
-                
-                if(mysqli_query($conn, $sql_2)) {
-                    echo "The course is available in French\n ";
-                } else {
+
+                if($ok && !mysqli_query($conn, $sql_2)) {
+                    $ok = false;
                     echo "French Error: " . mysqli_error($conn);
                 }
 
                 $t2 = "INSERT INTO `teaching`(`course_code`, `course_lang`, `prof_file_nb`, `uni_year`) 
                         VALUES ('$courseCode','F','$courseProf','$uniYear')";
 
-                if(mysqli_query($conn, $t2)) {
-                } else {
+                if($ok && !mysqli_query($conn, $t2)) {
+                    $ok = false;
                     echo "French Error: " . mysqli_error($conn);
                 }
-                
+            }
+
+            if($ok) {
+                echo "Done";
             }
         } else {
             $_SESSION["error"] = $error;

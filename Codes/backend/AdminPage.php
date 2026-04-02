@@ -45,8 +45,9 @@
 </head>
 <body>
 
-    <input type="radio" name="nav" id="tab-professors" checked>
-    <input type="radio" name="nav" id="tab-courses">
+    <?php $navCourses = isset($_GET["tab"]) && $_GET["tab"] === "courses"; ?>
+    <input type="radio" name="nav" id="tab-professors"<?php echo $navCourses ? "" : " checked"; ?>>
+    <input type="radio" name="nav" id="tab-courses"<?php echo $navCourses ? " checked" : ""; ?>>
     <input type="radio" name="nav" id="tab-correctors">
     <input type="radio" name="nav" id="tab-edit-admins">
 
@@ -205,30 +206,47 @@
                 </details>
                 <details class="dropdown-menu">
                 <summary>Search Course</summary>
-                <form id="searchCourse" action="searchCourse.php" method="post"> <div class="dropdown-content">
+                <form id="searchCourseForm" action="searchCourse.php" method="post" onsubmit="return false;">
+                    <div class="dropdown-content">
                         <div class="form-group">
                             <div>
                                 <label for="searchCode">Course Code</label>
-                                <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100....">
-                                <label for="courseLang">Course Language</label>
-                                <select name="courseLang" id="courseLang">
+                                <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100...." maxlength="7">
+                                <label for="searchCourseLang">Course Language</label>
+                                <select name="searchCourseLang" id="searchCourseLang">
                                     <option value="E">E</option>
                                     <option value="F">F</option>
                                 </select>
-                                <input type="submit" id="SearchBtn" name="searchBtn" class="btn" value="Search">
+                                <input type="button" id="searchCourseBtn" name="searchBtn" class="btn" value="Search">
                             </div><br>
-                            
+
+                            <input type="hidden" id="hiddenCourseCode" name="course_code" value="">
+                            <input type="hidden" id="hiddenCourseLang" name="course_lang" value="">
+                            <input type="hidden" id="hiddenCourseIsActive" value="">
+
                             <label for="resCourseCode">Course Code: </label>
-                            <input type="text" id="resCourseCode" name="resCourseCode" value="">
+                            <input type="text" id="resCourseCode" name="resCourseCode" value="" disabled>
+                            <br>
+                            <label for="resCourseLang">Course Language: </label>
+                            <select id="resCourseLang" name="resCourseLang" disabled>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                            </select>
                             <br>
                             <label for="resCourseName">Course Name: </label>
-                            <input type="text" id="resCourseName" name="courseName" value="">
+                            <input type="text" id="resCourseName" name="resCourseName" value="" disabled>
                             <br>
                             <label for="resCourseCredit">Course Credits: </label>
-                            <input type="number" id="resCourseCredit" min="3" max="6" name="courseCredit" value="">
+                            <input type="number" id="resCourseCredit" min="3" max="6" name="resCourseCredit" value="" disabled>
+                            <br>
+                            <label for="resCourseHours">Course Hours: </label>
+                            <input type="number" id="resCourseHours" min="36" max="72" name="resCourseHours" value="" disabled>
+                            <br>
+                            <label for="resCourseYear">University Year: </label>
+                            <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" disabled>
                             <br>
                             <label for="resCourseLevel">Course Level: </label>
-                            <select id="resCourseLevel" name="courseLevel">
+                            <select id="resCourseLevel" name="resCourseLevel" disabled>
                                 <option value="L1">L1</option>
                                 <option value="L2">L2</option>
                                 <option value="L3">L3</option>
@@ -236,69 +254,86 @@
                             </select>
                             <br>
                             <label for="resCourseSemester">Course Semester:</label>
-                            <select name="courseSemester" id="resCourseSemester">
+                            <select name="resCourseSemester" id="resCourseSemester" disabled>
                                 <option value="1">Semester 1</option>
                                 <option value="2">Semester 2</option>
                             </select>
                             <br>
                             <label for="resCourseMajor">Course Major: </label>
-                            <select name="courseMajor" id="resCourseMajor">
+                            <select name="resCourseMajor" id="resCourseMajor" disabled>
                                 <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
                             </select>
                             <br>
                             <label for="resCourseProf">Course Professor: </label>
-                            <select name="courseProf" id="resCourseProf">
+                            <select name="resCourseProf" id="resCourseProf" disabled>
                                 <?php foreach($_SESSION["professors"] as $file=>$name){ echo "<option value='$file'>$name</option>"; } ?>
                             </select>
                             <br>
                             <label for="resCourseCategory">Course Category</label>
-                            <select name="courseCategory" id="resCourseCategory">
+                            <select name="resCourseCategory" id="resCourseCategory" disabled>
                                 <option value="mandatory">Mandatory</option>
                                 <option value="optional">Optional</option>
                                 <option value="common">Common</option>
                             </select>
                         </div>
                         <input type="button" id="resEditCourse" class="btn" value="Edit Course">
-                        <input type="button" id="resConfirmCourse" style="display: none;" class="btn" value="Confirm Course">
+                        <input type="button" id="resConfirmCourse" class="btn" value="Confirm changes" style="display: none;">
                         <input type="button" id="resDisableCourse" class="btn" value="Disable Course">
-                        <input type="reset" id="resCancelSearch" class="btn" value="Cancel">
+                        <input type="button" id="resCancelSearch" class="btn" value="Cancel">
                     </div>
                 </form>
             </details>
-                <details class="dropdown-menu">
+                <?php
+                    $viewMajorCoursesLoaded = array_key_exists("view_major_courses", $_SESSION);
+                    $viewMajorCourses = $_SESSION["view_major_courses"] ?? [];
+                    $vmf = $_SESSION["view_major_filter"] ?? [];
+                    $vmfSel = function ($key, $value) use ($vmf) {
+                        return isset($vmf[$key]) && (string) $vmf[$key] === (string) $value ? " selected" : "";
+                    };
+                ?>
+                <details class="dropdown-menu"<?php echo $viewMajorCoursesLoaded ? " open" : ""; ?>>
                     <summary>View Courses of The Major</summary>
-                    <form id="viewMajorCourses" action="viewMajorCourses" method="post">
+                    <form id="viewMajorCourses" action="viewCourses.php" method="post">
                         <div class="dropdown-content">
                             <div class="form-group">
                                 <search>
                                 <label for="majorName">Major Name</label>
-                                <select id="majorName" name="majorName">
-                                    <option value=""></option>
-                                    <option value="opt1">Option 1</option>
-                                    <option value="opt2">Option 2</option>
+                                <select id="majorName" name="major">
+                                    <?php
+                                        foreach ($_SESSION["majors"] as $id => $name) {
+                                            $sel = isset($vmf["major"]) && (string) $vmf["major"] === (string) $id ? " selected" : "";
+                                            echo "<option value=\"" . htmlspecialchars((string) $id, ENT_QUOTES, "UTF-8") . "\"$sel>" . htmlspecialchars($name, ENT_QUOTES, "UTF-8") . "</option>";
+                                        }
+                                    ?>
                                 </select>
                                 <label for="majorLevel">Major Level</label>
                                 <select id="majorLevel" name="majorLevel">
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
-                                    <option value="L3">L3</option>
-                                    <option value="M1">M1</option>
+                                    <option value="L1"<?php echo $vmfSel("majorLevel", "L1"); ?>>L1</option>
+                                    <option value="L2"<?php echo $vmfSel("majorLevel", "L2"); ?>>L2</option>
+                                    <option value="L3"<?php echo $vmfSel("majorLevel", "L3"); ?>>L3</option>
+                                    <option value="M1"<?php echo $vmfSel("majorLevel", "M1"); ?>>M1</option>
                                 </select> 
                                 <label for="majorSemester">Semester</label>
                                 <select id="majorSemester" name="majorSemester">
-                                    <option value="fall">Fall</option>
-                                    <option value="Spring">Spring</option>
+                                    <option value="1"<?php echo $vmfSel("majorSemester", "1"); ?>>Semester 1</option>
+                                    <option value="2"<?php echo $vmfSel("majorSemester", "2"); ?>>Semester 2</option>
                                 </select>
                                 <label for="majorLang">Major Language</label>
                                 <select id="majorLang" name="majorLang">
-                                    <option value="E">English</option>
-                                    <option value="F">French</option>
+                                    <option value="E"<?php echo $vmfSel("majorLang", "E"); ?>>English</option>
+                                    <option value="F"<?php echo $vmfSel("majorLang", "F"); ?>>French</option>
                                 </select>
                                 </search>
                             </div>
-                            <input type="button" id="findButton" class="btn" name="findButton" value="Find">
-                            <input type="reset" id="deleteButton" class="btn" name="deleteButton" value="Delete"><br>
-                            <br><div class="table-container" style="display: none;">
+                            <?php
+                                if (!empty($_SESSION["view_major_error"])) {
+                                    echo '<p style="color:#b91c1c;font-weight:600;">' . htmlspecialchars($_SESSION["view_major_error"], ENT_QUOTES, "UTF-8") . '</p>';
+                                    unset($_SESSION["view_major_error"]);
+                                }
+                            ?>
+                            <input type="submit" id="findViewMajorBtn" class="btn" name="findView" value="Find">
+                            <input type="submit" id="deleteViewMajorBtn" class="btn" name="deleteView" value="Delete"><br>
+                            <br><div class="table-container" style="<?php echo $viewMajorCoursesLoaded ? "" : "display: none;"; ?>">
                                 <table>
                                     <thead>
                                         <tr>
@@ -310,13 +345,25 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td><a href="#" class="code-link">I2204</a></td>
-                                            <td>Imperative Programming</td>
-                                            <td>Mandatory</td>
-                                            <td>3</td>
-                                            <td>Ibitssam Constantin</td>
-                                        </tr>
+                                        <?php
+                                        if ($viewMajorCoursesLoaded && count($viewMajorCourses) === 0) {
+                                            echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, semester, and language).</td></tr>';
+                                        }
+                                        foreach ($viewMajorCourses as $r) {
+                                            $profName = htmlspecialchars(
+                                                trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? "")),
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            );
+                                            echo "<tr>";
+                                            echo "<td>" . htmlspecialchars($r["course_code"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . htmlspecialchars($r["course_category"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . htmlspecialchars((string)($r["course_credit_nb"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $profName . "</td>";
+                                            echo "</tr>";
+                                        }
+                                        ?>
                                     </tbody>
                                 </table>
                             </div>
