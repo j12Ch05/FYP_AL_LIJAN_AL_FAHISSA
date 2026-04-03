@@ -49,7 +49,7 @@ Jean C. Chamoun
 
   * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Checked)
   * Search Course (fetch data using code)(Check with the team)
-  * view Courses(fetch all possible data using a specific query)(need more work)
+  * view Courses(fetch all possible data using a specific query)(Check with the team)
 - Admin Correctors Page (fetch data and send data)
 
   * Insert Correctors

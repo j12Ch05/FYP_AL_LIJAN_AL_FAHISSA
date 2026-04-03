@@ -27,8 +27,8 @@
         $sql = "SELECT c.course_code, c.course_name, c.course_category, c.course_credit_nb,
                        p.prof_first_name, p.prof_last_name
                 FROM course c
-                JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang
-                JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+                LEFT JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang
+                LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
                 WHERE c.major_id = ? AND c.course_level = ? AND c.course_semester_nb = ? AND c.course_lang = ?";
 
         $stmt = mysqli_prepare($conn, $sql);

@@ -301,8 +301,8 @@
                                 <select id="majorName" name="major">
                                     <?php
                                         foreach ($_SESSION["majors"] as $id => $name) {
-                                            $sel = isset($vmf["major"]) && (string) $vmf["major"] === (string) $id ? " selected" : "";
-                                            echo "<option value=\"" . htmlspecialchars((string) $id, ENT_QUOTES, "UTF-8") . "\"$sel>" . htmlspecialchars($name, ENT_QUOTES, "UTF-8") . "</option>";
+                                            $selectedMajor = isset($vmf["major"]) && (string)$vmf["major"] === (string)$id ? " selected" : "";
+                                            echo "<option value='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'{$selectedMajor}>" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>";
                                         }
                                     ?>
                                 </select>
@@ -422,48 +422,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>I3350</td>
-                                            <td>Mobile</td>
-                                            <td>Ziad El-balaa</td>
-                                            <td>
-                                                <select name="secondCorr" class="correctorSelect" disabled>
-                                                    <option value=""></option>
-                                                    <option value="o1">Ralph El khoury</option>
-                                                    <option value="o2">Bernadette Wakim</option>
-                                                    <option value="o3">Joseph Constantin</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select name="thirdCorr" class="correctorSelect" disabled>
-                                                    <option value=""></option>
-                                                    <option value="o1">Ralph El khoury</option>
-                                                    <option value="o2">Bernadette Wakim</option>
-                                                    <option value="o3">Joseph Constantin</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>I3306</td>
-                                            <td>Database</td>
-                                            <td>Bernadette Wakim</td>
-                                            <td>
-                                                <select name="secondCorr" class="correctorSelect" disabled>
-                                                    <option value=""></option>
-                                                    <option value="o1">Ralph El khoury</option>
-                                                    <option value="o2">Ziad El balaa</option>
-                                                    <option value="o3">Joseph Constantin</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select name="thirdCorr" class="correctorSelect" disabled>
-                                                    <option value=""></option>
-                                                    <option value="o1">Ralph El khoury</option>
-                                                    <option value="o2">Bernadette Wakim</option>
-                                                    <option value="o3">Joseph Constantin</option>
-                                                </select>
-                                            </td>
-                                        </tr>
+                                        
+                                  
                                     </tbody>
                                 </table>
                             </div><br>
