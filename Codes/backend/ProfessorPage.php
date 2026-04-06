@@ -3,7 +3,7 @@
     include("database.php");
 
     if (!isset($_SESSION["email"])) {
-        header("location: login.html");
+        header("location: login.php");
         exit();
     }
 
@@ -28,7 +28,7 @@
     $result_dep = mysqli_stmt_get_result($stmt_dep);
     $department = mysqli_fetch_assoc($result_dep);
 
-    $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb, c.course_lang, t.uni_year, m.major_name
+    $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb,c.course_level, c.course_lang, c.course_semester_nb, m.major_name
                     FROM teaching t
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
                     JOIN major m ON c.major_id = m.major_id
@@ -143,7 +143,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3>My Courses</h3>
-                    <button class="btn btn-secondary" id="ProfexcelExport">Excel Export</button>
+                    <form id="exportExcel" action="Prof_export_course.php" method="post"><button type="submit" class="btn btn-secondary" id="ProfexcelExport" name="exportExcel" >Excel Export</button></form>
                 </div>
                 
                 <div class="table-container">
@@ -155,6 +155,7 @@
                                 <th>Semester</th>
                                 <th>Language</th>
                                 <th>Major</th>
+                                <th>Level</th>
                                 <th>Credits</th>
                             </tr>
                         </thead>
@@ -163,9 +164,10 @@
                             <tr>
                                 <td><a href="#" class="code-link"><?php echo htmlspecialchars($course['course_code']); ?></a></td>
                                 <td><?php echo htmlspecialchars($course['course_name']); ?></td>
-                                <td><?php echo htmlspecialchars($course['uni_year']); ?></td>
+                                <td><?php echo htmlspecialchars($course['course_semester_nb']); ?></td>
                                 <td><?php echo htmlspecialchars($course['course_lang']); ?></td>
                                 <td><?php echo htmlspecialchars($course['major_name']); ?></td>
+                                <td><?php echo htmlspecialchars($course['course_level']); ?></td>
                                 <td><?php echo htmlspecialchars($course['course_credit_nb']); ?></td>
                             </tr>
                             <?php endwhile; ?>
@@ -209,14 +211,14 @@
                         .then(response => response.text())
                         .then(data => {
                             if (data.includes("successfully")) {
-                                alert("Success: " + data);
+                                alert("Success in updating the profile");
                                 const profileInputs = profileForm.querySelectorAll('.profileInput');
                                 profileInputs.forEach(input => {
                                     input.disabled = true;
                                 });
                                 applyBtn.style.display = 'none';
                             } else {
-                                alert("Error: " + data);
+                                alert("Error: The profile did not update. Something went wrong" );
                             }
                         })
                         .catch(error => {
@@ -229,12 +231,7 @@
         });
     </script>
 
-    <script>
-        document.getElementById('ProfexcelExport').addEventListener('click', function() {
-            window.location.href = 'Prof_export_courses.php';
-        });
-
-    </script>
+    
 
 </body>
 </html>

@@ -3,63 +3,39 @@ require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Border;
 
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
+// This checks if the button from your other file was clicked
+if (isset($_POST['exportExcel'])) {
+    
+    // Clear any previous output buffers to prevent file corruption
+    if (ob_get_contents()) ob_end_clean();
 
-// 1. Setting the Title (Merged Cells)
-$sheet->mergeCells('A1:G1');
-$sheet->setCellValue('A1', 'امتحانات الفصل الأول - الدورة الأولى - 2025/2026');
-$sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-$sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setRightToLeft(true);
 
-// 2. Formatting the Headers (Row 2)
-$headers = ['عدد اللجان', 'رقم المقرر', 'اللغة', 'اسم المقرر', 'اسم الأستاذ الثلاثي', 'الملف'];
-$sheet->fromArray($headers, NULL, 'A2');
+    // Header
+    $sheet->setCellValue('A1', 'جدول البيانات المستخرج');
+    $sheet->mergeCells('A1:D1');
 
-// Style the header row
-$headerStyle = [
-    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-    'fill' => [
-        'fillType' => Fill::FILL_SOLID,
-        'startColor' => ['rgb' => '4F81BD']
-    ],
-    'borders' => [
-        'allBorders' => ['borderStyle' => Border::BORDER_THIN]
-    ]
-];
-$sheet->getStyle('A2:F2')->applyFromArray($headerStyle);
+    // Sample Data (Replace this with your SQL Fetching logic)
+    $data = [
+        ['رقم المقرر', 'المادة', 'الأستاذ'],
+        ['S1101', 'Statistique', 'Prof 1'],
+        ['I2201', 'Web Dev', 'Prof 2'],
+    ];
+    $sheet->fromArray($data, NULL, 'A2');
 
-// 3. Adding Data (Example based on your first image)
-$data = [
-    ['2', 'S1101', 'F', 'Statistique', 'أستاذ 1', '1234'],
-    ['', 'S1101', 'A', 'Statistique', '', ''], // Empty cells for visual grouping
-    ['3', 'S2250', 'F/A', 'Calcul des Probabilités', 'أستاذ 2', '1234'],
-];
+    // Prepare the download
+    $fileName = "Export_" . date('Y-m-d_H-i') . ".xlsx";
+    
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+    header('Cache-Control: max-age=0');
 
-$sheet->fromArray($data, NULL, 'A3');
-
-// 4. Mimicking the Second Image (Green Styling)
-// Let's color a specific range green like your second image
-$sheet->getStyle('A5:F10')->getFill()
-    ->setFillType(Fill::FILL_SOLID)
-    ->getStartColor()->setARGB('C6EFCE');
-
-// 5. Adjust Column Widths
-foreach (range('A', 'F') as $columnID) {
-    $sheet->getColumnDimension($columnID)->setAutoSize(true);
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    
+    // Stop execution so the rest of the HTML doesn't get inside the Excel file
+    exit;
 }
-
-// 6. Output the file to the browser
-$writer = new Xlsx($spreadsheet);
-$fileName = 'schedule_2026.xlsx';
-
-header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
-$writer->save('php://output');
-exit;
-?>
