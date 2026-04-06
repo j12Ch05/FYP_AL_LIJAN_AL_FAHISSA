@@ -143,7 +143,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3>My Courses</h3>
-                    <button class="btn btn-secondary">Excel Export</button>
+                    <button class="btn btn-secondary" id="ProfexcelExport">Excel Export</button>
                 </div>
                 
                 <div class="table-container">
@@ -227,6 +227,13 @@
                 });
             }
         });
+    </script>
+
+    <script>
+        document.getElementById('ProfexcelExport').addEventListener('click', function() {
+            window.location.href = 'Prof_export_courses.php';
+        });
+
     </script>
 
 </body>
