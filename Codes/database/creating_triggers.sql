@@ -10,15 +10,24 @@ BEGIN
       AND `course_lang` = OLD.`course_lang`;
 END$$
 
-CREATE TRIGGER `delete_teaching_after_course_disabled`
-AFTER UPDATE ON `course`
+
+
+
+
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER after_teaching_delete
+AFTER DELETE ON teaching
 FOR EACH ROW
 BEGIN
-    IF NEW.`isActive` = 0 AND OLD.`isActive` <> 0 THEN
-        DELETE FROM `teaching`
-        WHERE `course_code` = OLD.`course_code`
-          AND `course_lang` = OLD.`course_lang`;
-    END IF;
-END$$
+    DELETE FROM correctors
+    WHERE course_code = OLD.course_code
+      AND course_lang = OLD.course_lang
+      AND prof_file_nb = OLD.prof_file_nb;
+END;
+//
 
 DELIMITER ;

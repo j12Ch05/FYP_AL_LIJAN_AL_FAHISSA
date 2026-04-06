@@ -31,25 +31,47 @@
             exit();
         }
 
-        $sql = "UPDATE `course` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        if (!$stmt) {
-            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (disable)."]);
+        $sqlCourse = "UPDATE `course` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ?";
+        $stmtCourse = mysqli_prepare($conn, $sqlCourse);
+        if (!$stmtCourse) {
+            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (disable course)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmt, "ss", $code, $lang);
-        $ok = mysqli_stmt_execute($stmt);
-        $err = mysqli_stmt_error($stmt);
-        $affected = mysqli_stmt_affected_rows($stmt);
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_bind_param($stmtCourse, "ss", $code, $lang);
+        $okCourse = mysqli_stmt_execute($stmtCourse);
+        $courseErr = mysqli_stmt_error($stmtCourse);
+        $courseAffected = mysqli_stmt_affected_rows($stmtCourse);
+        mysqli_stmt_close($stmtCourse);
 
-        if ($ok && $affected > 0) {
+        if (!$okCourse) {
+            json_out(["status" => "error", "message" => $courseErr ?: "Course disable failed."]);
+            mysqli_close($conn);
+            exit();
+        }
+
+        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ?";
+        $stmtTeaching = mysqli_prepare($conn, $sqlTeaching);
+        if (!$stmtTeaching) {
+            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (disable teaching)."]);
+            mysqli_close($conn);
+            exit();
+        }
+        mysqli_stmt_bind_param($stmtTeaching, "ss", $code, $lang);
+        $okTeaching = mysqli_stmt_execute($stmtTeaching);
+        $teachingErr = mysqli_stmt_error($stmtTeaching);
+        mysqli_stmt_close($stmtTeaching);
+
+        if (!$okTeaching) {
+            json_out(["status" => "error", "message" => $teachingErr ?: "Teaching disable failed."]);
+            mysqli_close($conn);
+            exit();
+        }
+
+        if ($courseAffected > 0) {
             json_out(["status" => "success", "message" => "Course disabled.", "isActive" => 0]);
-        } elseif ($ok && $affected === 0) {
-            json_out(["status" => "error", "message" => "No course found with given code/language. Nothing was changed."]); 
         } else {
-            json_out(["status" => "error", "message" => $err ?: "Update failed."]);
+            json_out(["status" => "error", "message" => "No course found with given code/language. Nothing was changed."]);
         }
         mysqli_close($conn);
         exit();
@@ -65,25 +87,47 @@
             exit();
         }
 
-        $sql = "UPDATE `course` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        if (!$stmt) {
-            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (enable)."]);
+        $sqlCourse = "UPDATE `course` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ?";
+        $stmtCourse = mysqli_prepare($conn, $sqlCourse);
+        if (!$stmtCourse) {
+            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (enable course)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmt, "ss", $code, $lang);
-        $ok = mysqli_stmt_execute($stmt);
-        $err = mysqli_stmt_error($stmt);
-        $affected = mysqli_stmt_affected_rows($stmt);
-        mysqli_stmt_close($stmt);
+        mysqli_stmt_bind_param($stmtCourse, "ss", $code, $lang);
+        $okCourse = mysqli_stmt_execute($stmtCourse);
+        $courseErr = mysqli_stmt_error($stmtCourse);
+        $courseAffected = mysqli_stmt_affected_rows($stmtCourse);
+        mysqli_stmt_close($stmtCourse);
 
-        if ($ok && $affected > 0) {
+        if (!$okCourse) {
+            json_out(["status" => "error", "message" => $courseErr ?: "Course enable failed."]);
+            mysqli_close($conn);
+            exit();
+        }
+
+        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ?";
+        $stmtTeaching = mysqli_prepare($conn, $sqlTeaching);
+        if (!$stmtTeaching) {
+            json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (enable teaching)."]);
+            mysqli_close($conn);
+            exit();
+        }
+        mysqli_stmt_bind_param($stmtTeaching, "ss", $code, $lang);
+        $okTeaching = mysqli_stmt_execute($stmtTeaching);
+        $teachingErr = mysqli_stmt_error($stmtTeaching);
+        mysqli_stmt_close($stmtTeaching);
+
+        if (!$okTeaching) {
+            json_out(["status" => "error", "message" => $teachingErr ?: "Teaching enable failed."]);
+            mysqli_close($conn);
+            exit();
+        }
+
+        if ($courseAffected > 0) {
             json_out(["status" => "success", "message" => "Course enabled.", "isActive" => 1]);
-        } elseif ($ok && $affected === 0) {
-            json_out(["status" => "error", "message" => "No course found with given code/language. Nothing was changed."]); 
         } else {
-            json_out(["status" => "error", "message" => $err ?: "Update failed."]);
+            json_out(["status" => "error", "message" => "No course found with given code/language. Nothing was changed."]);
         }
         mysqli_close($conn);
         exit();

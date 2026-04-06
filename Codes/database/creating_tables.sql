@@ -47,16 +47,18 @@ CREATE TABLE teaching (
   course_lang varchar(2) NOT NULL,
   prof_file_nb INT NOT NULL,
   uni_year VARCHAR(15) NOT NULL,
+  isActive BOOLEAN DEFAULT 1,
   PRIMARY KEY (course_code, course_lang, prof_file_nb),
   CONSTRAINT fk_teaching_course FOREIGN KEY (course_code, course_lang) REFERENCES course (course_code, course_lang) ON DELETE CASCADE,
   CONSTRAINT fk_teaching_prof FOREIGN KEY (prof_file_nb) REFERENCES professor (prof_file_nb) ON DELETE CASCADE
 );
 
 CREATE TABLE correctors (
+  id INT AUTO_INCREMENT PRIMARY KEY,
   course_code VARCHAR(6) NOT NULL,
   prof_file_nb INT NOT NULL,
   second_corrector_file_nb INT DEFAULT NULL,
   third_corrector_file_nb INT DEFAULT NULL,
-  session_nb varchar(7) NOT NULL,
-  course_lang varchar(2) NOT NULL
+  session_nb VARCHAR(7) DEFAULT NULL,
+  course_lang VARCHAR(2) NOT NULL
 );

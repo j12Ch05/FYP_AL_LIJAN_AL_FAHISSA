@@ -26,17 +26,17 @@ Jean C. Chamoun
 - Creating the database(Check with the supervisor)
 - Creating the tables(Check with the supervisor)
 - Creating the constraints(Check with the supervisor)
-- Creating the triggers (Undone)
+- Creating the triggers (In Progress)
 
 ## Back-End:
 
-- Establish the connection with the database(Wo)
+- Establish the connection with the database(Done)
 
 ### Charbel's part:
 
 - Log in Page backend(Checked)
-- Professor profile page(fetch data,edit data)(check with the team)
-- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)(Check with the team)
+- Professor profile page(fetch data,edit data)(check with the supervisor)
+- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)(Check with the supervisor)
 - Admin Professors Page(fetching data from a specific query)
 - Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
 - Edit Admin Page
@@ -48,10 +48,10 @@ Jean C. Chamoun
 - Admin Courses Page
 
   * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Checked)
-  * Search Course (fetch data using code)(Check with the team)
-  * view Courses(fetch all possible data using a specific query)(Check with the team)
+  * Search Course (fetch data using code)(Check with the supervisor)
+  * view Courses(fetch all possible data using a specific query)(Check with the supervisor)
 - Admin Correctors Page (fetch data and send data)
 
-  * Insert Correctors
+  * Insert Correctors(in Progress)
   * View Correctors
   * Excel format(format2,format3)

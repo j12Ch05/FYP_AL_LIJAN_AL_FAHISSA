@@ -296,4 +296,131 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // --- 6. Correctors Edit/Delete/Apply Logic ---
+    const editCorrBtn = document.getElementById('editCorr');
+    const deleteCorrBtn = document.getElementById('deleteCorr');
+    const applyCorrBtn = document.getElementById('applyCorr');
+    const cancelBtn = document.getElementById('cancelButton');
+
+    function getCorrectorSelects() {
+        return Array.from(document.querySelectorAll('.corrector-select'));
+    }
+
+    function setCorrectorSelectsDisabled(disabled) {
+        getCorrectorSelects().forEach(sel => {
+            sel.disabled = disabled;
+        });
+    }
+
+    function setViewModeCorrectors() {
+        setCorrectorSelectsDisabled(true);
+        const hasRows = getCorrectorSelects().length > 0;
+        if (editCorrBtn) editCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
+        if (deleteCorrBtn) deleteCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
+        if (applyCorrBtn) applyCorrBtn.style.display = 'none';
+        const tableContainer = document.querySelector('#content-correctors .table-container');
+        if (tableContainer) tableContainer.style.display = 'block';
+    }
+
+    function setEditModeCorrectors() {
+        setCorrectorSelectsDisabled(false);
+        if (editCorrBtn) editCorrBtn.style.display = 'none';
+        if (deleteCorrBtn) deleteCorrBtn.style.display = 'inline-block';
+        if (applyCorrBtn) applyCorrBtn.style.display = 'inline-block';
+    }
+
+    function populateCorrectorsTable(courses, professors) {
+        const tbody = document.getElementById('correctorsTableBody');
+        tbody.innerHTML = '';
+        if (courses.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
+            return;
+        }
+        courses.forEach(r => {
+            const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim();
+            const courseCode = r.course_code;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${courseCode}</td>
+                <td>${r.course_name}</td>
+                <td>${profName}</td>
+                <td><select name='second_corrector[${courseCode}]' disabled class='corrector-select'>
+                    <option value=''>null</option>
+                    ${Object.entries(professors).map(([id, name]) => `<option value='${id}' ${r.second_corrector == id ? 'selected' : ''}>${name}</option>`).join('')}
+                </select></td>
+                <td><select name='third_corrector[${courseCode}]' disabled class='corrector-select'>
+                    <option value=''>null</option>
+                    ${Object.entries(professors).map(([id, name]) => `<option value='${id}' ${r.third_corrector == id ? 'selected' : ''}>${name}</option>`).join('')}
+                </select></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Find: AJAX (session updated server-side; table filled without full page reload)
+    const insertCorrectorsForm = document.getElementById('insertCorrectors');
+    if (insertCorrectorsForm) {
+        insertCorrectorsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(insertCorrectorsForm);
+            formData.set('findBtn', 'true');
+
+            fetch('insertCorrectors.php', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData,
+                credentials: 'same-origin',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        populateCorrectorsTable(data.courses, data.professors);
+                        const details = document.getElementById('insertCorrectorsDetails');
+                        if (details) details.open = true;
+                        const tableContainer = document.querySelector('#content-correctors .table-container');
+                        if (tableContainer) tableContainer.style.display = 'block';
+                        setViewModeCorrectors();
+                        showBrowserNotification('Correctors', 'Courses loaded successfully.');
+                    } else {
+                        showBrowserNotification('Correctors', data.message || 'Failed to load courses.');
+                        alert(data.message || 'Failed to load courses.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showBrowserNotification('Correctors', 'Error loading courses.');
+                    alert('Error loading courses.');
+                });
+        });
+    }
+
+    if (editCorrBtn) {
+        editCorrBtn.addEventListener('click', () => {
+            setEditModeCorrectors();
+        });
+    }
+
+    if (deleteCorrBtn) {
+        deleteCorrBtn.addEventListener('click', () => {
+            getCorrectorSelects().forEach(sel => sel.value = '');
+            setEditModeCorrectors();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'insertCorrectors.php';
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'cancelBtn';
+            hidden.value = '1';
+            form.appendChild(hidden);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
 });

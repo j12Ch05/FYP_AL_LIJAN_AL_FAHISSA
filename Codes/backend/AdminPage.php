@@ -45,11 +45,17 @@
 </head>
 <body>
 
-    <?php $navCourses = isset($_GET["tab"]) && $_GET["tab"] === "courses"; ?>
-    <input type="radio" name="nav" id="tab-professors"<?php echo $navCourses ? "" : " checked"; ?>>
-    <input type="radio" name="nav" id="tab-courses"<?php echo $navCourses ? " checked" : ""; ?>>
-    <input type="radio" name="nav" id="tab-correctors">
-    <input type="radio" name="nav" id="tab-edit-admins">
+    <?php 
+        $activeTab = $_GET["tab"] ?? "professors";
+        $isProfessors = $activeTab === "professors";
+        $isCourses = $activeTab === "courses";
+        $isCorrectors = $activeTab === "correctors";
+        $isEditAdmins = $activeTab === "edit-admins";
+    ?>
+    <input type="radio" name="nav" id="tab-professors"<?php echo $isProfessors ? " checked" : ""; ?>>
+    <input type="radio" name="nav" id="tab-courses"<?php echo $isCourses ? " checked" : ""; ?>>
+    <input type="radio" name="nav" id="tab-correctors"<?php echo $isCorrectors ? " checked" : ""; ?>>
+    <input type="radio" name="nav" id="tab-edit-admins"<?php echo $isEditAdmins ? " checked" : ""; ?>>
 
     <aside class="sidebar">
         <div class="logo-section">
@@ -147,13 +153,13 @@
                                     }
                                 ?>
                                 <label for="courseCode">Enter the code of the course</label>
-                                <input type="text" id="courseCode" name="courseCode" maxlength="7" placeholder="I3341,M2250,P1101..."><br>
+                                <input type="text" id="courseCode" name="courseCode" maxlength="7" placeholder="I3341,M2250,P1101..." required><br>
                                 <label for="courseName">Enter the name of the course</label>
-                                <input type="text" id="courseName" name="courseName" placeholder="Enter the name"><br>
+                                <input type="text" id="courseName" name="courseName" placeholder="Enter the name" required><br>
                                 <label for="courseCredit">Enter the credits of the course</label>
-                                <input type="number" min="3" max="6" name="courseCredit" id="courseCredit"><br>
+                                <input type="number" min="3" max="6" name="courseCredit" id="courseCredit" required><br>
                                 <label for="courseHours">Enter the hours of the course</label>
-                                <input type="number" min="36" max="72" name="courseHours" id="courseHours"><br>
+                                <input type="number" min="36" max="72" name="courseHours" id="courseHours" required><br>
                                 <label for="courseLang">Enter the language of the course</label>
                                 <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
                                 <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
@@ -189,7 +195,7 @@
                                 </select>
                                 <br>
                                 <label for="courseYear">Enter the university year</label>
-                                <input type="text" id="courseYear" name="courseYear" maxlength="15"><br>
+                                <input type="text" id="courseYear" name="courseYear" maxlength="15" required><br>
                                 <label for="courseCategory">Choose the category</label>
                                 <select name="courseCategory" id="courseCategory">
                                     <option value="mandatory">Mandatory</option>
@@ -287,6 +293,8 @@
                     $viewMajorCoursesLoaded = array_key_exists("view_major_courses", $_SESSION);
                     $viewMajorCourses = $_SESSION["view_major_courses"] ?? [];
                     $vmf = $_SESSION["view_major_filter"] ?? [];
+
+                    // to keep the filter after the rendering
                     $vmfSel = function ($key, $value) use ($vmf) {
                         return isset($vmf[$key]) && (string) $vmf[$key] === (string) $value ? " selected" : "";
                     };
@@ -301,8 +309,8 @@
                                 <select id="majorName" name="major">
                                     <?php
                                         foreach ($_SESSION["majors"] as $id => $name) {
-                                            $selectedMajor = isset($vmf["major"]) && (string)$vmf["major"] === (string)$id ? " selected" : "";
-                                            echo "<option value='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'{$selectedMajor}>" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>";
+                                            $selectedMajor = $vmfSel("major" ,$id );
+                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
                                         }
                                     ?>
                                 </select>
@@ -350,16 +358,12 @@
                                             echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, semester, and language).</td></tr>';
                                         }
                                         foreach ($viewMajorCourses as $r) {
-                                            $profName = htmlspecialchars(
-                                                trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? "")),
-                                                ENT_QUOTES,
-                                                "UTF-8"
-                                            );
+                                            $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
                                             echo "<tr>";
-                                            echo "<td>" . htmlspecialchars($r["course_code"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
-                                            echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
-                                            echo "<td>" . htmlspecialchars($r["course_category"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
-                                            echo "<td>" . htmlspecialchars((string)($r["course_credit_nb"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $r["course_code"] . "</td>";
+                                            echo "<td>" . $r["course_name"]. "</td>";
+                                            echo "<td>" . $r["course_category"]. "</td>";
+                                            echo "<td>" . $r["course_credit_nb"] . "</td>";
                                             echo "<td>" . $profName . "</td>";
                                             echo "</tr>";
                                         }
@@ -374,43 +378,67 @@
 
         <section id="content-correctors" class="tab-content">
             <h1>Correctors</h1>
-
-<details class="dropdown-menu">
+        
+        <?php
+                    $correctorsLoaded = array_key_exists("insert_correctors_data", $_SESSION);
+                    $correctors = $_SESSION["insert_correctors_data"] ?? [];
+                    $icf = $_SESSION["insert_correctors_filter"] ?? [];
+                    $icfSel = function ($key, $value) use ($icf) {
+                        return isset($icf[$key]) && (string) $icf[$key] === (string) $value ? " selected" : "";
+                    };
+        ?>
+        <details id="insertCorrectorsDetails" class="dropdown-menu" <?php echo $correctorsLoaded ? 'open' : ''; ?>>
                 <summary>Insert Correctors</summary>
-                    <div class="dropdown-content">
+                <div class="dropdown-content">
+                <form id="insertCorrectors" action="insertCorrectors.php" method="post">
                          <div class="form-group">
                             <search>
                                 <label for="corrSession">Session</label>
                                 <select name="corrSession" id="corrSession">
-                                    <option value="sem1">Semester 1</option>
-                                        <option value="sem2">Semester 2</option>
-                                        <option value="sess2">Session 2</option>
+                                    <option value="sem1"<?php echo $icfSel("corrSession", "sem1"); ?>>Semester 1</option>
+                                    <option value="sem2"<?php echo $icfSel("corrSession", "sem2"); ?>>Semester 2</option>
+                                    <option value="sess2"<?php echo $icfSel("corrSession", "sess2"); ?>>Session 2</option>
                                 </select>
                                 <label for="corrMajor">Major</label>
                                 <select name="corrMajor" id="corrMajor">
-                                    <option value=""></option>
-                                    <option value="opt1">Option 1</option>
-                                    <option value="opt2">Option 2</option>
+                                    <?php
+                                        foreach ($_SESSION["majors"] as $id => $name) {
+                                            $selectedMajor = $icfSel("corrMajor", $id);
+                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                        }
+                                    ?>
                                 </select>
                                 <label for="corrLevel">Level</label>
                                 <select name="corrLevel" id="corrLevel">
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
-                                    <option value="L3">L3</option>
-                                    <option value="M1">M1</option>
+                                    <option value="L1"<?php echo $icfSel("corrLevel", "L1"); ?>>L1</option>
+                                    <option value="L2"<?php echo $icfSel("corrLevel", "L2"); ?>>L2</option>
+                                    <option value="L3"<?php echo $icfSel("corrLevel", "L3"); ?>>L3</option>
+                                    <option value="M1"<?php echo $icfSel("corrLevel", "M1"); ?>>M1</option>
                                 </select>
                                 <label for="corrLang">Language</label>
                                 <select name="corrLang" id="corrLang">
-                                    <option value="corrEng">E</option>
-                                    <option value="corrFr">F</option>
+                                    <option value="E"<?php echo $icfSel("corrLang", "E"); ?>>English</option>
+                                    <option value="F"<?php echo $icfSel("corrLang", "F"); ?>>French</option>
                                 </select>
                             </search><br>
                     </div>
                     
-                    <input type="button" id="findButton" name="findBtn" class="btn" value="Find">
-                    <input type="reset" id="cancelButton" name="cancelBtn" class="btn" value="Cancel"><br><br>
+                    <input type="submit" id="findButton" name="findBtn" class="btn" value="Find">
+                    <input type="button" id="cancelButton" name="cancelBtn" class="btn" value="Cancel"><br><br>
+                </form>
 
-                     <div class="table-container" style="display: none;">
+                    <?php if (isset($_SESSION["insert_correctors_error"])): ?>
+                        <p style="color: red; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_correctors_error"]); ?></p>
+                        <?php unset($_SESSION["insert_correctors_error"]); ?>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION["insert_correctors_success"])): ?>
+                        <p style="color: green; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_correctors_success"]); ?></p>
+                        <?php unset($_SESSION["insert_correctors_success"]); ?>
+                    <?php endif; ?>
+
+                    <form id="correctorsForm" action="insertCorrectors.php" method="post">
+                     <div class="table-container" style="display: <?php echo $correctorsLoaded ? 'block' : 'none'; ?>;">
                                 <table>
                                     <thead>
                                         <tr>
@@ -421,15 +449,43 @@
                                             <th>Third Corrector</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        
-                                  
+                                    <tbody id="correctorsTableBody">
+                                        <?php
+                                        if ($correctorsLoaded && count($correctors) === 0) {
+                                            echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
+                                        } else {
+                                            foreach ($correctors as $r) {
+                                                $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
+                                                $courseCode = $r["course_code"];
+                                                echo "<tr>";
+                                                echo "<td>" . htmlspecialchars($courseCode) . "</td>";
+                                                echo "<td>" . htmlspecialchars($r["course_name"]) . "</td>"; 
+                                                echo "<td>" . htmlspecialchars($profName) . "</td>";
+                                                echo "<td><select name='second_corrector[" . htmlspecialchars($courseCode) . "]' disabled class='corrector-select'>";
+                                                echo "<option value=''>null</option>";
+                                                foreach ($_SESSION["professors"] as $id => $name) {
+                                                    $selected = ($r["second_corrector"] == $id) ? " selected" : "";
+                                                    echo "<option value='" . htmlspecialchars($id) . "'$selected>" . htmlspecialchars($name) . "</option>";
+                                                }
+                                                echo "</select></td>";
+                                                echo "<td><select name='third_corrector[" . htmlspecialchars($courseCode) . "]' disabled class='corrector-select'>";
+                                                echo "<option value=''>null</option>";
+                                                foreach ($_SESSION["professors"] as $id => $name) {
+                                                    $selected = ($r["third_corrector"] == $id) ? " selected" : "";
+                                                    echo "<option value='" . htmlspecialchars($id) . "'$selected>" . htmlspecialchars($name) . "</option>";
+                                                }
+                                                echo "</select></td>";
+                                                echo "</tr>";
+                                            }
+                                        }
+                                        ?>
                                     </tbody>
                                 </table>
                             </div><br>
-                            <input type="button" id="editCorr" class="btn" name="editCorr" value="Edit Correctors" style="display: none;">
-                            <input type="reset" id="deleteCorr" class="btn" name="deleteCorr" value="Delete Correctors" style="display: none;">
-                            <input type="reset" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
+                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
+                            </form>
+                            <input type="button" id="editCorr" class="btn" value="Edit Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
+                            <input type="button" id="deleteCorr" class="btn" value="Delete Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
                 </div>
                 </details>
 
