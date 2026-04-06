@@ -35,8 +35,8 @@ Jean C. Chamoun
 ### Charbel's part:
 
 - Log in Page backend(Checked)
-- Professor profile page(fetch data,edit data)
-- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)
+- Professor profile page(fetch data,edit data)(check with the team)
+- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)(without the excel export)
 - Admin Professors Page(fetching data from a specific query)
 - Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
 - Edit Admin Page
