@@ -455,24 +455,46 @@
                                             echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
                                         } else {
                                             foreach ($correctors as $r) {
+                                                $enabled = isset($_POST["editCorr"]) ? "" : "disabled";
                                                 $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
                                                 $courseCode = $r["course_code"];
+                                                $firstCorrectorId = isset($r["first_corrector_id"]) ? (string)$r["first_corrector_id"] : null;
+                                                $secondSelected = isset($r["second_corrector"]) ? (string)$r["second_corrector"] : "";
+                                                $thirdSelected = isset($r["third_corrector"]) ? (string)$r["third_corrector"] : "";
                                                 echo "<tr>";
-                                                echo "<td>" . htmlspecialchars($courseCode) . "</td>";
-                                                echo "<td>" . htmlspecialchars($r["course_name"]) . "</td>"; 
-                                                echo "<td>" . htmlspecialchars($profName) . "</td>";
-                                                echo "<td><select name='second_corrector[" . htmlspecialchars($courseCode) . "]' disabled class='corrector-select'>";
-                                                echo "<option value=''>null</option>";
+                                                echo "<td>" . $courseCode . "</td>";
+                                                echo "<td>" . $r["course_name"] . "</td>"; 
+                                                echo "<td>" . $profName . "</td>";
+                                                echo "<td><select name='second_corrector[" . $courseCode . "]' $enabled  class='corrector-select'>";
+                                                if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
+                                                    $selectedName = $_SESSION["professors"][$secondSelected];
+                                                    echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
+                                                    echo "<option value=''>null</option>";
+                                                } else {
+                                                    echo "<option value='' selected>null</option>";
+                                                }
                                                 foreach ($_SESSION["professors"] as $id => $name) {
-                                                    $selected = ($r["second_corrector"] == $id) ? " selected" : "";
-                                                    echo "<option value='" . htmlspecialchars($id) . "'$selected>" . htmlspecialchars($name) . "</option>";
+                                                    $idStr = (string)$id;
+                                                    if ($idStr === $secondSelected || $idStr === $firstCorrectorId || $idStr === $thirdSelected) {
+                                                        continue;
+                                                    }
+                                                    echo "<option value='" . $idStr . "'>" . $name . "</option>";
                                                 }
                                                 echo "</select></td>";
-                                                echo "<td><select name='third_corrector[" . htmlspecialchars($courseCode) . "]' disabled class='corrector-select'>";
-                                                echo "<option value=''>null</option>";
+                                                echo "<td><select name='third_corrector[" . $courseCode . "]' $enabled  class='corrector-select'>";
+                                                if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
+                                                    $selectedName = $_SESSION["professors"][$thirdSelected];
+                                                    echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
+                                                    echo "<option value=''>null</option>";
+                                                } else {
+                                                    echo "<option value='' selected>null</option>";
+                                                }
                                                 foreach ($_SESSION["professors"] as $id => $name) {
-                                                    $selected = ($r["third_corrector"] == $id) ? " selected" : "";
-                                                    echo "<option value='" . htmlspecialchars($id) . "'$selected>" . htmlspecialchars($name) . "</option>";
+                                                    $idStr = (string)$id;
+                                                    if ($idStr === $thirdSelected || $idStr === $firstCorrectorId || $idStr === $secondSelected) {
+                                                        continue;
+                                                    }
+                                                    echo "<option value='" . $idStr . "'>" . $name . "</option>";
                                                 }
                                                 echo "</select></td>";
                                                 echo "</tr>";
@@ -483,33 +505,71 @@
                                 </table>
                             </div><br>
                             <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
-                            </form>
                             <input type="button" id="editCorr" class="btn" value="Edit Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
                             <input type="button" id="deleteCorr" class="btn" value="Delete Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
+                            </form>
+                            
                 </div>
                 </details>
-
-                <details class="dropdown-menu">
+                <?php
+                    $viewCorrectors = array_key_exists("view_correctors_data", $_SESSION);
+                    $correctorsList = $_SESSION["view_correctors_data"] ?? [];
+                    $corr = (is_array($correctorsList) && count($correctorsList) > 0) ? $correctorsList[0] : [];
+                    $vcf = $_SESSION["view_correctors_filter"] ?? [];
+                    $vcfSel = function ($key, $value) use ($vcf) {
+                        return isset($vcf[$key]) && (string) $vcf[$key] === (string) $value ? " selected" : "";
+                    };
+                    $viewCorrectorsLoaded = array_key_exists("view_correctors_loaded", $_SESSION);
+                ?>
+                <details class="dropdown-menu"<?php echo $viewCorrectorsLoaded ? " open" : ""; ?>>
                         <summary>View Correctors by the course id</summary>
-                        <form id="searchCorrector" action="searchCorrector.php" method="post">
+                        <form id="searchCorrector" action="viewCorrectors.php" method="post">
                             <div class="dropdown-content">
                             <div class="form-group">
                                 <label for="courseId">Enter the course ID</label>
                                 <div style="display: flex; gap: 10px; align-items: center;">
                                     <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;">
                                     <label for="correctorLang">Language</label>
-                                    <select id="correctorLang">
-                                        <option value="correctorEng">E</option>
-                                        <option value="correctorFr">F</option>
+                                    <select id="correctorLang" name="correctorLang">
+                                        <option value="E" <?php echo $vcfSel("correctorLang","E") ?> >E</option>
+                                        <option value="F" <?php echo $vcfSel("correctorLang","F") ?> >F</option>
                                     </select>
-                                    <input type="button"  id="searchID" name="searchID" value="Search">
+                                    <label for="correctorSession">Session</label>
+                                    <select name="correctorSession" id="correctorSession">
+                                        <option value="sem1"<?php echo $vcfSel("correctorSession", "sem1"); ?>>Semester 1</option>
+                                        <option value="sem2"<?php echo $vcfSel("correctorSession", "sem2"); ?>>Semester 2</option>
+                                        <option value="sess2"<?php echo $vcfSel("correctorSession", "sess2"); ?>>Session 2</option>
+                                    </select>
+
+                                    <input type="submit"  id="searchID" name="searchID" value="Search">
                                 </div><br>
-                                <p>Corrector1 ID: </p><br>
-                                <p>Corrector1 Name: </p><br>
-                                <p>Corrector2 ID: </p><br>
-                                <p>Corrector2 Name: </p><br>
+                                <?php 
+
+                                    if ($viewCorrectors && count($correctorsList) === 0) {
+                                            echo '<p style="text-align:center;color:#64748b;">No courses match these filters (check the course id, session, and language).</p>';
+                                    } elseif ($viewCorrectors && count($correctorsList) > 0) {
+                                        $courseCode = $corr["course_code"] ?? "";
+                                        $courseName = $corr["course_name"] ?? "";
+                                        $file1 = isset($corr["prof_file_nb"]) ? $corr["prof_file_nb"] : null;
+                                        $prof1 = ($file1 !== null && $file1 !== "" && isset($professors[$file1])) ? $professors[$file1] : "No corrector assigned";
+                                        $file2 = isset($corr["second_corrector_file_nb"]) ? $corr["second_corrector_file_nb"] : null;
+                                        $prof2 = ($file2 !== null && $file2 !== "" && isset($professors[$file2])) ? $professors[$file2] : "No corrector assigned";
+                                        $file3 = isset($corr["third_corrector_file_nb"]) ? $corr["third_corrector_file_nb"] : null;
+                                        $prof3 = ($file3 !== null && $file3 !== "" && isset($professors[$file3])) ? $professors[$file3] : "No corrector assigned";
+
+                                        echo "<p>Course Code: $courseCode </p><br>";
+                                        echo "<p>Course Name: $courseName </p><br>";
+                                        echo "<p>Corrector1 ID: " . (($file1 !== null && $file1 !== "") ? $file1 : "Not assigned") . " </p><br>";
+                                        echo "<p>Corrector1 Name: $prof1 </p><br>";
+                                        echo "<p>Corrector2 ID: " . (($file2 !== null && $file2 !== "") ? $file2 : "Not assigned") . " </p><br>";
+                                        echo "<p>Corrector2 Name: $prof2 </p><br>";
+                                        echo "<p>Corrector3 ID: " . (($file3 !== null && $file3 !== "") ? $file3 : "Not assigned") . " </p><br>";
+                                        echo "<p>Corrector3 Name: $prof3 </p><br>";
+                                    }
+
+                                ?>
                                 </div>
-                        <input type="button" id="edit" name="editCorrectors" class="btn" value="Edit Correctors">
+                        <input type="submit" id="cancelCorrectors" name="cancelCorrectors" class="btn" value="Cancel Search">
                         </div>
                         </form>
                 </details>
@@ -576,6 +636,13 @@
 
     <script src="AdminPage.js">  
     </script>
+
+    <?php
+        // Clear the view_correctors_loaded flag after rendering
+        if (isset($_SESSION["view_correctors_loaded"])) {
+            unset($_SESSION["view_correctors_loaded"]);
+        }
+    ?>
 
 </body>
 </html>

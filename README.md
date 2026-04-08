@@ -48,10 +48,10 @@ Jean C. Chamoun
 - Admin Courses Page
 
   * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Checked)
-  * Search Course (fetch data using code)(Check with the supervisor)
-  * view Courses(fetch all possible data using a specific query)(Check with the supervisor)
+  * Search Course (fetch data using code)(Check with the team)
+  * view Courses(fetch all possible data using a specific query)(Check with the team)
 - Admin Correctors Page (fetch data and send data)
 
-  * Insert Correctors(in Progress)
-  * View Correctors
-  * Excel format(format2,format3)
+  * Insert Correctors(Check with the team)
+  * View Correctors(Check with the team)
+  * Excel format(format2,format3)(In Progress)

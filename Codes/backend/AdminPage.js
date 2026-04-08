@@ -313,8 +313,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function syncCorrectorPairOptions() {
+        const rows = Array.from(document.querySelectorAll('#correctorsTableBody tr'));
+        rows.forEach(row => {
+            const selects = row.querySelectorAll('select.corrector-select');
+            if (selects.length !== 2) return;
+            const secondSel = selects[0];
+            const thirdSel = selects[1];
+            const secondVal = secondSel.value;
+            const thirdVal = thirdSel.value;
+
+            Array.from(secondSel.options).forEach(opt => {
+                if (opt.value === '') return;
+                opt.disabled = opt.value === thirdVal;
+            });
+            Array.from(thirdSel.options).forEach(opt => {
+                if (opt.value === '') return;
+                opt.disabled = opt.value === secondVal;
+            });
+        });
+    }
+
+    function bindCorrectorPairGuards() {
+        const rows = Array.from(document.querySelectorAll('#correctorsTableBody tr'));
+        rows.forEach(row => {
+            const selects = row.querySelectorAll('select.corrector-select');
+            if (selects.length !== 2) return;
+            const secondSel = selects[0];
+            const thirdSel = selects[1];
+            if (secondSel.dataset.guardBound === '1' && thirdSel.dataset.guardBound === '1') {
+                return;
+            }
+
+            secondSel.addEventListener('change', () => {
+                if (secondSel.value !== '' && secondSel.value === thirdSel.value) {
+                    thirdSel.value = '';
+                }
+                syncCorrectorPairOptions();
+            });
+
+            thirdSel.addEventListener('change', () => {
+                if (thirdSel.value !== '' && thirdSel.value === secondSel.value) {
+                    secondSel.value = '';
+                }
+                syncCorrectorPairOptions();
+            });
+
+            secondSel.dataset.guardBound = '1';
+            thirdSel.dataset.guardBound = '1';
+        });
+
+        syncCorrectorPairOptions();
+    }
+
     function setViewModeCorrectors() {
         setCorrectorSelectsDisabled(true);
+        bindCorrectorPairGuards();
         const hasRows = getCorrectorSelects().length > 0;
         if (editCorrBtn) editCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
         if (deleteCorrBtn) deleteCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
@@ -325,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setEditModeCorrectors() {
         setCorrectorSelectsDisabled(false);
+        bindCorrectorPairGuards();
         if (editCorrBtn) editCorrBtn.style.display = 'none';
         if (deleteCorrBtn) deleteCorrBtn.style.display = 'inline-block';
         if (applyCorrBtn) applyCorrBtn.style.display = 'inline-block';
@@ -340,19 +395,41 @@ document.addEventListener('DOMContentLoaded', () => {
         courses.forEach(r => {
             const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim();
             const courseCode = r.course_code;
+            const firstCorrectorId = r.first_corrector_id !== undefined && r.first_corrector_id !== null ? String(r.first_corrector_id) : '';
+            const secondSelected = r.second_corrector !== undefined && r.second_corrector !== null ? String(r.second_corrector) : '';
+            const thirdSelected = r.third_corrector !== undefined && r.third_corrector !== null ? String(r.third_corrector) : '';
+
+            const secondOptions = [];
+            if (secondSelected && professors[secondSelected]) {
+                secondOptions.push(`<option value='${secondSelected}' selected>${professors[secondSelected]}</option>`);
+                secondOptions.push(`<option value=''>null</option>`);
+            } else {
+                secondOptions.push(`<option value='' selected>null</option>`);
+            }
+            Object.entries(professors).forEach(([id, name]) => {
+                if (id === secondSelected || id === firstCorrectorId || id === thirdSelected) return;
+                secondOptions.push(`<option value='${id}'>${name}</option>`);
+            });
+
+            const thirdOptions = [];
+            if (thirdSelected && professors[thirdSelected]) {
+                thirdOptions.push(`<option value='${thirdSelected}' selected>${professors[thirdSelected]}</option>`);
+                thirdOptions.push(`<option value=''>null</option>`);
+            } else {
+                thirdOptions.push(`<option value='' selected>null</option>`);
+            }
+            Object.entries(professors).forEach(([id, name]) => {
+                if (id === thirdSelected || id === firstCorrectorId || id === secondSelected) return;
+                thirdOptions.push(`<option value='${id}'>${name}</option>`);
+            });
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${courseCode}</td>
                 <td>${r.course_name}</td>
                 <td>${profName}</td>
-                <td><select name='second_corrector[${courseCode}]' disabled class='corrector-select'>
-                    <option value=''>null</option>
-                    ${Object.entries(professors).map(([id, name]) => `<option value='${id}' ${r.second_corrector == id ? 'selected' : ''}>${name}</option>`).join('')}
-                </select></td>
-                <td><select name='third_corrector[${courseCode}]' disabled class='corrector-select'>
-                    <option value=''>null</option>
-                    ${Object.entries(professors).map(([id, name]) => `<option value='${id}' ${r.third_corrector == id ? 'selected' : ''}>${name}</option>`).join('')}
-                </select></td>
+                <td><select name='second_corrector[${courseCode}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
+                <td><select name='third_corrector[${courseCode}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
             `;
             tbody.appendChild(tr);
         });
@@ -381,6 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const tableContainer = document.querySelector('#content-correctors .table-container');
                         if (tableContainer) tableContainer.style.display = 'block';
                         setViewModeCorrectors();
+                        bindCorrectorPairGuards();
                         showBrowserNotification('Correctors', 'Courses loaded successfully.');
                     } else {
                         showBrowserNotification('Correctors', data.message || 'Failed to load courses.');
@@ -423,4 +501,47 @@ document.addEventListener('DOMContentLoaded', () => {
             form.submit();
         });
     }
+
+    bindCorrectorPairGuards();
+
+    // --- View Correctors by Course ID (AJAX) ---
+    const searchCorrectorForm = document.getElementById('searchCorrector');
+    if (searchCorrectorForm) {
+        searchCorrectorForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const courseId = document.getElementById('courseId')?.value || '';
+            const correctorLang = document.getElementById('correctorLang')?.value || 'E';
+            const correctorSession = document.getElementById('correctorSession')?.value || 'sem1';
+            
+            const formData = new FormData();
+            formData.append('courseId', courseId);
+            formData.append('correctorLang', correctorLang);
+            formData.append('correctorSession', correctorSession);
+            formData.append('searchID', 'true');
+            
+            fetch('viewCorrectors.php', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    // Keep the dropdown open instead of closing
+                    const details = searchCorrectorForm.closest('details');
+                    if (details) details.open = true;
+                    
+                    showBrowserNotification('Correctors', 'Search completed. Refreshing page...');
+                    // Small delay to let notification show, then reload
+                    setTimeout(() => location.reload(), 1500);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showBrowserNotification('Error', 'Failed to search correctors');
+                    // Keep dropdown open on error too
+                    const details = searchCorrectorForm.closest('details');
+                    if (details) details.open = true;
+                });
+        });
+    }
+
 });
