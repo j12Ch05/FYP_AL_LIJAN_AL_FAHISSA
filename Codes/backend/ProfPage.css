@@ -1,0 +1,223 @@
+:root {
+    --primary-purple: #6c63ff;
+    --dark-purple: #5a52d4;
+    --bg-gray: #f4f7fe;
+    --white: #ffffff;
+    --text-main: #333333;
+    --text-muted: #777777;
+    --border: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-gray);
+    color: var(--text-main);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+    color: var(--white);
+    position: fixed;
+    height: 100vh;
+    padding: 20px 0;
+}
+
+.logo-section {
+    padding: 20px 30px;
+    margin-bottom: 40px;
+}
+
+.logo-section h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.logo-section p {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.nav-item {
+    display: block;
+    padding: 15px 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item .icon {
+    margin-right: 10px;
+}
+
+/* Main Content Area */
+.main-content {
+    margin-left: 280px;
+    flex: 1;
+    padding: 50px;
+}
+
+.welcome-header {
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+}
+
+.welcome-header span {
+    color: var(--primary-purple);
+    font-weight: 600;
+}
+
+/* Card UI */
+.card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 15px;
+}
+
+/* Form Styling */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input, .form-group select {
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fbfbfb;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.readonly-input {
+    background-color: #f1f5f9 !important;
+    cursor: not-allowed;
+}
+
+/* Table Styling */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: var(--primary-purple);
+    color: white;
+    text-align: left;
+    padding: 15px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+th:first-child { border-radius: 8px 0 0 0; }
+th:last-child { border-radius: 0 8px 0 0; }
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+.code-link {
+    color: var(--primary-purple);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+    background: linear-gradient(135deg, #7b61ff, #5a52d4);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.profile-message {
+    margin: 20px 0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.profile-message.error {
+    background: #ffe8e8;
+    color: #b22222;
+    border-color: #f4c2c2;
+}
+
+.profile-message.success {
+    background: #e8ffef;
+    color: #1e7d34;
+    border-color: #b7e3c8;
+}
+
+/* Tab Logic (No JS) */
+input[type="radio"] {
+    display: none;
+}
+
+.tab-content {
+    display: none;
+}
+
+#tab-profile:checked ~ .main-content #content-profile,
+#tab-courses:checked ~ .main-content #content-courses {
+    display: block;
+}
+
+#tab-profile:checked ~ .sidebar .label-profile,
+#tab-courses:checked ~ .sidebar .label-courses {
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid white;
+}

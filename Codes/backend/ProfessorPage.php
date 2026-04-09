@@ -9,7 +9,7 @@
 
     $email = $_SESSION["email"];
 
-    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_last_name, prof_birth_date, prof_address, prof_phone, prof_email, dep_id FROM professor WHERE prof_email = ?";
+    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_last_name,prof_father_name, prof_birth_date, prof_address, prof_phone, prof_email, dep_id FROM professor WHERE prof_email = ?";
     $stmt_prof = mysqli_prepare($conn, $sql_prof);
     mysqli_stmt_bind_param($stmt_prof, "s", $email);
     mysqli_stmt_execute($stmt_prof);
@@ -105,6 +105,10 @@
                         <input type="text" name="last_name" value="<?php echo htmlspecialchars($professor['prof_last_name']); ?>" disabled class="profileInput">
                     </div>
                     <div class="form-group">
+                        <label>Father Name</label>
+                        <input type="text" name="father_name" value="<?php echo htmlspecialchars($professor['prof_father_name']); ?>" disabled class="profileInput">
+                    </div>
+                    <div class="form-group">
                         <label>Birth Date</label>
                         <input type="text" name="birth_date" value="<?php echo htmlspecialchars($birth_date); ?>" disabled class="profileInput">
                     </div>
@@ -190,7 +194,10 @@
                             input.disabled = false;
                         });
                         const applyBtn = document.querySelector('#applyProfileChanges');
-                        if (applyBtn) applyBtn.style.display = 'inline-block';
+                        if (applyBtn) {
+                            applyBtn.style.display = 'inline-block';
+                            editBtn.style.display = 'none';
+                        }
                     }
                 });
             }
@@ -217,6 +224,7 @@
                                     input.disabled = true;
                                 });
                                 applyBtn.style.display = 'none';
+                                editBtn.style.display = 'inline-block';
                             } else {
                                 alert("Error: The profile did not update. Something went wrong" );
                             }

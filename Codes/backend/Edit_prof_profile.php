@@ -15,6 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 $email = $_SESSION["email"];
 $first_name = trim($_POST["first_name"] ?? '');
 $last_name = trim($_POST["last_name"] ?? '');
+$father_name = trim($_POST["father_name"] ?? '');
 $birth_date = trim($_POST["birth_date"] ?? '');
 $address = trim($_POST["address"] ?? '');
 $phone = trim($_POST["phone"] ?? '');
@@ -42,6 +43,7 @@ $birth_date_db = $birth_date_obj->format('Y-m-d');
 $sql_update = "UPDATE professor SET
               prof_first_name = ?,
               prof_last_name = ?,
+              prof_father_name = ?,
               prof_birth_date = ?,
               prof_address = ?,
               prof_phone = ?,
@@ -54,7 +56,7 @@ if (!$stmt) {
     exit();
 }
 
-mysqli_stmt_bind_param($stmt, "sssssss", $first_name, $last_name, $birth_date_db, $address, $phone, $department, $email);
+mysqli_stmt_bind_param($stmt, "ssssssss", $first_name, $last_name,$father_name, $birth_date_db, $address, $phone, $department, $email);
 
 if (mysqli_stmt_execute($stmt)) {
     echo "Profile updated successfully!";

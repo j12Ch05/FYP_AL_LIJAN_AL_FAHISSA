@@ -33,7 +33,7 @@
 
                 $mail->setFrom("noreply@example.com");
 //$mail->addAddress("receiveralaf@gmail.com");
-                $mail->addAddress($email)
+                $mail->addAddress($email);
                 $mail->Subject = "Password Reset";
                 $mail->Body = <<<END
 

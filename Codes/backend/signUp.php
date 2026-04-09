@@ -26,6 +26,7 @@
 
         $firstName = trim($_POST["firstName"]);
         $lastName = trim($_POST["lastName"]);
+        $fatherName = trim($_POST["fatherName"]);
         $birthDate = $_POST["birthDate"];
         $d = strtotime($birthDate);
         $phone = $_POST["phone"];
@@ -39,6 +40,9 @@
         }
         if (!preg_match($arabicPattern, $lastName)) {
             $errors[] = "Last name must be in Arabic.";
+        }
+        if (!preg_match($arabicPattern, $fatherName)) {
+            $errors[] = "Father name must be in Arabic.";
         }
 
         //Checking if the user is old enough to Sign up
@@ -77,6 +81,7 @@
 
             $_SESSION["firstName"]   = $firstName;
             $_SESSION["lastName"]    = $lastName;
+            $_SESSION["fatherName"] = $fatherName;
             $_SESSION["birthDate"]   = $date;
             $_SESSION["address"]     = $_POST["address"];
             $_SESSION["phone"]       = $phone;
@@ -127,6 +132,11 @@
             <div class="form-group">
                 <label for="lname">Last Name</label>
                 <input type="text" id="lname" name="lastName" placeholder="Enter your last name in arabic" maxlength="20" required />
+            </div>
+            
+            <div class="form-group">
+                <label for="fatherName">Father Name</label>
+                <input type="text" id="lname" name="fatherName" placeholder="Enter your father name in arabic" maxlength="20" required />
             </div>
 
             <div class="form-group">

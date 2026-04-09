@@ -8,6 +8,7 @@
     $fileNumber = (int)$_SESSION["fileNumber"];
     $firstName = mysqli_real_escape_string($conn, $_SESSION["firstName"]);
     $lastName  = mysqli_real_escape_string($conn, $_SESSION["lastName"]);
+    $fatherName  = mysqli_real_escape_string($conn, $_SESSION["fatherName"]);
     $birth  = $_SESSION["birthDate"];
     if($birth instanceof DateTime){
         $birth = $birth->format('Y-m-d');
@@ -28,12 +29,12 @@
     $sql_insert = "INSERT INTO professor (
                         prof_file_nb, prof_first_name, prof_last_name, 
                         prof_birth_date, prof_address, prof_phone, 
-                        prof_email, prof_password, dep_id, isAdmin, prof_category
+                        prof_email, prof_password, dep_id, isAdmin, prof_category,prof_father_name
                     ) 
                     VALUES (
                         $fileNumber, '$firstName', '$lastName', 
                         '$birthDate', '$address', '$phone', 
-                        '$email', '$password', '$department', FALSE, '$category'
+                        '$email', '$password', '$department', FALSE, '$category','$fatherName'
                     )";
 
     

@@ -573,38 +573,53 @@
                         </div>
                         </form>
                 </details>
-                <details class="dropdown-menu">
+                <details class="dropdown-menu" <?php $_SESSION["excelLoaded"] ? " open":""; ?>>
                     <summary>Excel Format</summary>
+                    <?php
+                        $eef = $_SESSION["excel_export_filter"] ?? [];
+                        $eefSel = function ($key, $value) use ($eef) {
+                            return isset($eef[$key]) && (string) $eef[$key] === (string) $value ? " selected" : "";
+                        };
+                    ?>
                     <form id="exportExcel" action="exportExcel.php" method="post">
                         <div class="dropdown-content">
+                            <?php
+                                if (!empty($_SESSION["excel_export_error"])) {
+                                    echo '<p style="color:#b91c1c;font-weight:600;">' . htmlspecialchars($_SESSION["excel_export_error"], ENT_QUOTES, "UTF-8") . '</p>';
+                                    unset($_SESSION["excel_export_error"]);
+                                }
+                            ?>
                             <div class="form-group">
                                 <search>
                                     <label for="session">Session</label>
                                     <select id="session" name="sessionId">
-                                        <option value="sem1">Semester 1</option>
-                                        <option value="sem2">Semester 2</option>
-                                        <option value="sess2">Session 2</option>
+                                         <option value="sem1"<?php echo $eefSel("sessionId", "sem1"); ?>>Semester 1</option>
+                                        <option value="sem2"<?php echo $eefSel("sessionId", "sem2"); ?>>Semester 2</option>
+                                        <option value="sess2"<?php echo $eefSel("sessionId", "sess2"); ?>>Session 2</option>
                                     </select>
                                     <label for="excelMajor">Major</label>
                                     <select id="excelMajor" name="excelMajor">
-                                        <option value="all">All</option>
-                                        <option value="opt1">Option1</option>
-                                        <option value="opt2">Option2</option>
+                                        <option value="all" <?php echo $eefSel("excelMajor","all") ?>>All</option>
+                                        <?php foreach ($_SESSION["majors"] as $id => $name) {
+                                            $selectedMajor = $eefSel("excelMajor", $id);
+                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                        } ?>
                                     </select>
                                     <label for="excelLevel">Level</label>
                                     <select name="excelLevel" id="excelLevel">
-                                        <option value="all">All</option>
-                                        <option value="L1">L1</option>
-                                        <option value="L2">L2</option>
-                                        <option value="L3">L3</option>
-                                        <option value="M1">M1</option>
+                                        <option value="all" <?php echo $eefSel("excelLevel","all") ?>>All</option>
+                                        <option value="L1" <?php echo $eefSel("excelLevel","L1") ?>>L1</option>
+                                        <option value="L2" <?php echo $eefSel("excelLevel","L2") ?>>L2</option>
+                                        <option value="L3" <?php echo $eefSel("excelLevel","L3") ?>>L3</option>
+                                        <option value="M1" <?php echo $eefSel("excelLevel","M1") ?>>M1</option>
                                     </select>
                                 </search>
                             </div>
                             <label for="format">Choose the format</label>
-                            <input type="button" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
-                            <input type="button" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
-                            <input type="button" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
+                            <input type="submit" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
+                            <input type="submit" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
+                            <input type="submit" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
+                            <input type="submit" id="format" class="btn" name="cancelExcel" value="Cancel">
                         </div>
                     </form>
                 </details>

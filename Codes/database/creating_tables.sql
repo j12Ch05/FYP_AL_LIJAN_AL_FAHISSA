@@ -2,6 +2,7 @@ CREATE TABLE professor (
   prof_file_nb INT NOT NULL,
   prof_first_name VARCHAR(30) NOT NULL,
   prof_last_name VARCHAR(30) NOT NULL,
+  prof_father_name VARCHAR(30) NOT NULL,
   prof_birth_date DATE NOT NULL,
   prof_address VARCHAR(40) DEFAULT NULL,
   prof_phone VARCHAR(10) DEFAULT NULL,
