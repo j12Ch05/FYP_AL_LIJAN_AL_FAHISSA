@@ -573,7 +573,7 @@
                         </div>
                         </form>
                 </details>
-                <details class="dropdown-menu" <?php $_SESSION["excelLoaded"] ? " open":""; ?>>
+                <details class="dropdown-menu">
                     <summary>Excel Format</summary>
                     <?php
                         $eef = $_SESSION["excel_export_filter"] ?? [];

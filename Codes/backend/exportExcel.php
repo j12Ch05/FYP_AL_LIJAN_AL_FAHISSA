@@ -2,6 +2,8 @@
     session_start();
     ob_start();
     include __DIR__ . "/database.php";
+
+
     
     if (isset($_POST["cancelExcel"])) {
         unset($_SESSION["excel_export_filter"], $_SESSION["excel_export_error"]);
@@ -10,6 +12,7 @@
         header("Location: AdminPage.php?tab=correctors");
         exit;
     }    
+
 
     if(isset($_POST["tawzi3"]) || isset($_POST["ta3in"]) || isset($_POST["edbarat"])){
         $session = $_POST["sessionId"] ?? "";
@@ -22,7 +25,6 @@
             "excelLevel" => $level
         ];
 
-        $_SESSION["excelLoaded"] = true;
         
         //here will be the switch between the excel format
         if(isset($_POST["tawzi3"])){

@@ -26,7 +26,22 @@
         $dep = $row["dep_id"];
     }
     mysqli_stmt_close($stmt_p);
-    
+
+    $sql_courses = "SELECT c.course_code,c.course_name,c.course_lang FROM course c 
+                    JOIN major m ON m.major_id = c.major_id
+                    WHERE m.dep_id = ?";
+    $stmt_c = mysqli_prepare($conn,$sql_courses);
+    mysqli_stmt_bind_param($stmt_c,"s",$dep);
+    mysqli_stmt_execute($stmt_c);
+    $res_c = mysqli_stmt_get_result($stmt_c);
+
+
+    $courses = [];
+    while($row = mysqli_fetch_assoc($res_c)){
+        $courses[$row["course_lang"]][$row["course_code"]] = $row["course_name"];
+    }
+    mysqli_stmt_close($stmt_c);
+
     $departments = [
         "bio" => "علوم الأحياء",
         "bioch" => "الكيمياء الحيوية",
@@ -66,7 +81,8 @@
 
     $sql = "SELECT     c.course_code,
                        c.course_name,
-                       COALESCE(corr.prof_file_nb, t.prof_file_nb) AS prof_file_nb,
+                       c.course_lang,
+                       corr.prof_file_nb AS prof_file_nb,
                        corr.second_corrector_file_nb,
                        corr.third_corrector_file_nb,
                        t.uni_year
@@ -77,25 +93,27 @@
                 LEFT JOIN teaching t ON c.course_code = t.course_code
                     AND c.course_lang = t.course_lang
                     AND t.isActive = 1
+                LEFT JOIN major m ON m.major_id = c.major_id
                 ";
         //s is a variable to know which parameters we need
         $s = 0;
 
     if($level == "all" && $major == "all"){
+        $sql .= "WHERE m.dep_id = ?";
         $s = 0;
     }
     else if($level == "all"){
-        $sql .= "WHERE c.major_id = ?";
+        $sql .= "WHERE c.major_id = ? AND  m.dep_id = ?";
         $file_name .= $major;
         $s = 1;
     }
     else if($major == "all"){
-        $sql .= "WHERE c.course_level = ?";
+        $sql .= "WHERE c.course_level = ? AND  m.dep_id = ?";
         $file_name .= $level;
         $s = 2;
     }
     else{
-        $sql .= "WHERE c.major_id = ? AND c.course_level = ?";
+        $sql .= "WHERE c.major_id = ? AND c.course_level = ? AND  m.dep_id = ?";
         $file_name .= $level ." - " . $major;
         $s = 3;
     }
@@ -113,16 +131,16 @@
         exit;
     }
     else if($s == 1){
-        mysqli_stmt_bind_param($stmt,"ss",$sess,$major);
+        mysqli_stmt_bind_param($stmt,"sss",$sess,$major,$dep);
     }
     else if($s == 2){
-        mysqli_stmt_bind_param($stmt,"ss",$sess,$level);
+        mysqli_stmt_bind_param($stmt,"sss",$sess,$level,$dep);
     }
     else if($s == 3){
-        mysqli_stmt_bind_param($stmt,"sss",$sess,$major,$level);
+        mysqli_stmt_bind_param($stmt,"ssss",$sess,$major,$level,$dep);
     }
     else {
-        mysqli_stmt_bind_param($stmt,"s",$sess);
+        mysqli_stmt_bind_param($stmt,"ss",$sess,$dep);
     }
 
     if(!mysqli_stmt_execute($stmt)){
@@ -140,23 +158,54 @@
         while ($row = mysqli_fetch_assoc($result)) {
             $rows[] = $row;
         }
-        //list of the professors file number and how many correctors list they are in 
-        $corrProfs = array_fill_keys(array_column($rows, 'prof_file_nb'), 1);
+        // Keys: prof_file_nb. Values: [0] = committee count, [1] = ['E' => course codes, 'F' => course codes]
+        $profIds = array_filter(array_unique(array_column($rows, 'prof_file_nb')), static function ($v) {
+            return $v !== null && $v !== '';
+        });
+        $langBuckets = static function () {
+            return ['E' => [], 'F' => []];
+        };
+        $corrProfs = [];
+        foreach ($profIds as $pid) {
+            $corrProfs[(string)$pid] = [0, $langBuckets()];
+        }
         mysqli_stmt_close($stmt);
     }
 
+    $addCorrectorAssignment = function (&$map, $profId, $courseCode, $courseLang) use ($sess) {
+        if ($profId === null || $profId === '') {
+            return;
+        }
+        if ($sess === '' || $courseCode === '') {
+            return;
+        }
+        $lang = strtoupper(trim((string)$courseLang));
+        if ($lang !== 'E' && $lang !== 'F') {
+            $lang = 'E';
+        }
+        $profKey = (string)$profId;
+        if (!isset($map[$profKey])) {
+            $map[$profKey] = [0, ['E' => [], 'F' => []]];
+        }
+        $map[$profKey][0]++;
+        if (!in_array($courseCode, $map[$profKey][1][$lang], true)) {
+            $map[$profKey][1][$lang][] = $courseCode;
+        }
+    };
+
     foreach ($rows as $row) {
-        $corrProfs[$row['prof_file_nb']]++;
-        if (!empty($row['second_corrector_file_nb'])) {
-            $corrProfs[$row['second_corrector_file_nb']]++;
-        }
-        if (!empty($row['third_corrector_file_nb'])) {
-            $corrProfs[$row['third_corrector_file_nb']]++;
-        }
+        $courseCode = $row["course_code"] ?? '';
+        $courseLang = $row["course_lang"] ?? 'E';
+        $addCorrectorAssignment($corrProfs, $row['prof_file_nb'] ?? null, $courseCode, $courseLang);
+        $addCorrectorAssignment($corrProfs, $row['second_corrector_file_nb'] ?? null, $courseCode, $courseLang);
+        $addCorrectorAssignment($corrProfs, $row['third_corrector_file_nb'] ?? null, $courseCode, $courseLang);
     }
 
-    $file_name .= " " . $rows[0]["uni_year"];
-    $title2 .= " " . $rows[0]["uni_year"];
+    $uniYear = $rows[0]["uni_year"] ?? '';
+    if ($uniYear !== '') {
+        $file_name .= " " . $uniYear;
+        $title2 .= " " . $uniYear;
+    }
 
     try {
         $spreadsheet = new Spreadsheet();
@@ -179,8 +228,19 @@
         $sheet->getColumnDimension('C')->setWidth(40); 
         $sheet->getColumnDimension('D')->setWidth(10);  
         $sheet->getColumnDimension('E')->setWidth(10);   
-        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(10);
         $sheet->getRowDimension('3')->setRowHeight(50);
+
+        $tableStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+
+        
  
         $sheet->setCellValue('A3','رقم الملف');
         $sheet->setCellValue('B3','اسم الاستاذ الثلاثي');
@@ -198,6 +258,67 @@
         if ($tmpFile === false) {
             throw new RuntimeException('Unable to create temporary file for export.');
         }
+
+        //filling the table 
+        $startRow = 4;
+        $cell = $startRow;
+        foreach($corrProfs as $profFileNb => $profData){
+            $height = 30;
+            $linesC = [];
+            $linesD = [];
+            $linesE = [];
+            $byLang = $profData[1] ?? ['E' => [], 'F' => []];
+            $perCourse = [];
+            foreach (['E', 'F'] as $lg) {
+                foreach ($byLang[$lg] ?? [] as $code) {
+                    $codeKey = (string)$code;
+                    if (!isset($perCourse[$codeKey])) {
+                        $perCourse[$codeKey] = ['E' => false, 'F' => false];
+                    }
+                    $perCourse[$codeKey][$lg] = true;
+                }
+            }
+            ksort($perCourse, SORT_STRING);
+            foreach ($perCourse as $codeKey => $flags) {
+                $hasE = !empty($flags['E']);
+                $hasF = !empty($flags['F']);
+                if ($hasE && $hasF) {
+                    $linesD[] = 'F/E';
+                } elseif ($hasF) {
+                    $linesD[] = 'F';
+                } else {
+                    $linesD[] = 'E';
+                }
+                $cname = $courses['E'][$codeKey] ?? $courses['F'][$codeKey] ?? '';
+                $linesC[] = $cname;
+                $linesE[] = $codeKey;
+                $height += 12;
+            }
+            $textC = implode("\n", $linesC);
+            $textD = implode("\n", $linesD);
+            $textE = implode("\n", $linesE);
+
+            $sheet->setCellValue('A'.$cell , (string)$profFileNb);
+            $sheet->setCellValue('B'.$cell , (string)($professors[$profFileNb] ?? 'Unknown'));
+            $sheet->setCellValue('C'.$cell , $textC);
+            $sheet->setCellValue('D'.$cell , $textD);
+            $sheet->setCellValue('E'.$cell , $textE);
+            $sheet->setCellValue('F'.$cell , (int)$profData[0]);
+            $alignTop = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP;
+            $sheet->getStyle('C'.$cell)->getAlignment()->setWrapText(true)->setVertical($alignTop);
+            $sheet->getStyle('D'.$cell)->getAlignment()->setWrapText(true)->setVertical($alignTop);
+            $sheet->getStyle('E'.$cell)->getAlignment()->setWrapText(true)->setVertical($alignTop);
+            $sheet->getRowDimension(2)->setRowHeight(-1);
+            $cell++;
+        }
+
+        $lastRow = $sheet->getHighestRow(); // Gets the last row that has data
+        $sheet->getStyle('A3:F' . $lastRow)->applyFromArray($tableStyle);
+        $sheet->getStyle('A4:A'.$cell)->getFont()->setSize(12);
+        $sheet->getStyle('B4:B'.$cell)->getFont()->setSize(14);
+        $sheet->getStyle('F4:F'.$cell)->getFont()->setSize(12);
+
+        
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($tmpFile);
