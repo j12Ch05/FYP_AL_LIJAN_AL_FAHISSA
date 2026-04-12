@@ -54,7 +54,7 @@ Jean C. Chamoun
 
   * Insert Correctors(Check with the supervisor)
   * View Correctors(Check with the supervisor)
-  * Excel format(format2,format3)(Done with format2 ta3in)(Check with the team)
+  * Excel format(format2,format3)(Check with the team)
 
 ## Report:
 
