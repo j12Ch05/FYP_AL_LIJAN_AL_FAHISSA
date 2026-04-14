@@ -17,12 +17,13 @@ if (isset($_POST['exportExcel'])) {
 
     $email = $_SESSION['email'];
 
-    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_last_name, dep_id FROM professor WHERE prof_email = ?";
+    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_father_name, prof_last_name, dep_id FROM professor WHERE prof_email = ?";
     $stmt_prof = mysqli_prepare($conn, $sql_prof);
     mysqli_stmt_bind_param($stmt_prof, 's', $email);
     mysqli_stmt_execute($stmt_prof);
     $result_prof = mysqli_stmt_get_result($stmt_prof);
     $professor = mysqli_fetch_assoc($result_prof);
+    mysqli_stmt_close($stmt_prof);
 
     if (!$professor) {
         die('Professor not found.');
@@ -34,6 +35,7 @@ if (isset($_POST['exportExcel'])) {
     mysqli_stmt_execute($stmt_dep);
     $result_dep = mysqli_stmt_get_result($stmt_dep);
     $department = mysqli_fetch_assoc($result_dep);
+    mysqli_stmt_close($stmt_dep);
     $departmentName = $department['dep_name'] ?? $professor['dep_id'];
 
     $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb, c.course_level, c.course_lang, c.course_semester_nb, m.major_name
@@ -41,7 +43,7 @@ if (isset($_POST['exportExcel'])) {
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
                     JOIN major m ON c.major_id = m.major_id
                     WHERE t.prof_file_nb = ?
-                    ORDER BY c.course_code";
+                    ORDER BY c.course_code, c.course_lang";
     $stmt_courses = mysqli_prepare($conn, $sql_courses);
     mysqli_stmt_bind_param($stmt_courses, 'i', $professor['prof_file_nb']);
     mysqli_stmt_execute($stmt_courses);
@@ -51,6 +53,7 @@ if (isset($_POST['exportExcel'])) {
     while ($row = mysqli_fetch_assoc($result_courses)) {
         $courses[] = $row;
     }
+    mysqli_stmt_close($stmt_courses);
 
     if (ob_get_contents()) {
         ob_end_clean();
@@ -74,7 +77,7 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('H4', 'القسم:');
     $sheet->setCellValue('I4', $departmentName);
     $sheet->setCellValue('H5', 'الاسم:');
-    $sheet->setCellValue('I5', $professor['prof_first_name'] . ' ' . $professor['prof_last_name']);
+    $sheet->setCellValue('I5', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
     $sheet->setCellValue('H6', 'رقم الملف:');
     $sheet->setCellValue('I6', $professor['prof_file_nb']);
     $sheet->setCellValue('H7', 'العام الجامعي:');
@@ -142,7 +145,7 @@ if (isset($_POST['exportExcel'])) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $fileName = 'Prof_Course_Export_' . date('Y-m-d_H-i') . '.xlsx';
+    $fileName = 'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $fileName . '"');
     header('Cache-Control: max-age=0');
