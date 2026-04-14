@@ -3,7 +3,7 @@
     include("database.php");
     $email = $_SESSION["email"];
     
-    $sql_professors = "SELECT p.prof_file_nb,p.prof_first_name,p.prof_last_name FROM professor p Join professor a on a.dep_id = p.dep_id where a.prof_email= ?";
+    $sql_professors = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name, p.prof_birth_date, p.prof_email, p.prof_phone, d.dep_name, p.isAdmin, p.prof_category FROM professor p JOIN department d ON p.dep_id = d.dep_id WHERE p.dep_id = (SELECT dep_id FROM professor WHERE prof_email = ?)";
     $stmt_p = mysqli_prepare($conn, $sql_professors);
     mysqli_stmt_bind_param($stmt_p,"s",$email);
     mysqli_stmt_execute($stmt_p);
@@ -11,9 +11,30 @@
 
     $professors = [];
     while($row = mysqli_fetch_assoc($res_p)){
-        $professors[$row["prof_file_nb"]] = $row["prof_first_name"] . " " . $row["prof_last_name"];
+        $professors[] = $row;
     }
-    mysqli_stmt_close($stmt_p); 
+    mysqli_stmt_close($stmt_p);
+
+    $professors_full = $professors;
+    $professors = [];
+    foreach($professors_full as $prof){
+        $professors[$prof["prof_file_nb"]] = $prof["prof_first_name"] . " " . $prof["prof_last_name"];
+    }
+
+    // Fetch courses for each professor
+    foreach($professors_full as &$prof){
+        $sql_courses = "SELECT c.course_name, c.course_lang FROM course c JOIN teaching t ON c.course_code = t.course_code AND c.course_lang = t.course_lang WHERE t.prof_file_nb = ?";
+        $stmt_c = mysqli_prepare($conn, $sql_courses);
+        mysqli_stmt_bind_param($stmt_c, "i", $prof['prof_file_nb']);
+        mysqli_stmt_execute($stmt_c);
+        $res_c = mysqli_stmt_get_result($stmt_c);
+        $courses = [];
+        while($row_c = mysqli_fetch_assoc($res_c)){
+            $courses[] = $row_c['course_name'] . ' (' . $row_c['course_lang'] . ')';
+        }
+        $prof['courses'] = implode(', ', $courses);
+        mysqli_stmt_close($stmt_c);
+    } 
 
     $sql_majors = "SELECT m.major_id, m.major_name FROM major m Join professor a on a.dep_id = m.dep_id where a.prof_email=? ";
     $stmt_m = mysqli_prepare($conn, $sql_majors);
@@ -99,16 +120,38 @@
                                 <option value="course taught">Course</option>
                             </select>
                     </div>
-                </details>
-
-            <details class="dropdown-menu">
-                    <summary>Search Professor</summary>
-                    <form id="searchProfessor" action="searchProfessor.php" method="post">
-                        <div class="dropdown-content">
-                        <div class="form-group">
-                            <label for="professorSearchBy">Filter by</label>
-                            <select id="professorSearchBy" name="professorSearchBy" style="width: 220px; margin-bottom: 10px;">
-                                <option value="">-- choose filter --</option>
+                        <table border="1" style="width:100%; margin-top:10px;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Birth Date</th>
+                                    <th>Rank</th>
+                                    <th>Courses Taught</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                foreach($professors_full as $prof){
+                                    $rank = $prof['isAdmin'] ? 'Admin' : $prof['prof_category'];
+                                    echo "<tr>
+                                        <td>{$prof['prof_file_nb']}</td>
+                                        <td>{$prof['prof_first_name']} {$prof['prof_last_name']}</td>
+                                        <td>{$prof['dep_name']}</td>
+                                        <td>{$prof['prof_email']}</td>
+                                        <td>{$prof['prof_phone']}</td>
+                                        <td>{$prof['prof_birth_date']}</td>
+                                        <td>{$rank}</td>
+                                        <td>{$prof['courses']}</td>
+                                    </tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                                 <option value="id">ID</option>
                                 <option value="name">Name</option>
                                 <option value="course">Course</option>

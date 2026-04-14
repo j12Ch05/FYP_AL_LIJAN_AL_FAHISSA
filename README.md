@@ -37,7 +37,7 @@ Jean C. Chamoun
 - Log in Page backend(Checked)
 - Professor profile page(fetch data,edit data)(check with the supervisor)
 - Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)(Check with the supervisor)
-- Admin Professors Page(fetching data from a specific query)
+- Admin Professors Page(fetching data from a specific query)(check with the team)
 - Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
 - Edit Admin Page(check with the team)
 
