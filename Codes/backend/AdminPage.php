@@ -635,13 +635,22 @@
                                     <label for="professorId">Enter the ID</label>
                                         <div style="display: flex; gap: 10px; align-items: center;">
                                         <input type="text" id="professorId" name="professorId" placeholder="Enter the professor ID" style="width: 200px;">
-                                        <input type="button"  id="searchID" name="searchID" value="Search">
+                                        <input type="submit" id="searchID" name="searchID" value="Search">
                                         </div><br>
-                                        <p>Professor ID: </p><br>
-                                        <p>Professor Name: </p><br>
+                                        <?php if (isset($_SESSION['search_message'])): ?>
+                                            <p><?php echo $_SESSION['search_message']; unset($_SESSION['search_message']); ?></p>
+                                        <?php endif; ?>
+                                        <p>Professor ID: <?php echo $_SESSION['searched_prof_id'] ?? ''; ?></p><br>
+                                        <p>Professor Name: <?php echo $_SESSION['searched_prof_name'] ?? ''; ?></p><br>
                                 </div>
-                                <input type="button" id="makeAdmin" name="makeAdmin" class="btn" value="Make Admin">
-                                <input type="button" id="removeAdmin" name="removeAdmin" class="btn" value="Remove Admin">
+                                <form action="MakeAdmin.php" method="post" style="display: inline;">
+                                    <input type="hidden" name="prof_file_nb" value="<?php echo $_SESSION['searched_prof_id'] ?? ''; ?>">
+                                    <input type="submit" class="btn" value="Make Admin">
+                                </form>
+                                <form action="RemoveAdmin.php" method="post" style="display: inline;">
+                                    <input type="hidden" name="prof_file_nb" value="<?php echo $_SESSION['searched_prof_id'] ?? ''; ?>">
+                                    <input type="submit" class="btn" value="Remove Admin">
+                                </form>
                             </div>
                         </form>
                 </details>
