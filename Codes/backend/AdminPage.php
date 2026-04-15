@@ -1,8 +1,14 @@
 <?php
     session_start();
     include("database.php");
-    $email = $_SESSION["email"];
     
+
+    if(!isset($_SESSION['email'])){
+        header("location: login.php");
+        exit();
+    }
+    
+    $email = $_SESSION["email"];
     $sql_professors = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name, p.prof_birth_date, p.prof_email, p.prof_phone, d.dep_name, p.isAdmin, p.prof_category FROM professor p JOIN department d ON p.dep_id = d.dep_id WHERE p.dep_id = (SELECT dep_id FROM professor WHERE prof_email = ?)";
     $stmt_p = mysqli_prepare($conn, $sql_professors);
     mysqli_stmt_bind_param($stmt_p,"s",$email);
