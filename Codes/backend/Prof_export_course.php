@@ -97,8 +97,8 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('I6', $professor['prof_category'] === 'ملاك' ? 'X' : '');
 
     $sheet->getStyle('F4:K7')->getFont()->setSize(11);
-    $sheet->getStyle('F4:K7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-    $sheet->getStyle('G5:I6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    //$sheet->getStyle('F4:K7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $sheet->getStyle('G5:I6')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getStyle('G5:I6')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
     // Table headers
@@ -115,7 +115,7 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('J10', 'مصحح ثان');
 
     $sheet->getStyle('F9:J10')->getFont()->setBold(true);
-    $sheet->getStyle('F9:J10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('F9:J10')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getRowDimension(9)->setRowHeight(25);
     $sheet->getRowDimension(10)->setRowHeight(20);
 
