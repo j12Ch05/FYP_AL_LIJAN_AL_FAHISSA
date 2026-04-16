@@ -125,18 +125,23 @@
         <section id="content-professors" class="tab-content">
             <h1>Professors</h1>
             <details class="dropdown-menu">
-                <summary>View All Professor</summary>
-                    <div class="dropdown-content">
-                         <div class="form-group">
-                            <label for="professorSearchBy">Filter by</label>
-                            <select id="professorSearchBy" name="professorSearchBy" style="width: 220px; margin-bottom: 10px;">
-                                <option value="">-- choose filter --</option>
-                                <option value="all">All</option>
-                                <option value="department">Department</option>
-                                <option value="course taught">Course</option>
-                            </select>
+                <summary>View All Professors</summary>
+                <div class="dropdown-content">
+                    <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <label for="professorSearchBy">Filter by</label>
+                        <select id="professorSearchBy" name="professorSearchBy" style="width: 220px;">
+                            <option value="all">All</option>
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="department">Department</option>
+                            <option value="course">Course</option>
+                        </select>
+                        <input type="text" id="professorFilterValue" placeholder="Enter filter value" style="width: 260px;">
+                        <button type="button" id="applyProfessorFilter" class="btn">Apply Filter</button>
+                        <button type="button" id="clearProfessorFilter" class="btn">Clear</button>
                     </div>
-                        <table border="1" style="width:100%; margin-top:10px;">
+                    <div class="table-container" style="margin-top: 10px;">
+                        <table id="professorsTable" border="1" style="width:100%;">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -145,54 +150,36 @@
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Birth Date</th>
-                                    <th>Rank</th>
+                                    <th>Role</th>
+                                    <th>Category</th>
                                     <th>Courses Taught</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 foreach($professors_full as $prof){
-                                    $rank = $prof['isAdmin'] ? 'Admin' : $prof['prof_category'];
-                                    echo "<tr>
-                                        <td>{$prof['prof_file_nb']}</td>
-                                        <td>{$prof['prof_first_name']} {$prof['prof_last_name']}</td>
-                                        <td>{$prof['dep_name']}</td>
-                                        <td>{$prof['prof_email']}</td>
-                                        <td>{$prof['prof_phone']}</td>
-                                        <td>{$prof['prof_birth_date']}</td>
-                                        <td>{$rank}</td>
-                                        <td>{$prof['courses']}</td>
+                                    $role = $prof['isAdmin'] ? 'Admin' : 'Professor';
+                                    $category = htmlspecialchars($prof['prof_category']);
+                                    echo "<tr data-prof-id='" . htmlspecialchars($prof['prof_file_nb']) . "'>
+                                        <td class='prof-id'>" . htmlspecialchars($prof['prof_file_nb']) . "</td>
+                                        <td class='prof-name'>" . htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name']) . "</td>
+                                        <td class='prof-department'>" . htmlspecialchars($prof['dep_name']) . "</td>
+                                        <td class='prof-email'>" . htmlspecialchars($prof['prof_email']) . "</td>
+                                        <td class='prof-phone'>" . htmlspecialchars($prof['prof_phone']) . "</td>
+                                        <td class='prof-birth'>" . htmlspecialchars($prof['prof_birth_date']) . "</td>
+                                        <td class='prof-role'>" . htmlspecialchars($role) . "</td>
+                                        <td class='prof-category'>" . $category . "</td>
+                                        <td class='prof-courses'>" . htmlspecialchars($prof['courses']) . "</td>
+                                        <td><button type='button' class='remove-prof-btn btn' data-prof-id='" . htmlspecialchars($prof['prof_file_nb']) . "'>Remove</button></td>
                                     </tr>";
                                 }
                                 ?>
                             </tbody>
                         </table>
                     </div>
-                                <option value="id">ID</option>
-                                <option value="name">Name</option>
-                                <option value="course">Course</option>
-                            </select>
-                            <label for="professorQuery">Enter the search term</label>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="text" id="professorQuery" name="professorQuery" placeholder="Enter department, name, or course" style="width: 200px;">
-                                <input type="button"  id="searchID" name="searchID" value="Search">
-                            </div><br>
-                            <p>Professor ID: </p><br>
-                            <p>Professor Name: </p><br>
-                            <p>Courses Taught(with language): </p><br>
-                            <p>Professor Department: </p><br>
-                            <p>Professor Birth Date: </p><br>
-                            <p>Professor Email: </p><br>
-                            <p>Professor Phone: </p><br>
-                            <p>Professor Rank(admin or not): </p><br>
-                        </div>
-                        <input type="button" id="remove" name="removeProfessor" class="btn" value="remove Professor">
-
-                        
-                        </div>
-                        </div>
-                    </form>
-                </details>
+                </div>
+            </details>
         </section>
 
         <section id="content-courses" class="tab-content">
@@ -752,6 +739,92 @@
                     removeAdminBtn.disabled = true;
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterBy = document.getElementById('professorSearchBy');
+            const filterInput = document.getElementById('professorFilterValue');
+            const applyBtn = document.getElementById('applyProfessorFilter');
+            const clearBtn = document.getElementById('clearProfessorFilter');
+            const tableBody = document.querySelector('#professorsTable tbody');
+
+            const normalize = (value) => (value || '').toString().toLowerCase();
+
+            const filterRows = () => {
+                if (!tableBody) return;
+                const criteria = filterBy ? filterBy.value : 'all';
+                const term = normalize(filterInput ? filterInput.value.trim() : '');
+                Array.from(tableBody.rows).forEach((row) => {
+                    let show = true;
+                    if (criteria !== 'all' && term !== '') {
+                        switch (criteria) {
+                            case 'id':
+                                show = normalize(row.querySelector('.prof-id')?.textContent).includes(term);
+                                break;
+                            case 'name':
+                                show = normalize(row.querySelector('.prof-name')?.textContent).includes(term);
+                                break;
+                            case 'department':
+                                show = normalize(row.querySelector('.prof-department')?.textContent).includes(term);
+                                break;
+                            case 'course':
+                                show = normalize(row.querySelector('.prof-courses')?.textContent).includes(term);
+                                break;
+                            default:
+                                show = normalize(row.textContent).includes(term);
+                        }
+                    }
+                    row.style.display = show ? '' : 'none';
+                });
+            };
+
+            const updateFilterInputState = () => {
+                if (!filterBy || !filterInput) return;
+                filterInput.disabled = filterBy.value === 'all';
+                if (filterBy.value === 'all') {
+                    filterInput.value = '';
+                }
+                filterInput.placeholder = filterBy.value === 'department'
+                    ? 'Enter department name'
+                    : filterBy.value === 'course'
+                        ? 'Enter course name'
+                        : filterBy.value === 'id'
+                            ? 'Enter professor ID'
+                            : 'Enter search text';
+            };
+
+            if (filterBy) {
+                filterBy.addEventListener('change', updateFilterInputState);
+                updateFilterInputState();
+            }
+
+            if (applyBtn) {
+                applyBtn.addEventListener('click', filterRows);
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function () {
+                    if (filterBy) filterBy.value = 'all';
+                    if (filterInput) filterInput.value = '';
+                    updateFilterInputState();
+                    filterRows();
+                });
+            }
+
+            if (tableBody) {
+                tableBody.addEventListener('click', function (event) {
+                    const button = event.target.closest('.remove-prof-btn');
+                    if (!button) return;
+                    const row = button.closest('tr');
+                    const profId = button.dataset.profId || '';
+                    const profName = row?.querySelector('.prof-name')?.textContent || '';
+                    if (confirm(`Remove ${profName.trim()} (${profId}) from the table?`)) {
+                        row?.remove();
+                    }
+                });
+            }
         });
     </script>
 
