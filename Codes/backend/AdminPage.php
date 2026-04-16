@@ -673,30 +673,28 @@
 
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
-                <details class="dropdown-menu">
-                    <summary>Select Professor</summary>
-                    <div class="dropdown-content">
-                        <div class="form-group">
-                            <label for="professorDropdown">Select Professor</label>
-                            <select id="professorDropdown" name="professorDropdown" style="width: 300px;">
-                                <option value="">-- Select a Professor --</option>
-                                <?php foreach($all_professors as $prof): ?>
-                                    <option value="<?php echo htmlspecialchars($prof['prof_file_nb']); ?>">
-                                        <?php echo htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name'] . ' (' . $prof['prof_file_nb'] . ')'); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: inline;">
-                            <input type="hidden" id="prof_file_nb_make" name="prof_file_nb" value="">
-                            <input type="submit" class="btn" value="Make Admin" id="makeAdminBtn" disabled>
-                        </form>
-                        <form id="removeAdminForm" action="RemoveAdmin.php" method="post" style="display: inline;">
-                            <input type="hidden" id="prof_file_nb_remove" name="prof_file_nb" value="">
-                            <input type="submit" class="btn" value="Remove Admin" id="removeAdminBtn" disabled>
-                        </form>
-                    </div>
-                </details>
+            <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
+                <label for="professorDropdown">Select Professor</label>
+                <select id="professorDropdown" name="professorDropdown" style="width: 100%;">
+                    <option value="">-- Select a Professor --</option>
+                    <?php foreach($all_professors as $prof): ?>
+                        <option value="<?php echo htmlspecialchars($prof['prof_file_nb']); ?>">
+                            <?php echo htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name'] . ' (' . $prof['prof_file_nb'] . ')'); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div id="selectedProfessorInfo" style="margin-bottom: 20px; padding: 12px; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600; color: #1f2937; font-size: 16px;">Selected Professor: None</div>
+            <div class="form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: inline;">
+                    <input type="hidden" id="prof_file_nb_make" name="prof_file_nb" value="">
+                    <input type="submit" class="btn" value="Make Admin" id="makeAdminBtn" disabled>
+                </form>
+                <form id="removeAdminForm" action="RemoveAdmin.php" method="post" style="display: inline;">
+                    <input type="hidden" id="prof_file_nb_remove" name="prof_file_nb" value="">
+                    <input type="submit" class="btn" value="Remove Admin" id="removeAdminBtn" disabled>
+                </form>
+            </div>
         </section>
 
     </main>
@@ -704,41 +702,34 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const professorDropdown = document.getElementById('professorDropdown');
-            const displayProfId = document.getElementById('displayProfId');
-            const displayProfName = document.getElementById('displayProfName');
-            const prof_file_nb_make = document.getElementById('prof_file_nb_make');
-            const prof_file_nb_remove = document.getElementById('prof_file_nb_remove');
+            const profFileNbMake = document.getElementById('prof_file_nb_make');
+            const profFileNbRemove = document.getElementById('prof_file_nb_remove');
             const makeAdminBtn = document.getElementById('makeAdminBtn');
             const removeAdminBtn = document.getElementById('removeAdminBtn');
+            const selectedProfessorInfo = document.getElementById('selectedProfessorInfo');
 
-            // Get professor data from dropdown options
-            const getProfessorData = () => {
-                const selectedOption = professorDropdown.options[professorDropdown.selectedIndex];
-                const profFileNb = selectedOption.value;
-                const profName = selectedOption.text;
-                return { profFileNb, profName };
+            const updateSelectionInfo = (profFileNb, profLabel) => {
+                if (!selectedProfessorInfo) return;
+                if (profFileNb) {
+                    selectedProfessorInfo.textContent = `Selected Professor: ${profLabel}`;
+                } else {
+                    selectedProfessorInfo.textContent = 'Selected Professor: None';
+                }
             };
 
-            // Update display and hidden fields when dropdown changes
-            professorDropdown.addEventListener('change', function() {
-                const { profFileNb, profName } = getProfessorData();
-                
-                if (profFileNb) {
-                    displayProfId.textContent = profFileNb;
-                    displayProfName.textContent = profName.substring(0, profName.lastIndexOf('(') - 1);
-                    prof_file_nb_make.value = profFileNb;
-                    prof_file_nb_remove.value = profFileNb;
-                    makeAdminBtn.disabled = false;
-                    removeAdminBtn.disabled = false;
-                } else {
-                    displayProfId.textContent = '-';
-                    displayProfName.textContent = '-';
-                    prof_file_nb_make.value = '';
-                    prof_file_nb_remove.value = '';
-                    makeAdminBtn.disabled = true;
-                    removeAdminBtn.disabled = true;
-                }
-            });
+            if (professorDropdown) {
+                professorDropdown.addEventListener('change', function() {
+                    const profFileNb = this.value;
+                    const enabled = profFileNb !== '';
+                    const profLabel = this.options[this.selectedIndex]?.text || '';
+
+                    profFileNbMake.value = enabled ? profFileNb : '';
+                    profFileNbRemove.value = enabled ? profFileNb : '';
+                    if (makeAdminBtn) makeAdminBtn.disabled = !enabled;
+                    if (removeAdminBtn) removeAdminBtn.disabled = !enabled;
+                    updateSelectionInfo(profFileNb, profLabel);
+                });
+            }
         });
     </script>
 
