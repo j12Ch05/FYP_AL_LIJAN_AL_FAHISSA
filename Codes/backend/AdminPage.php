@@ -673,6 +673,11 @@
 
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
+            <?php if (!empty($_SESSION['admin_status_message'])): ?>
+                <div style="margin-bottom: 16px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; border-radius: 8px; font-weight: 600;">
+                    <?php echo htmlspecialchars($_SESSION['admin_status_message'], ENT_QUOTES, 'UTF-8'); unset($_SESSION['admin_status_message']); ?>
+                </div>
+            <?php endif; ?>
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="professorDropdown">Select Professor</label>
                 <select id="professorDropdown" name="professorDropdown" style="width: 100%;">
