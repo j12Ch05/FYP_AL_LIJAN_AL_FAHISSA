@@ -64,62 +64,80 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setRightToLeft(true);
     $sheet->setTitle('Course Export');
 
+    // Column widths
+    $sheet->getColumnDimension('A')->setWidth(3);
+    $sheet->getColumnDimension('B')->setWidth(4);
+    $sheet->getColumnDimension('C')->setWidth(4);
+    $sheet->getColumnDimension('D')->setWidth(7);
+    $sheet->getColumnDimension('E')->setWidth(8);
+    $sheet->getColumnDimension('F')->setWidth(14);
+    $sheet->getColumnDimension('G')->setWidth(12);
+    $sheet->getColumnDimension('H')->setWidth(14);
+    $sheet->getColumnDimension('I')->setWidth(16);
+    $sheet->getColumnDimension('J')->setWidth(18);
+    $sheet->getColumnDimension('K')->setWidth(20);
+
     // Page header
     $sheet->mergeCells('A1:K1');
     $sheet->setCellValue('A1', 'الجامعة اللبنانية - كلية العلوم الفرع الثاني');
     $sheet->mergeCells('A2:K2');
     $sheet->setCellValue('A2', 'إضـبـارة تـصـحـيـح الـمـسـابـقـات');
 
-    $sheet->getStyle('A1:K2')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1:K2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('A1:K2')->getFont()->setBold(true)->setSize(16);
+    $sheet->getStyle('A1:K2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getRowDimension(1)->setRowHeight(30);
+    $sheet->getRowDimension(2)->setRowHeight(24);
 
     // Professor metadata
     $sheet->setCellValue('H4', 'القسم:');
     $sheet->setCellValue('I4', $departmentName);
-    $sheet->setCellValue('H5', 'الاسم:');
-    $sheet->setCellValue('I5', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
-    $sheet->setCellValue('H6', 'رقم الملف:');
-    $sheet->setCellValue('I6', $professor['prof_file_nb']);
-    $sheet->setCellValue('H7', 'العام الجامعي:');
-    $sheet->setCellValue('I7', date('Y') . ' - ' . (date('Y') + 1));
-    $sheet->setCellValue('K4', 'الدورة:');
-    $sheet->setCellValue('K5', 'الأولى');
-    $sheet->setCellValue('K6', 'الفصل:');
-    $sheet->setCellValue('K7', 'الأول');
-    $sheet->setCellValue('F4', 'الامتحان:');
-    $sheet->setCellValue('G4', 'جزئي');
-    $sheet->setCellValue('F5', 'وضعه في الكلية:');
-    $sheet->setCellValue('G5', 'متعاقد بالساعة');
-    $sheet->setCellValue('H5', 'متفرغ');
-    $sheet->setCellValue('I5', 'ملاك');
-    $sheet->setCellValue('G6', $professor['prof_category'] === 'متعاقد بالساعة' ? 'X' : '');
-    $sheet->setCellValue('H6', $professor['prof_category'] === 'متفرغ' ? 'X' : '');
-    $sheet->setCellValue('I6', $professor['prof_category'] === 'ملاك' ? 'X' : '');
+    $sheet->mergeCells('I4:J4');
+    $sheet->setCellValue('J4', 'الدورة:');
+    $sheet->setCellValue('K4', 'الأولى');
 
-    $sheet->getStyle('F4:K7')->getFont()->setSize(11);
-    //$sheet->getStyle('F4:K7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-    $sheet->getStyle('G5:I6')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-    $sheet->getStyle('G5:I6')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->setCellValue('H5', 'العام الجامعي:');
+    $sheet->setCellValue('I5', date('Y') . ' - ' . (date('Y') + 1));
+    $sheet->setCellValue('J5', 'الفصل:');
+    $sheet->setCellValue('K5', 'الأول');
+
+    $sheet->setCellValue('J6', 'الإسم:');
+    $sheet->setCellValue('K6', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
+    $sheet->setCellValue('J7', 'رقم الملف:');
+    $sheet->setCellValue('K7', $professor['prof_file_nb']);
+
+    $sheet->setCellValue('F8', 'الامتحان:');
+    $sheet->setCellValue('G8', 'جزئي');
+    $sheet->setCellValue('F9', 'وضعه في الكلية:');
+    $sheet->setCellValue('G9', 'ملاك');
+    $sheet->setCellValue('H9', 'متفرغ');
+    $sheet->setCellValue('I9', 'متعاقد بالساعة');
+    $sheet->setCellValue('G10', $professor['prof_category'] === 'ملاك' ? 'X' : '');
+    $sheet->setCellValue('H10', $professor['prof_category'] === 'متفرغ' ? 'X' : '');
+    $sheet->setCellValue('I10', $professor['prof_category'] === 'متعاقد بالساعة' ? 'X' : '');
+
+    $sheet->getStyle('F8:I10')->getFont()->setSize(11);
+    $sheet->getStyle('F8:I10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('F8:I10')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
     // Table headers
-    $sheet->mergeCells('F9:F10');
-    $sheet->setCellValue('F9', 'المقرر');
-    $sheet->mergeCells('G9:H9');
-    $sheet->setCellValue('G9', 'إجازة');
-    $sheet->mergeCells('I9:J9');
-    $sheet->setCellValue('I9', 'ماستر');
+    $sheet->mergeCells('F12:F13');
+    $sheet->setCellValue('F12', 'المقرر');
+    $sheet->mergeCells('G12:H12');
+    $sheet->setCellValue('G12', 'إجازة');
+    $sheet->mergeCells('I12:J12');
+    $sheet->setCellValue('I12', 'ماستر');
 
-    $sheet->setCellValue('G10', 'مصحح أول');
-    $sheet->setCellValue('H10', 'مصحح ثان');
-    $sheet->setCellValue('I10', 'مصحح أول');
-    $sheet->setCellValue('J10', 'مصحح ثان');
+    $sheet->setCellValue('G13', 'مصحح أول');
+    $sheet->setCellValue('H13', 'مصحح ثان');
+    $sheet->setCellValue('I13', 'مصحح أول');
+    $sheet->setCellValue('J13', 'مصحح ثان');
 
-    $sheet->getStyle('F9:J10')->getFont()->setBold(true);
-    $sheet->getStyle('F9:J10')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-    $sheet->getRowDimension(9)->setRowHeight(25);
-    $sheet->getRowDimension(10)->setRowHeight(20);
+    $sheet->getStyle('F12:J13')->getFont()->setBold(true);
+    $sheet->getStyle('F12:J13')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getRowDimension(12)->setRowHeight(28);
+    $sheet->getRowDimension(13)->setRowHeight(22);
 
-    $startRow = 11;
+    $startRow = 14;
     $licenseCount = 0;
     $masterCount = 0;
     foreach ($courses as $index => $course) {
@@ -144,6 +162,10 @@ if (isset($_POST['exportExcel'])) {
         $sheet->setCellValue('F' . $endRow, 'لا توجد مقررات');
     }
 
+    $sheet->getStyle('F' . $startRow . ':J' . $endRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('F' . $startRow . ':F' . $endRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->getStyle('G' . $startRow . ':J' . $endRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
     $summaryRow = $endRow + 2;
     $sheet->setCellValue('F' . $summaryRow, 'المجموع');
     $sheet->setCellValue('G' . $summaryRow, count($courses));
@@ -151,12 +173,23 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('G' . ($summaryRow + 1), $licenseCount);
     $sheet->setCellValue('F' . ($summaryRow + 2), 'العدد الإجمالي (ماستر):');
     $sheet->setCellValue('G' . ($summaryRow + 2), $masterCount);
+    $sheet->setCellValue('F' . ($summaryRow + 3), 'عدد اللجان المقترحة (إجازة):');
+    $sheet->setCellValue('G' . ($summaryRow + 3), 1);
+    $sheet->setCellValue('F' . ($summaryRow + 4), 'عدد اللجان المقترحة (ماستر):');
+    $sheet->setCellValue('G' . ($summaryRow + 4), 1);
+    $sheet->setCellValue('F' . ($summaryRow + 5), 'التاريخ:');
+    $sheet->setCellValue('F' . ($summaryRow + 6), 'توقيع صاحب العلاقة');
+    $sheet->setCellValue('F' . ($summaryRow + 7), 'ختم وتوقيع رئيس القسم');
 
-    $sheet->getStyle('F9:J' . $endRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 2))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 4))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('F' . $summaryRow . ':F' . ($summaryRow + 7))->getFont()->setBold(true);
+    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 7))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getRowDimension($summaryRow + 5)->setRowHeight(18);
+    $sheet->getRowDimension($summaryRow + 6)->setRowHeight(18);
+    $sheet->getRowDimension($summaryRow + 7)->setRowHeight(18);
 
     foreach (range('A', 'K') as $columnID) {
-        $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        $sheet->getColumnDimension($columnID)->setAutoSize(false);
     }
 
     $fileName = 'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
