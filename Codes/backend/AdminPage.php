@@ -57,6 +57,16 @@
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
 
+    // Fetch all professors sorted alphabetically for admin edit dropdown
+    $sql_all_profs = "SELECT prof_file_nb, prof_first_name, prof_last_name FROM professor ORDER BY prof_first_name ASC, prof_last_name ASC";
+    $stmt_all = mysqli_prepare($conn, $sql_all_profs);
+    mysqli_stmt_execute($stmt_all);
+    $res_all = mysqli_stmt_get_result($stmt_all);
+    $all_professors = [];
+    while($row = mysqli_fetch_assoc($res_all)){
+        $all_professors[] = $row;
+    }
+    mysqli_stmt_close($stmt_all);
     
     mysqli_close($conn);
 ?>
@@ -677,35 +687,73 @@
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
                 <details class="dropdown-menu">
-                    <summary>Search Professor</summary>
-                        <form id="searchProfessor" action="searchProfessor.php" method="post">
-                            <div class="dropdown-content">
-                                <div class="form-group">
-                                    <label for="professorId">Enter the ID</label>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="text" id="professorId" name="professorId" placeholder="Enter the professor ID" style="width: 200px;">
-                                        <input type="submit" id="searchID" name="searchID" value="Search">
-                                        </div><br>
-                                        <?php if (isset($_SESSION['search_message'])): ?>
-                                            <p><?php echo $_SESSION['search_message']; unset($_SESSION['search_message']); ?></p>
-                                        <?php endif; ?>
-                                        <p>Professor ID: <?php echo $_SESSION['searched_prof_id'] ?? ''; ?></p><br>
-                                        <p>Professor Name: <?php echo $_SESSION['searched_prof_name'] ?? ''; ?></p><br>
-                                </div>
-                                <form action="MakeAdmin.php" method="post" style="display: inline;">
-                                    <input type="hidden" name="prof_file_nb" value="<?php echo $_SESSION['searched_prof_id'] ?? ''; ?>">
-                                    <input type="submit" class="btn" value="Make Admin">
-                                </form>
-                                <form action="RemoveAdmin.php" method="post" style="display: inline;">
-                                    <input type="hidden" name="prof_file_nb" value="<?php echo $_SESSION['searched_prof_id'] ?? ''; ?>">
-                                    <input type="submit" class="btn" value="Remove Admin">
-                                </form>
-                            </div>
+                    <summary>Select Professor</summary>
+                    <div class="dropdown-content">
+                        <div class="form-group">
+                            <label for="professorDropdown">Select Professor</label>
+                            <select id="professorDropdown" name="professorDropdown" style="width: 300px;">
+                                <option value="">-- Select a Professor --</option>
+                                <?php foreach($all_professors as $prof): ?>
+                                    <option value="<?php echo htmlspecialchars($prof['prof_file_nb']); ?>">
+                                        <?php echo htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name'] . ' (' . $prof['prof_file_nb'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: inline;">
+                            <input type="hidden" id="prof_file_nb_make" name="prof_file_nb" value="">
+                            <input type="submit" class="btn" value="Make Admin" id="makeAdminBtn" disabled>
                         </form>
+                        <form id="removeAdminForm" action="RemoveAdmin.php" method="post" style="display: inline;">
+                            <input type="hidden" id="prof_file_nb_remove" name="prof_file_nb" value="">
+                            <input type="submit" class="btn" value="Remove Admin" id="removeAdminBtn" disabled>
+                        </form>
+                    </div>
                 </details>
         </section>
 
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const professorDropdown = document.getElementById('professorDropdown');
+            const displayProfId = document.getElementById('displayProfId');
+            const displayProfName = document.getElementById('displayProfName');
+            const prof_file_nb_make = document.getElementById('prof_file_nb_make');
+            const prof_file_nb_remove = document.getElementById('prof_file_nb_remove');
+            const makeAdminBtn = document.getElementById('makeAdminBtn');
+            const removeAdminBtn = document.getElementById('removeAdminBtn');
+
+            // Get professor data from dropdown options
+            const getProfessorData = () => {
+                const selectedOption = professorDropdown.options[professorDropdown.selectedIndex];
+                const profFileNb = selectedOption.value;
+                const profName = selectedOption.text;
+                return { profFileNb, profName };
+            };
+
+            // Update display and hidden fields when dropdown changes
+            professorDropdown.addEventListener('change', function() {
+                const { profFileNb, profName } = getProfessorData();
+                
+                if (profFileNb) {
+                    displayProfId.textContent = profFileNb;
+                    displayProfName.textContent = profName.substring(0, profName.lastIndexOf('(') - 1);
+                    prof_file_nb_make.value = profFileNb;
+                    prof_file_nb_remove.value = profFileNb;
+                    makeAdminBtn.disabled = false;
+                    removeAdminBtn.disabled = false;
+                } else {
+                    displayProfId.textContent = '-';
+                    displayProfName.textContent = '-';
+                    prof_file_nb_make.value = '';
+                    prof_file_nb_remove.value = '';
+                    makeAdminBtn.disabled = true;
+                    removeAdminBtn.disabled = true;
+                }
+            });
+        });
+    </script>
 
     <script src="AdminPage.js">  
     </script>
