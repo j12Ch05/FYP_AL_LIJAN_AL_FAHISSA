@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyCoursePayload(data) {
         getEl('hiddenCourseCode').value = data.course_code;
         getEl('hiddenCourseLang').value = data.course_lang;
+        if (getEl('hiddenCourseMajor')) getEl('hiddenCourseMajor').value = data.major_id;
         getEl('resCourseCode').value = data.course_code;
         getEl('resCourseLang').value = data.course_lang;
         getEl('resCourseName').value = data.course_name;
@@ -111,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearSearchCourseResults() {
         getEl('hiddenCourseCode').value = '';
         getEl('hiddenCourseLang').value = '';
+        if (getEl('hiddenCourseMajor')) getEl('hiddenCourseMajor').value = '';
         getEl('resCourseCode').value = '';
         getEl('resCourseLang').value = 'E';
         getEl('resCourseName').value = '';
@@ -169,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fd.append('action', 'update');
             fd.append('course_code', getEl('hiddenCourseCode').value);
             fd.append('course_lang', getEl('hiddenCourseLang').value);
+            if (getEl('hiddenCourseMajor')) fd.append('old_major_id', getEl('hiddenCourseMajor').value);
             fd.append('course_name', getEl('resCourseName').value);
             fd.append('course_credit_nb', getEl('resCourseCredit').value);
             fd.append('course_hours_nb', getEl('resCourseHours').value);
@@ -218,7 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resDisableCourse.addEventListener('click', () => {
             const code = getEl('hiddenCourseCode').value;
             const lang = getEl('hiddenCourseLang').value;
-            if (!code) {
+            const major = getEl('hiddenCourseMajor') ? getEl('hiddenCourseMajor').value : '';
+
+            if (!code || !major) {
                 alert('Search for a course first.');
                 return;
             }
@@ -234,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fd.append('action', currentlyActive ? 'disable' : 'enable');
             fd.append('course_code', code);
             fd.append('course_lang', lang);
+            fd.append('major_id', major);
 
             fetch('editCourse.php', { method: 'POST', body: fd })
                 .then((r) => r.text().then((text) => ({ status: r.status, text })))
@@ -275,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resCancelSearch.addEventListener('click', () => {
             getEl('searchCode').value = '';
             getEl('searchCourseLang').value = 'E';
+            if (getEl('searchCourseMajor')) getEl('searchCourseMajor').selectedIndex = 0;
             clearSearchCourseResults();
         });
     }

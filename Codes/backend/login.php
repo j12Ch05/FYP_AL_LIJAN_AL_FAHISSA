@@ -42,11 +42,12 @@
             }
             if(empty($error)){
                 $_SESSION["email"] = $email;
+                $_SESSION["admin"] = $admin;
                 if($admin){
                     header("location: AdminPage.php");
                 }
                 else{
-                    header("location: ProfPage.html");
+                    header("location: ProfessorPage.php");
                 }
             }
             else{

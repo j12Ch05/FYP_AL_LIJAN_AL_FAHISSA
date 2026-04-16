@@ -50,9 +50,11 @@
                 FROM course c
                 LEFT JOIN correctors corr ON c.course_code = corr.course_code
                     AND c.course_lang = corr.course_lang
+                    AND c.major_id = corr.major_id
                     AND corr.session_nb = ?
                 LEFT JOIN teaching t ON c.course_code = t.course_code
                     AND c.course_lang = t.course_lang
+                    AND c.major_id = t.major_id
                     AND t.isActive = 1
                 LEFT JOIN major m ON m.major_id = c.major_id
                 ";

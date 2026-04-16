@@ -24,21 +24,22 @@
     if ($action === "disable") {
         $code = trim($_POST["course_code"] ?? "");
         $lang = $_POST["course_lang"] ?? "";
+        $major = $_POST["major_id"] ?? "";
 
-        if ($code === "" || $lang === "") {
-            json_out(["status" => "error", "message" => "Missing course code or language."]);
+        if ($code === "" || $lang === "" || $major === "") {
+            json_out(["status" => "error", "message" => "Missing course code, language, or major."]);
             mysqli_close($conn);
             exit();
         }
 
-        $sqlCourse = "UPDATE `course` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ?";
+        $sqlCourse = "UPDATE `course` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $stmtCourse = mysqli_prepare($conn, $sqlCourse);
         if (!$stmtCourse) {
             json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (disable course)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmtCourse, "ss", $code, $lang);
+        mysqli_stmt_bind_param($stmtCourse, "sss", $code, $lang, $major);
         $okCourse = mysqli_stmt_execute($stmtCourse);
         $courseErr = mysqli_stmt_error($stmtCourse);
         $courseAffected = mysqli_stmt_affected_rows($stmtCourse);
@@ -50,14 +51,14 @@
             exit();
         }
 
-        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ?";
+        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 0 WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $stmtTeaching = mysqli_prepare($conn, $sqlTeaching);
         if (!$stmtTeaching) {
             json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (disable teaching)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmtTeaching, "ss", $code, $lang);
+        mysqli_stmt_bind_param($stmtTeaching, "sss", $code, $lang, $major);
         $okTeaching = mysqli_stmt_execute($stmtTeaching);
         $teachingErr = mysqli_stmt_error($stmtTeaching);
         mysqli_stmt_close($stmtTeaching);
@@ -80,21 +81,22 @@
     if ($action === "enable") {
         $code = trim($_POST["course_code"] ?? "");
         $lang = $_POST["course_lang"] ?? "";
+        $major = $_POST["major_id"] ?? "";
 
-        if ($code === "" || $lang === "") {
-            json_out(["status" => "error", "message" => "Missing course code or language."]);
+        if ($code === "" || $lang === "" || $major === "") {
+            json_out(["status" => "error", "message" => "Missing course code, language, or major."]);
             mysqli_close($conn);
             exit();
         }
 
-        $sqlCourse = "UPDATE `course` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ?";
+        $sqlCourse = "UPDATE `course` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $stmtCourse = mysqli_prepare($conn, $sqlCourse);
         if (!$stmtCourse) {
             json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (enable course)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmtCourse, "ss", $code, $lang);
+        mysqli_stmt_bind_param($stmtCourse, "sss", $code, $lang, $major);
         $okCourse = mysqli_stmt_execute($stmtCourse);
         $courseErr = mysqli_stmt_error($stmtCourse);
         $courseAffected = mysqli_stmt_affected_rows($stmtCourse);
@@ -106,14 +108,14 @@
             exit();
         }
 
-        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ?";
+        $sqlTeaching = "UPDATE `teaching` SET `isActive` = 1 WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $stmtTeaching = mysqli_prepare($conn, $sqlTeaching);
         if (!$stmtTeaching) {
             json_out(["status" => "error", "message" => mysqli_error($conn) ?: "Prepare failed (enable teaching)."]);
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($stmtTeaching, "ss", $code, $lang);
+        mysqli_stmt_bind_param($stmtTeaching, "sss", $code, $lang, $major);
         $okTeaching = mysqli_stmt_execute($stmtTeaching);
         $teachingErr = mysqli_stmt_error($stmtTeaching);
         mysqli_stmt_close($stmtTeaching);
@@ -136,6 +138,7 @@
     if ($action === "update") {
         $code = trim($_POST["course_code"] ?? "");
         $lang = $_POST["course_lang"] ?? "";
+        $old_major = $_POST["old_major_id"] ?? "";
         $name = trim($_POST["course_name"] ?? "");
         $credit = (int) ($_POST["course_credit_nb"] ?? 0);
         $hours = (int) ($_POST["course_hours_nb"] ?? 0);
@@ -146,15 +149,15 @@
         $prof = $_POST["prof_file_nb"] ?? "";
         $uniYear = trim($_POST["uni_year"] ?? "");
 
-        if ($code === "" || $lang === "") {
-            json_out(["status" => "error", "message" => "Missing course code or language."]);
+        if ($code === "" || $lang === "" || $old_major === "") {
+            json_out(["status" => "error", "message" => "Missing course code, language, or original major."]);
             mysqli_close($conn);
             exit();
         }
 
         mysqli_begin_transaction($conn);
 
-        $q1 = "UPDATE `course` SET `course_name` = ?, `course_credit_nb` = ?, `course_hours_nb` = ?, `course_semester_nb` = ?, `course_level` = ?, `course_category` = ?, `major_id` = ? WHERE `course_code` = ? AND `course_lang` = ?";
+        $q1 = "UPDATE `course` SET `course_name` = ?, `course_credit_nb` = ?, `course_hours_nb` = ?, `course_semester_nb` = ?, `course_level` = ?, `course_category` = ?, `major_id` = ? WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $st1 = mysqli_prepare($conn, $q1);
         if (!$st1) {
             mysqli_rollback($conn);
@@ -164,7 +167,7 @@
         }
         mysqli_stmt_bind_param(
             $st1,
-            "siiisssss",
+            "siiissssss",
             $name,
             $credit,
             $hours,
@@ -173,14 +176,15 @@
             $category,
             $major,
             $code,
-            $lang
+            $lang,
+            $old_major
         );
         $ok1 = mysqli_stmt_execute($st1);
         $e1 = mysqli_stmt_error($st1);
         $affected1 = mysqli_stmt_affected_rows($st1);
         mysqli_stmt_close($st1);
 
-        $q2 = "UPDATE `teaching` SET `prof_file_nb` = ?, `uni_year` = ? WHERE `course_code` = ? AND `course_lang` = ?";
+        $q2 = "UPDATE `teaching` SET `major_id` = ?, `prof_file_nb` = ?, `uni_year` = ? WHERE `course_code` = ? AND `course_lang` = ? AND `major_id` = ?";
         $st2 = mysqli_prepare($conn, $q2);
         if (!$st2) {
             mysqli_rollback($conn);
@@ -188,20 +192,15 @@
             mysqli_close($conn);
             exit();
         }
-        mysqli_stmt_bind_param($st2, "ssss", $prof, $uniYear, $code, $lang);
+        mysqli_stmt_bind_param($st2, "ssssss", $major, $prof, $uniYear, $code, $lang, $old_major);
         $ok2 = mysqli_stmt_execute($st2);
         $e2 = mysqli_stmt_error($st2);
         $affected2 = mysqli_stmt_affected_rows($st2);
         mysqli_stmt_close($st2);
 
         if ($ok1 && $ok2) {
-            if ($affected1 === 0 && $affected2 === 0) {
-                mysqli_rollback($conn);
-                json_out(["status" => "error", "message" => "No matching course/teaching row found to update."]);
-            } else {
-                mysqli_commit($conn);
-                json_out(["status" => "success", "message" => "Course updated."]);
-            }
+            mysqli_commit($conn);
+            json_out(["status" => "success", "message" => "Course updated."]);
         } else {
             mysqli_rollback($conn);
             json_out(["status" => "error", "message" => $e1 ?: $e2 ?: "Update failed."]);

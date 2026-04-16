@@ -12,9 +12,10 @@
 
     $courseCode = trim($_POST["searchCode"] ?? "");
     $courseLang = $_POST["searchCourseLang"] ?? $_POST["courseLang"] ?? "";
+    $courseMajor = $_POST["searchCourseMajor"] ?? "";
 
-    if ($courseCode === "" || $courseLang === "") {
-        echo json_encode(["status" => "error", "message" => "Course code and language are required."]);
+    if ($courseCode === "" || $courseLang === "" || $courseMajor === "") {
+        echo json_encode(["status" => "error", "message" => "Course code, language, and major are required."]);
         mysqli_close($conn);
         exit();
     }
@@ -23,12 +24,12 @@
             c.course_level, c.course_semester_nb, c.major_id, c.course_category, c.isActive,
             p.prof_file_nb, t.uni_year
         FROM course c
-        JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang
-        JOIN professor p ON p.prof_file_nb = t.prof_file_nb
-        WHERE c.course_code = ? AND c.course_lang = ?";
+        LEFT JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id AND t.isActive = 1
+        LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+        WHERE c.course_code = ? AND c.course_lang = ? AND c.major_id = ?";
 
     $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "ss", $courseCode, $courseLang);
+    mysqli_stmt_bind_param($stmt, "sss", $courseCode, $courseLang, $courseMajor);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $row = mysqli_fetch_assoc($result);

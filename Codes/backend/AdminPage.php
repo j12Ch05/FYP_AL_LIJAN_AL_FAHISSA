@@ -42,9 +42,8 @@
         mysqli_stmt_close($stmt_c);
     } 
 
-    $sql_majors = "SELECT m.major_id, m.major_name FROM major m Join professor a on a.dep_id = m.dep_id where a.prof_email=? ";
+    $sql_majors = "SELECT m.major_id, m.major_name FROM major m where 1";
     $stmt_m = mysqli_prepare($conn, $sql_majors);
-    mysqli_stmt_bind_param($stmt_m,"s",$email);
     mysqli_stmt_execute($stmt_m);
     $res_m = mysqli_stmt_get_result($stmt_m);
 
@@ -269,11 +268,16 @@
                                     <option value="E">E</option>
                                     <option value="F">F</option>
                                 </select>
+                                <label for="searchCourseMajor">Course Major</label>
+                                <select name="searchCourseMajor" id="searchCourseMajor">
+                                    <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
+                                </select>
                                 <input type="button" id="searchCourseBtn" name="searchBtn" class="btn" value="Search">
                             </div><br>
 
                             <input type="hidden" id="hiddenCourseCode" name="course_code" value="">
                             <input type="hidden" id="hiddenCourseLang" name="course_lang" value="">
+                            <input type="hidden" id="hiddenCourseMajor" name="old_major_id" value="">
                             <input type="hidden" id="hiddenCourseIsActive" value="">
 
                             <label for="resCourseCode">Course Code: </label>

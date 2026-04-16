@@ -44,8 +44,8 @@
                    corr.third_corrector_file_nb as third_corrector,
                    t.uni_year,c.course_level
             FROM correctors corr
-            LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang
-            LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang
+            LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.major_id = corr.major_id
+            LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
             LEFT JOIN major m ON m.major_id = c.major_id
             WHERE m.dep_id = ? and corr.session_nb = ?";
 

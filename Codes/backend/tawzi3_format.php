@@ -41,7 +41,7 @@
                    m.major_name,
                    t.uni_year
             FROM teaching t
-            JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
+            JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
             JOIN major m ON c.major_id = m.major_id
             JOIN professor p ON t.prof_file_nb = p.prof_file_nb
             WHERE m.dep_id = ? AND t.isActive = 1";

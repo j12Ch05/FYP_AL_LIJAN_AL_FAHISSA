@@ -17,7 +17,7 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
                    corr.third_corrector_file_nb AS third_corrector,
                    corr.session_nb
             FROM correctors corr
-            LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang
+            LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
             LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
             WHERE c.major_id = ? AND c.course_level = ? AND corr.course_lang = ? AND corr.session_nb = ?";
 
@@ -104,32 +104,33 @@ if (isset($_POST["applyCorr"])) {
         $second_val = $second !== '' ? $second : null;
         $third_val = $third !== '' ? $third : null;
 
-        $sql_check = "SELECT COUNT(*) FROM correctors WHERE course_code = ? AND course_lang = ? AND session_nb = ?";
+        $major = $_SESSION["insert_correctors_filter"]["corrMajor"] ?? "";
+        $sql_check = "SELECT COUNT(*) FROM correctors WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ?";
         $stmt_check = mysqli_prepare($conn, $sql_check);
         if (!$stmt_check) {
             continue;
         }
-        mysqli_stmt_bind_param($stmt_check, "sss", $course_code, $lang, $session);
+        mysqli_stmt_bind_param($stmt_check, "ssss", $course_code, $lang, $major, $session);
         mysqli_stmt_execute($stmt_check);
         mysqli_stmt_bind_result($stmt_check, $count);
         mysqli_stmt_fetch($stmt_check);
         mysqli_stmt_close($stmt_check);
 
         if ($count > 0) {
-            $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND session_nb = ?";
+            $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ?";
             $stmt = mysqli_prepare($conn, $sql);
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "iisss", $second_val, $third_val, $course_code, $lang, $session);
+                mysqli_stmt_bind_param($stmt, "iissss", $second_val, $third_val, $course_code, $lang, $major, $session);
                 mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
                 $updatedRows++;
             }
         } else {
             $prof_file_nb = null;
-            $sql_prof = "SELECT prof_file_nb FROM teaching WHERE course_code = ? AND course_lang = ? AND isActive = 1 LIMIT 1";
+            $sql_prof = "SELECT prof_file_nb FROM teaching WHERE course_code = ? AND course_lang = ? AND major_id = ? AND isActive = 1 LIMIT 1";
             $stmt_prof = mysqli_prepare($conn, $sql_prof);
             if ($stmt_prof) {
-                mysqli_stmt_bind_param($stmt_prof, "ss", $course_code, $lang);
+                mysqli_stmt_bind_param($stmt_prof, "sss", $course_code, $lang, $major);
                 mysqli_stmt_execute($stmt_prof);
                 mysqli_stmt_bind_result($stmt_prof, $prof_file_nb);
                 mysqli_stmt_fetch($stmt_prof);
@@ -140,10 +141,10 @@ if (isset($_POST["applyCorr"])) {
                 continue;
             }
 
-            $sql = "INSERT INTO correctors (course_code, course_lang, prof_file_nb, second_corrector_file_nb, third_corrector_file_nb, session_nb) VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO correctors (course_code, course_lang, major_id, prof_file_nb, second_corrector_file_nb, third_corrector_file_nb, session_nb) VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $sql);
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "ssiiis", $course_code, $lang, $prof_file_nb, $second_val, $third_val, $session);
+                mysqli_stmt_bind_param($stmt, "sssiiis", $course_code, $lang, $major, $prof_file_nb, $second_val, $third_val, $session);
                 mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
                 $updatedRows++;
