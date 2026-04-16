@@ -9,7 +9,7 @@
 
     $email = $_SESSION["email"];
 
-    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_last_name,prof_father_name, prof_birth_date, prof_address, prof_phone, prof_email, dep_id FROM professor WHERE prof_email = ?";
+    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_last_name,prof_father_name, prof_birth_date, prof_address, prof_phone, prof_email, dep_id, prof_category FROM professor WHERE prof_email = ?";
     $stmt_prof = mysqli_prepare($conn, $sql_prof);
     mysqli_stmt_bind_param($stmt_prof, "s", $email);
     mysqli_stmt_execute($stmt_prof);
@@ -136,6 +136,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" disabled class="profileInput">
+                        <option value="متعاقد بالساعة" <?php echo ($professor['prof_category'] == 'متعاقد بالساعة') ? 'selected' : ''; ?>>متعاقد بالساعة</option>
+                        <option value="ملاك" <?php echo ($professor['prof_category'] == 'ملاك') ? 'selected' : ''; ?>>ملاك</option>
+                        <option value="متفرغ" <?php echo ($professor['prof_category'] == 'متفرغ') ? 'selected' : ''; ?>>متفرغ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Email Address</label>
                         <input type="email" name="email" value="<?php echo htmlspecialchars($professor['prof_email']); ?>" disabled class="profileInput">
                     </div>
@@ -232,7 +240,8 @@
                         .catch(error => {
                             console.error('Error:', error);
                             alert("An error occurred while saving changes.");
-                        });
+           
+                     });
                     }
                 });
             }

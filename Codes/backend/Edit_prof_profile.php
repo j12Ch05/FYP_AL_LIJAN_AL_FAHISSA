@@ -20,9 +20,16 @@ $birth_date = trim($_POST["birth_date"] ?? '');
 $address = trim($_POST["address"] ?? '');
 $phone = trim($_POST["phone"] ?? '');
 $department = trim($_POST["department"] ?? '');
+$category = trim($_POST["category"] ?? '');
 
-if (empty($first_name) || empty($last_name) || empty($birth_date) || empty($department)) {
+if (empty($first_name) || empty($last_name) || empty($birth_date) || empty($department) || empty($category)) {
     echo "Error: All required fields must be filled.";
+    exit();
+}
+
+$valid_categories = ['متعاقد بالساعة', 'ملاك', 'متفرغ'];
+if (!in_array($category, $valid_categories)) {
+    echo "Error: Invalid category selected.";
     exit();
 }
 
@@ -47,7 +54,8 @@ $sql_update = "UPDATE professor SET
               prof_birth_date = ?,
               prof_address = ?,
               prof_phone = ?,
-              dep_id = ?
+              dep_id = ?,
+              prof_category = ?
               WHERE prof_email = ?";
 
 $stmt = mysqli_prepare($conn, $sql_update);
@@ -56,7 +64,7 @@ if (!$stmt) {
     exit();
 }
 
-mysqli_stmt_bind_param($stmt, "ssssssss", $first_name, $last_name,$father_name, $birth_date_db, $address, $phone, $department, $email);
+mysqli_stmt_bind_param($stmt, "sssssssss", $first_name, $last_name,$father_name, $birth_date_db, $address, $phone, $department, $category, $email);
 
 if (mysqli_stmt_execute($stmt)) {
     echo "Profile updated successfully!";
