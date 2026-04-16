@@ -264,7 +264,7 @@
             $sheet->setCellValue('C'.$cell , $textC);
             $sheet->setCellValue('D'.$cell , $textD);
             $sheet->setCellValue('E'.$cell , $textE);
-            $sheet->setCellValue('F'.$cell , (int)$profData[0]);
+            $sheet->setCellValue('F'.$cell , (int)count($linesE));
             $alignTop = \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP;
             $sheet->getStyle('C'.$cell)->getAlignment()->setWrapText(true)->setVertical($alignTop);
             $sheet->getStyle('D'.$cell)->getAlignment()->setWrapText(true)->setVertical($alignTop);

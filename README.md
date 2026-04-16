@@ -36,25 +36,26 @@ Jean C. Chamoun
 
 - Log in Page backend(Checked)
 - Professor profile page(fetch data,edit data)(check with the supervisor)
-- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)(Check with the supervisor)
-- Admin Professors Page(fetching data from a specific query)(check with the team)
-- Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))(check with the team)
-- Edit Admin Page(check with the team)
+- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)
+- Admin Professors Page(fetching data from a specific query)
+- Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
+- Edit Admin Page(to test)
 
 ### Jean's part:
 
-- Sign up Page backend(Finished this part sends the data into php and modified db)(Checked)
-- Forgot Password backend(Finished this part sends the data to a receiver from my creation for an ul account yet smtp gmail)(Checked)
+- Sign up Page backend(Checked)
+- Forgot Password backend(Checked)
 - Admin Courses Page
 
-  * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(Checked)
-  * Search Course (fetch data using code)(Check with the supervisor)
-  * view Courses(fetch all possible data using a specific query)(Check with the supervisor)
+  * Add Course (send data , check existance)(Finished this part it sends the course data to the db and fill table course and teaching)(add all majors for adding courses for other major)
+  * Search Course (fetch data using code)(Checked)
+  * view Courses(fetch all possible data using a specific query)(Checked)
 - Admin Correctors Page (fetch data and send data)
 
-  * Insert Correctors(Check with the supervisor)
-  * View Correctors(Check with the supervisor)
-  * Excel format(format2,format3)(Check with the team)
+  * Insert Correctors(Checked)
+  * Insert Numbers
+  * View Correctors(Checked)
+  * Excel format(format2,format3)(format 3 with number filled)
 
 ## Report:
 
