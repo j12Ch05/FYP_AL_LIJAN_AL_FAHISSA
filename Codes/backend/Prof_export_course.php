@@ -17,7 +17,7 @@ if (isset($_POST['exportExcel'])) {
 
     $email = $_SESSION['email'];
 
-    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_father_name, prof_last_name, dep_id FROM professor WHERE prof_email = ?";
+    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_father_name, prof_last_name, prof_category, dep_id FROM professor WHERE prof_email = ?";
     $stmt_prof = mysqli_prepare($conn, $sql_prof);
     mysqli_stmt_bind_param($stmt_prof, 's', $email);
     mysqli_stmt_execute($stmt_prof);
@@ -71,7 +71,7 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('A2', 'إضـبـارة تـصـحـيـح الـمـسـابـقـات');
 
     $sheet->getStyle('A1:K2')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1:K2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('A1:K2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
     // Professor metadata
     $sheet->setCellValue('H4', 'القسم:');
@@ -89,11 +89,17 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('F4', 'الامتحان:');
     $sheet->setCellValue('G4', 'جزئي');
     $sheet->setCellValue('F5', 'وضعه في الكلية:');
-    $sheet->setCellValue('G5', 'ملاك');
-    $sheet->setCellValue('F6', 'X');
+    $sheet->setCellValue('G5', 'متعاقد بالساعة');
+    $sheet->setCellValue('H5', 'متفرغ');
+    $sheet->setCellValue('I5', 'ملاك');
+    $sheet->setCellValue('G6', $professor['prof_category'] === 'متعاقد بالساعة' ? 'X' : '');
+    $sheet->setCellValue('H6', $professor['prof_category'] === 'متفرغ' ? 'X' : '');
+    $sheet->setCellValue('I6', $professor['prof_category'] === 'ملاك' ? 'X' : '');
 
     $sheet->getStyle('F4:K7')->getFont()->setSize(11);
     $sheet->getStyle('F4:K7')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $sheet->getStyle('G5:I6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('G5:I6')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
     // Table headers
     $sheet->mergeCells('F9:F10');
@@ -114,13 +120,21 @@ if (isset($_POST['exportExcel'])) {
     $sheet->getRowDimension(10)->setRowHeight(20);
 
     $startRow = 11;
+    $licenseCount = 0;
+    $masterCount = 0;
     foreach ($courses as $index => $course) {
         $row = $startRow + $index;
-        $sheet->setCellValue('F' . $row, $course['course_code'] . ' (' . $course['course_name'] . ')');
+        $sheet->setCellValue('F' . $row, $course['course_code'] . ' (' . $course['course_lang'] . ')');
         $sheet->setCellValue('G' . $row, '');
         $sheet->setCellValue('H' . $row, '');
         $sheet->setCellValue('I' . $row, '');
         $sheet->setCellValue('J' . $row, '');
+
+        if (in_array($course['course_level'], ['L1', 'L2', 'L3'], true)) {
+            $licenseCount++;
+        } elseif ($course['course_level'] === 'M1') {
+            $masterCount++;
+        }
     }
 
     if (count($courses) > 0) {
@@ -134,9 +148,9 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('F' . $summaryRow, 'المجموع');
     $sheet->setCellValue('G' . $summaryRow, count($courses));
     $sheet->setCellValue('F' . ($summaryRow + 1), 'العدد الإجمالي (إجازة):');
-    $sheet->setCellValue('G' . ($summaryRow + 1), count($courses));
+    $sheet->setCellValue('G' . ($summaryRow + 1), $licenseCount);
     $sheet->setCellValue('F' . ($summaryRow + 2), 'العدد الإجمالي (ماستر):');
-    $sheet->setCellValue('G' . ($summaryRow + 2), count($courses));
+    $sheet->setCellValue('G' . ($summaryRow + 2), $masterCount);
 
     $sheet->getStyle('F9:J' . $endRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 2))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
