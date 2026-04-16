@@ -674,7 +674,8 @@
         <section id="content-edit-admins" class="tab-content">
             <h1>Edit Admins</h1>
             <?php if (!empty($_SESSION['admin_status_message'])): ?>
-                <div style="margin-bottom: 16px; padding: 12px 14px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; border-radius: 8px; font-weight: 600;">
+                <?php $isError = strpos($_SESSION['admin_status_message'], 'Error:') === 0; ?>
+                <div style="margin-bottom: 16px; padding: 12px 14px; background: <?php echo $isError ? '#fef2f2' : '#f0fdf4'; ?>; border: 1px solid <?php echo $isError ? '#fca5a5' : '#86efac'; ?>; color: <?php echo $isError ? '#dc2626' : '#166534'; ?>; border-radius: 8px; font-weight: 600;">
                     <?php echo htmlspecialchars($_SESSION['admin_status_message'], ENT_QUOTES, 'UTF-8'); unset($_SESSION['admin_status_message']); ?>
                 </div>
             <?php endif; ?>
