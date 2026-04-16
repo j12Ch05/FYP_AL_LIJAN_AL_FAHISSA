@@ -683,11 +683,13 @@
                 <label for="professorDropdown">Select Professor</label>
                 <select id="professorDropdown" name="professorDropdown" style="width: 100%;">
                     <option value="">-- Select a Professor --</option>
-                    <?php foreach($all_professors as $prof): ?>
-                        <option value="<?php echo htmlspecialchars($prof['prof_file_nb']); ?>">
-                            <?php echo htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name'] . ' (' . $prof['prof_file_nb'] . ')'); ?>
-                        </option>
-                    <?php endforeach; ?>
+                     <?php
+                                        //Preparing the dropdown list for choosing the name of the professor
+                                        foreach($_SESSION["professors"] as $file=>$name){
+                                            echo "<option value='$file'>$name</option>";
+                                        }
+    
+                                   ?>
                 </select>
             </div>
             <div id="selectedProfessorInfo" style="margin-bottom: 20px; padding: 12px; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600; color: #1f2937; font-size: 16px;">Selected Professor: None</div>
