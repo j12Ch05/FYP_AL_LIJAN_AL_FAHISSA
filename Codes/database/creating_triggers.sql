@@ -179,8 +179,16 @@ BEGIN
             END
         WHERE course_code = NEW.course_code
           AND course_lang = NEW.course_lang
-          AND major_id    = NEW.major_id
+          AND major_id    = OLD.major_id
           AND session_nb IN ('sem1', 'sem2');
+    END IF;
+
+    IF OLD.major_id <> NEW.major_id THEN
+        UPDATE correctors
+        SET major_id = NEW.major_id
+        WHERE course_code = NEW.course_code
+          AND course_lang = NEW.course_lang
+          AND major_id    = OLD.major_id;
     END IF;
 END$$
 

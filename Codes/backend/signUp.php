@@ -176,7 +176,7 @@
                 <select name="category" id="prof_category" class="dropdown-select">
                     <option value="متعاقد بالساعة">متعاقد بالساعة</option>
                     <option value="متفرغ">متفرغ</option>
-                    <option value="الملاك"> الملاك</option>
+                    <option value="ملاك"> ملاك</option>
                 </select>
             </div>
 

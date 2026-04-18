@@ -9,6 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $prof_file_nb = trim($_POST["prof_file_nb"] ?? '');
+$_SESSION["current_admin"] = $prof_file_nb;
 
 if ($prof_file_nb === '') {
     $_SESSION['admin_status_message'] = 'Please select a professor first.';

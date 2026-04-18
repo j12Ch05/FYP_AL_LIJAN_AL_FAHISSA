@@ -10,7 +10,7 @@ CREATE TABLE professor (
   prof_password VARCHAR(255) NOT NULL,
   dep_id VARCHAR(7) NOT NULL,
   isAdmin BOOLEAN DEFAULT FALSE,
-  prof_category varchar(30) DEFAULT 'متعاقد بالساعة',
+  prof_category ENUM('متعاقد بالساعة','متفرغ','ملاك') DEFAULT 'متعاقد بالساعة',
   reset_date datetime DEFAULT NULL,
   PRIMARY KEY (prof_file_nb)
 );
@@ -38,7 +38,7 @@ CREATE TABLE course (
   course_hours_nb INT NOT NULL,
   course_lang VARCHAR(2) NOT NULL,
   course_semester_nb INT NOT NULL,
-  course_level VARCHAR(3) NOT NULL,
+  course_level ENUM('L1','L2','L3','M1') NOT NULL,
   course_category ENUM('common', 'optional', 'mandatory') NOT NULL,
   major_id VARCHAR(6) NOT NULL,
   isActive BOOLEAN DEFAULT TRUE,
@@ -59,7 +59,7 @@ CREATE TABLE teaching (
   CONSTRAINT fk_teaching_course 
     FOREIGN KEY (course_code, course_lang, major_id) 
     REFERENCES course (course_code, course_lang, major_id) 
-    ON DELETE CASCADE,
+    ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_teaching_prof 
     FOREIGN KEY (prof_file_nb) REFERENCES professor (prof_file_nb) 
     ON DELETE CASCADE

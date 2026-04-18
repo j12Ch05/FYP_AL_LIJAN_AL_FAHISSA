@@ -9,38 +9,81 @@
     }
     
     $email = $_SESSION["email"];
-    $sql_professors = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name, p.prof_birth_date, p.prof_email, p.prof_phone, d.dep_name, p.isAdmin, p.prof_category FROM professor p JOIN department d ON p.dep_id = d.dep_id WHERE p.dep_id = (SELECT dep_id FROM professor WHERE prof_email = ?)";
-    $stmt_p = mysqli_prepare($conn, $sql_professors);
-    mysqli_stmt_bind_param($stmt_p,"s",$email);
-    mysqli_stmt_execute($stmt_p);
-    $res_p = mysqli_stmt_get_result($stmt_p);
 
-    $professors = [];
-    while($row = mysqli_fetch_assoc($res_p)){
-        $professors[] = $row;
+    //Check if stills admin
+    $sql_admin = "SELECT isAdmin,prof_file_nb FROM professor WHERE prof_email = ?";
+    $stmt_a = mysqli_prepare($conn,$sql_admin);
+    mysqli_stmt_bind_param($stmt_a,"s",$email);
+    mysqli_stmt_execute($stmt_a);
+
+    $res_a = mysqli_stmt_get_result($stmt_a);
+    $admin = mysqli_fetch_assoc($res_a);
+
+    //If not admin
+    if(!$admin || $admin["isAdmin"]!=1){
+        header("location: login.php");
+        exit;
     }
-    mysqli_stmt_close($stmt_p);
 
-    $professors_full = $professors;
+    //handle if the admin removed himself
+    if($_SERVER['REQUEST_METHOD'] == 'POST'){
+
+        $currentAdmin = $_SESSION["current_admin"];
+        $adminFile = $admin["prof_file_nb"];
+
+        if($currentAdmin == $adminFile){
+            header("location: login.php");
+            exit;
+        }
+        
+    }
+
+    $sql_all_profs = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name,p.prof_birth_date, p.prof_email, p.prof_phone, p.isAdmin, p.prof_category FROM professor p JOIN professor a ON a.dep_id = p.dep_id where a.prof_email = ? ";
+    $stmt_all = mysqli_prepare($conn, $sql_all_profs);
+    mysqli_stmt_bind_param($stmt_all,'s',$email);
+    mysqli_stmt_execute($stmt_all);
+    $res_all = mysqli_stmt_get_result($stmt_all);
+    $all_professors = [];
+    while($row = mysqli_fetch_assoc($res_all)){
+        $all_professors[] = $row;
+    }
+    mysqli_stmt_close($stmt_all);
+
+
+    $professors_full = $all_professors;
     $professors = [];
     foreach($professors_full as $prof){
         $professors[$prof["prof_file_nb"]] = $prof["prof_first_name"] . " " . $prof["prof_last_name"];
     }
 
-    // Fetch courses for each professor
-    foreach($professors_full as &$prof){
-        $sql_courses = "SELECT c.course_name, c.course_lang FROM course c JOIN teaching t ON c.course_code = t.course_code AND c.course_lang = t.course_lang WHERE t.prof_file_nb = ?";
-        $stmt_c = mysqli_prepare($conn, $sql_courses);
-        mysqli_stmt_bind_param($stmt_c, "i", $prof['prof_file_nb']);
-        mysqli_stmt_execute($stmt_c);
-        $res_c = mysqli_stmt_get_result($stmt_c);
-        $courses = [];
-        while($row_c = mysqli_fetch_assoc($res_c)){
-            $courses[] = $row_c['course_name'] . ' (' . $row_c['course_lang'] . ')';
+    //this query to fetch the course of the professor for the view professor
+    $sql_teaching = "SELECT t.course_code,t.course_lang,t.prof_file_nb
+                     FROM teaching t
+                     JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+                     JOIN professor a ON a.dep_id = p.dep_id
+                     WHERE a.prof_email = ? and t.isActive = 1";  
+    $stmt_t = mysqli_prepare($conn,$sql_teaching);
+    mysqli_stmt_bind_param($stmt_t,"s",$email);
+    mysqli_stmt_execute($stmt_t);
+    $res_t = mysqli_stmt_get_result($stmt_t);
+    $teaching_courses = [];
+    while($row = mysqli_fetch_assoc($res_t)){
+        $course = $row["course_code"] . " (".$row["course_lang"].")";
+        if (!isset($teaching_courses[$row["prof_file_nb"]])) {
+            $teaching_courses[$row["prof_file_nb"]] = [];
         }
-        $prof['courses'] = implode(', ', $courses);
-        mysqli_stmt_close($stmt_c);
-    } 
+        if (!in_array($course, $teaching_courses[$row["prof_file_nb"]])) {
+            $teaching_courses[$row["prof_file_nb"]][] = $course;
+        }
+    }
+    
+    foreach($professors_full as &$prof){
+        $prof["courses"] = ""; // Initialize default value
+        if(isset($teaching_courses[$prof["prof_file_nb"]])){
+            $prof["courses"] = implode(", ", $teaching_courses[$prof["prof_file_nb"]]);
+        }
+    }
+    unset($prof); // Clean up reference
 
     $sql_majors = "SELECT m.major_id, m.major_name FROM major m where 1";
     $stmt_m = mysqli_prepare($conn, $sql_majors);
@@ -56,17 +99,7 @@
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
 
-    // Fetch all professors sorted alphabetically for admin edit dropdown
-    $sql_all_profs = "SELECT prof_file_nb, prof_first_name, prof_last_name FROM professor ORDER BY prof_first_name ASC, prof_last_name ASC";
-    $stmt_all = mysqli_prepare($conn, $sql_all_profs);
-    mysqli_stmt_execute($stmt_all);
-    $res_all = mysqli_stmt_get_result($stmt_all);
-    $all_professors = [];
-    while($row = mysqli_fetch_assoc($res_all)){
-        $all_professors[] = $row;
-    }
-    mysqli_stmt_close($stmt_all);
-    
+
     mysqli_close($conn);
 ?>
 
@@ -123,29 +156,29 @@
 
         <section id="content-professors" class="tab-content">
             <h1>Professors</h1>
-            <details class="dropdown-menu">
-                <summary>View All Professors</summary>
-                <div class="dropdown-content">
-                    <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                        <label for="professorSearchBy">Filter by</label>
-                        <select id="professorSearchBy" name="professorSearchBy" style="width: 220px;">
-                            <option value="all">All</option>
-                            <option value="id">ID</option>
-                            <option value="name">Name</option>
-                            <option value="department">Department</option>
-                            <option value="course">Course</option>
-                        </select>
-                        <input type="text" id="professorFilterValue" placeholder="Enter filter value" style="width: 260px;">
-                        <button type="button" id="applyProfessorFilter" class="btn">Apply Filter</button>
-                        <button type="button" id="clearProfessorFilter" class="btn">Clear</button>
-                    </div>
+            <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <label for="professorSearchBy">Filter by</label>
+                <select id="professorSearchBy" name="professorSearchBy" style="width: 220px;">
+                    <option value="all">All</option>
+                    <option value="id">ID</option>
+                    <option value="name">Name</option>
+                    <option value="course">Course</option>
+                    <option value="category">Category</option>
+                </select>
+                <input type="text" id="professorFilterValue" placeholder="Enter filter value" style="width: 260px;" disabled>
+                <select id="professorCategoryFilter" style="width: 260px; display: none;">
+                    <option value="متعاقد بالساعة">متعاقد بالساعة</option>
+                    <option value="متفرغ">متفرغ</option>
+                    <option value="ملاك">ملاك</option>
+                </select>
+                <button type="button" id="clearProfessorFilter" class="btn">Clear</button>
+            </div>
                     <div class="table-container" style="margin-top: 10px;">
                         <table id="professorsTable" border="1" style="width:100%;">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
-                                    <th>Department</th>
                                     <th>Email</th>
                                     <th>Phone</th>
                                     <th>Birth Date</th>
@@ -159,26 +192,26 @@
                                 <?php
                                 foreach($professors_full as $prof){
                                     $role = $prof['isAdmin'] ? 'Admin' : 'Professor';
-                                    $category = htmlspecialchars($prof['prof_category']);
+                                    $category = !empty($prof['prof_category']) ? htmlspecialchars($prof['prof_category']) : 'متعاقد بالساعة';
+                                    $isCurrentUser = ($prof['prof_email'] === $email);
+                                    $removeBtn = $isCurrentUser ? "<button type='button' class='btn' disabled style='background-color:#ccc;cursor:not-allowed;'>Current Admin</button>" : "<button type='button' class='remove-prof-btn btn' data-prof-id='" . htmlspecialchars($prof['prof_file_nb']) . "'>Remove</button>";
+
                                     echo "<tr data-prof-id='" . htmlspecialchars($prof['prof_file_nb']) . "'>
                                         <td class='prof-id'>" . htmlspecialchars($prof['prof_file_nb']) . "</td>
                                         <td class='prof-name'>" . htmlspecialchars($prof['prof_first_name'] . ' ' . $prof['prof_last_name']) . "</td>
-                                        <td class='prof-department'>" . htmlspecialchars($prof['dep_name']) . "</td>
                                         <td class='prof-email'>" . htmlspecialchars($prof['prof_email']) . "</td>
                                         <td class='prof-phone'>" . htmlspecialchars($prof['prof_phone']) . "</td>
                                         <td class='prof-birth'>" . htmlspecialchars($prof['prof_birth_date']) . "</td>
                                         <td class='prof-role'>" . htmlspecialchars($role) . "</td>
                                         <td class='prof-category'>" . $category . "</td>
-                                        <td class='prof-courses'>" . htmlspecialchars($prof['courses']) . "</td>
-                                        <td><button type='button' class='remove-prof-btn btn' data-prof-id='" . htmlspecialchars($prof['prof_file_nb']) . "'>Remove</button></td>
+                                        <td class='prof-courses'>" . htmlspecialchars($prof["courses"]) . "</td>
+                                        <td>$removeBtn</td>
                                     </tr>";
                                 }
                                 ?>
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </details>
         </section>
 
         <section id="content-courses" class="tab-content">
@@ -494,6 +527,7 @@
                                         <tr>
                                             <th>Course Code</th>
                                             <th>Course Name</th>
+                                            <th>Language</th>
                                             <th>First Corrector</th>
                                             <th>Second Corrector</th>
                                             <th>Third Corrector</th>
@@ -508,12 +542,14 @@
                                                 $enabled = isset($_POST["editCorr"]) ? "" : "disabled";
                                                 $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
                                                 $courseCode = $r["course_code"];
+                                                $courseLang = $r["course_lang"];
                                                 $firstCorrectorId = isset($r["first_corrector_id"]) ? (string)$r["first_corrector_id"] : null;
                                                 $secondSelected = isset($r["second_corrector"]) ? (string)$r["second_corrector"] : "";
                                                 $thirdSelected = isset($r["third_corrector"]) ? (string)$r["third_corrector"] : "";
                                                 echo "<tr>";
                                                 echo "<td>" . $courseCode . "</td>";
                                                 echo "<td>" . $r["course_name"] . "</td>"; 
+                                                echo "<td>" . $r["course_lang"] . "</td>"; 
                                                 echo "<td>" . $profName . "</td>";
                                                 echo "<td><select name='second_corrector[" . $courseCode . "]' $enabled  class='corrector-select'>";
                                                 if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
@@ -689,8 +725,8 @@
                     <option value="">-- Select a Professor --</option>
                      <?php
                                         //Preparing the dropdown list for choosing the name of the professor
-                                        foreach($_SESSION["professors"] as $file=>$name){
-                                            echo "<option value='$file'>$name</option>";
+                                         foreach($all_professors as $prof){
+                                            echo "<option value='".htmlspecialchars($prof['prof_file_nb'])."'>".htmlspecialchars($prof['prof_first_name']." ".$prof['prof_last_name'])."</option>";
                                         }
     
                                    ?>
@@ -713,6 +749,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Edit Admins Logic ---
             const professorDropdown = document.getElementById('professorDropdown');
             const profFileNbMake = document.getElementById('prof_file_nb_make');
             const profFileNbRemove = document.getElementById('prof_file_nb_remove');
@@ -722,11 +759,7 @@
 
             const updateSelectionInfo = (profFileNb, profLabel) => {
                 if (!selectedProfessorInfo) return;
-                if (profFileNb) {
-                    selectedProfessorInfo.textContent = `Selected Professor: ${profLabel}`;
-                } else {
-                    selectedProfessorInfo.textContent = 'Selected Professor: None';
-                }
+                selectedProfessorInfo.textContent = profFileNb ? `Selected Professor: ${profLabel}` : 'Selected Professor: None';
             };
 
             if (professorDropdown) {
@@ -735,20 +768,18 @@
                     const enabled = profFileNb !== '';
                     const profLabel = this.options[this.selectedIndex]?.text || '';
 
-                    profFileNbMake.value = enabled ? profFileNb : '';
-                    profFileNbRemove.value = enabled ? profFileNb : '';
+                    if (profFileNbMake) profFileNbMake.value = enabled ? profFileNb : '';
+                    if (profFileNbRemove) profFileNbRemove.value = enabled ? profFileNb : '';
                     if (makeAdminBtn) makeAdminBtn.disabled = !enabled;
                     if (removeAdminBtn) removeAdminBtn.disabled = !enabled;
                     updateSelectionInfo(profFileNb, profLabel);
                 });
             }
-        });
-    </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+            // --- Professors Filter Logic ---
             const filterBy = document.getElementById('professorSearchBy');
             const filterInput = document.getElementById('professorFilterValue');
+            const categorySelect = document.getElementById('professorCategoryFilter');
             const applyBtn = document.getElementById('applyProfessorFilter');
             const clearBtn = document.getElementById('clearProfessorFilter');
             const tableBody = document.querySelector('#professorsTable tbody');
@@ -758,7 +789,13 @@
             const filterRows = () => {
                 if (!tableBody) return;
                 const criteria = filterBy ? filterBy.value : 'all';
-                const term = normalize(filterInput ? filterInput.value.trim() : '');
+                let term = '';
+                if (criteria === 'category') {
+                    term = categorySelect ? normalize(categorySelect.value) : '';
+                } else {
+                    term = normalize(filterInput ? filterInput.value.trim() : '');
+                }
+
                 Array.from(tableBody.rows).forEach((row) => {
                     let show = true;
                     if (criteria !== 'all' && term !== '') {
@@ -769,8 +806,8 @@
                             case 'name':
                                 show = normalize(row.querySelector('.prof-name')?.textContent).includes(term);
                                 break;
-                            case 'department':
-                                show = normalize(row.querySelector('.prof-department')?.textContent).includes(term);
+                            case 'category':
+                                show = normalize(row.querySelector('.prof-category')?.textContent) === term;
                                 break;
                             case 'course':
                                 show = normalize(row.querySelector('.prof-courses')?.textContent).includes(term);
@@ -784,23 +821,45 @@
             };
 
             const updateFilterInputState = () => {
-                if (!filterBy || !filterInput) return;
-                filterInput.disabled = filterBy.value === 'all';
+                if (!filterBy || !filterInput || !categorySelect) return;
+                
                 if (filterBy.value === 'all') {
+                    filterInput.style.display = 'inline-block';
+                    filterInput.disabled = true;
                     filterInput.value = '';
+                    categorySelect.style.display = 'none';
+                } else if (filterBy.value === 'category') {
+                    filterInput.style.display = 'none';
+                    categorySelect.style.display = 'inline-block';
+                } else {
+                    filterInput.style.display = 'inline-block';
+                    filterInput.disabled = false;
+                    categorySelect.style.display = 'none';
+                    
+                    if (filterBy.value === 'name') {
+                        filterInput.placeholder = 'Enter professor name';
+                        filterInput.dir = 'auto'; 
+                    } else if (filterBy.value === 'course') {
+                        filterInput.placeholder = 'Enter course name';
+                        filterInput.dir = 'ltr';
+                    } else if (filterBy.value === 'id') {
+                        filterInput.placeholder = 'Enter professor ID';
+                        filterInput.dir = 'ltr';
+                    }
                 }
-                filterInput.placeholder = filterBy.value === 'department'
-                    ? 'Enter department name'
-                    : filterBy.value === 'course'
-                        ? 'Enter course name'
-                        : filterBy.value === 'id'
-                            ? 'Enter professor ID'
-                            : 'Enter search text';
             };
 
             if (filterBy) {
                 filterBy.addEventListener('change', updateFilterInputState);
                 updateFilterInputState();
+            }
+
+            if (filterInput) {
+                filterInput.addEventListener('input', filterRows);
+            }
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', filterRows);
             }
 
             if (applyBtn) {
@@ -816,22 +875,47 @@
                 });
             }
 
+            // --- Remove Professor Logic ---
             if (tableBody) {
                 tableBody.addEventListener('click', function (event) {
                     const button = event.target.closest('.remove-prof-btn');
                     if (!button) return;
                     const row = button.closest('tr');
                     const profId = button.dataset.profId || '';
-                    const profName = row?.querySelector('.prof-name')?.textContent || '';
-                    if (confirm(`Remove ${profName.trim()} (${profId}) from the table?`)) {
-                        row?.remove();
+                    const profName = (row?.querySelector('.prof-name')?.textContent || '').trim();
+                    const courses = (row?.querySelector('.prof-courses')?.textContent || '').trim();
+
+                    if (courses !== '') {
+                        alert(`Cannot remove ${profName} (${profId}): This professor is still assigned to courses. Please re-assign these courses first.`);
+                        return;
+                    }
+
+                    if (confirm(`Are you sure you want to completely delete ${profName} (${profId}) from the database? This action cannot be undone.`)) {
+                        const fd = new FormData();
+                        fd.append('prof_file_nb', profId);
+                        fetch('removeProfessor.php', { method: 'POST', body: fd })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    alert(data.message || 'Professor deleted.');
+                                    row?.remove();
+                                    const opts = document.querySelectorAll(`option[value="${profId}"]`);
+                                    opts.forEach(opt => opt.remove());
+                                } else {
+                                    alert(data.message || 'Failed to delete professor.');
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error deleting professor:', err);
+                                alert('An error occurred while deleting the professor.');
+                            });
                     }
                 });
             }
         });
     </script>
 
-    <script src="AdminPage.js">  
+    <script src="AdminPage.js?v=1.1">  
     </script>
 
     <?php

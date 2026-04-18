@@ -10,7 +10,7 @@ function isAjaxRequest(): bool
 
 function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string $language, string $session): array
 {
-    $sql_fetch = "SELECT corr.course_code, c.course_name,
+    $sql_fetch = "SELECT corr.course_code, c.course_name,corr.course_lang,
                    p.prof_file_nb AS first_corrector_id,
                    p.prof_first_name, p.prof_last_name,
                    corr.second_corrector_file_nb AS second_corrector,

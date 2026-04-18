@@ -130,6 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (searchCourseBtn && searchCourseForm) {
+        searchCourseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            searchCourseBtn.click();
+        });
+
         searchCourseBtn.addEventListener('click', () => {
             const formData = new FormData(searchCourseForm);
             formData.set('searchBtn', 'true');
@@ -434,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML = `
                 <td>${courseCode}</td>
                 <td>${r.course_name}</td>
+                <td>${r.course_lang}</td>
                 <td>${profName}</td>
                 <td><select name='second_corrector[${courseCode}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
                 <td><select name='third_corrector[${courseCode}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
