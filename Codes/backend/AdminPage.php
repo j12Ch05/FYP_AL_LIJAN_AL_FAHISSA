@@ -500,6 +500,7 @@
                                 </select>
                                 <label for="corrLang">Language</label>
                                 <select name="corrLang" id="corrLang">
+                                    <option value="all"<?php echo $icfSel("corrLang", "all"); ?>>All</option>
                                     <option value="E"<?php echo $icfSel("corrLang", "E"); ?>>English</option>
                                     <option value="F"<?php echo $icfSel("corrLang", "F"); ?>>French</option>
                                 </select>
@@ -551,7 +552,7 @@
                                                 echo "<td>" . $r["course_name"] . "</td>"; 
                                                 echo "<td>" . $r["course_lang"] . "</td>"; 
                                                 echo "<td>" . $profName . "</td>";
-                                                echo "<td><select name='second_corrector[" . $courseCode . "]' $enabled  class='corrector-select'>";
+                                                echo "<td><select name='second_corrector[" . $courseCode . "][" . $r["course_lang"] . "]' $enabled  class='corrector-select'>";
                                                 if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
                                                     $selectedName = $_SESSION["professors"][$secondSelected];
                                                     echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
@@ -567,7 +568,7 @@
                                                     echo "<option value='" . $idStr . "'>" . $name . "</option>";
                                                 }
                                                 echo "</select></td>";
-                                                echo "<td><select name='third_corrector[" . $courseCode . "]' $enabled  class='corrector-select'>";
+                                                echo "<td><select name='third_corrector[" . $courseCode . "][" . $r["course_lang"] . "]' $enabled  class='corrector-select'>";
                                                 if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
                                                     $selectedName = $_SESSION["professors"][$thirdSelected];
                                                     echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
@@ -593,9 +594,126 @@
                             <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
                             <input type="button" id="editCorr" class="btn" value="Edit Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
                             <input type="button" id="deleteCorr" class="btn" value="Delete Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
-                            </form>
-                            
+                             </form>
                 </div>
+        </details>
+                            
+                <?php 
+                    $numbersLoaded = array_key_exists("insert_numbers_data", $_SESSION);
+                    $numbersList = $_SESSION["insert_numbers_data"] ?? [];
+                    $inf = $_SESSION["insert_numbers_filter"] ?? [];
+                    $infSel = function ($key, $value) use ($inf) {
+                        return isset($inf[$key]) && (string) $inf[$key] === (string) $value ? " selected" : "";
+                    };
+                ?>
+                <details id="insertNumbersDetails" class="dropdown-menu" <?php echo $numbersLoaded ? 'open' : ''; ?>>
+                    <summary>Insert copies number of each corrector</summary>
+                    <div class="dropdown-content">
+                        <form id="insertNumbers" action="insertNumbers.php" method="post">
+                            <div class="form-group">
+                                <search>
+                                    <label for="numberSession">Session</label>
+                                    <select name="numberSession" id="numberSession">
+                                        <option value="sem1"<?php echo $infSel("numberSession", "sem1"); ?>>Semester 1</option>
+                                        <option value="sem2"<?php echo $infSel("numberSession", "sem2"); ?>>Semester 2</option>
+                                        <option value="sess2"<?php echo $infSel("numberSession", "sess2"); ?>>Session 2</option>
+                                    </select>
+                                    <label for="numberExam">Exam</label>
+                                    <select name="numberExam" id="numberExam">
+                                        <option value="P" <?php echo $infSel("numberExam", "P") ?>>Partial</option>
+                                        <option value="F" <?php echo $infSel("numberExam", "F") ?>>Final</option>
+                                    </select>
+                                    <label for="numberMajor">Major</label>
+                                    <select name="numberMajor" id="numberMajor">
+                                        <?php
+                                            foreach ($_SESSION["majors"] as $id => $name) {
+                                                $selectedMajor = $infSel("numberMajor", $id);
+                                                echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                            }
+                                        ?>
+                                    </select>
+                                    <label for="numberLevel">Level</label>
+                                    <select name="numberLevel" id="numberLevel">
+                                        <option value="L1"<?php echo $infSel("numberLevel", "L1"); ?>>L1</option>
+                                        <option value="L2"<?php echo $infSel("numberLevel", "L2"); ?>>L2</option>
+                                        <option value="L3"<?php echo $infSel("numberLevel", "L3"); ?>>L3</option>
+                                        <option value="M1"<?php echo $infSel("numberLevel", "M1"); ?>>M1</option>
+                                    </select>
+                                    <label for="numberLang">Language</label>
+                                    <select name="numberLang" id="numberLang">
+                                        <option value="all"<?php echo $infSel("numberLang", "all"); ?>>All</option>
+                                        <option value="E"<?php echo $infSel("numberLang", "E"); ?>>English</option>
+                                        <option value="F"<?php echo $infSel("numberLang", "F"); ?>>French</option>
+                                    </select>
+                                </search><br>
+                            </div>
+                            <input type="submit" id="findNumber" name="findNumber" class="btn" value="Find">
+                            <input type="button" id="cancelNumber" name="cancelNumber" class="btn" value="Cancel"><br><br>
+                        </form>
+
+                        <?php if (isset($_SESSION["insert_numbers_error"])): ?>
+                            <p style="color: red; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_numbers_error"]); ?></p>
+                            <?php unset($_SESSION["insert_numbers_error"]); ?>
+                        <?php endif; ?>
+
+                        <?php if (isset($_SESSION["insert_numbers_success"])): ?>
+                            <p style="color: green; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_numbers_success"]); ?></p>
+                            <?php unset($_SESSION["insert_numbers_success"]); ?>
+                        <?php endif; ?>
+
+                        <form id="numbersForm" action="insertNumbers.php" method="post">
+                            <div class="table-container" style="display: <?php echo $numbersLoaded ? 'block' : 'none'; ?>;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Course Code</th>
+                                            <th>Course Name</th>
+                                            <th>Language</th>
+                                            <th>First Corrector</th>
+                                            <th>1st Corr Copies</th>
+                                            <th>Second Corrector</th>
+                                            <th>2nd Corr Copies</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="numbersTableBody">
+                                        <?php
+                                        if ($numbersLoaded && count($numbersList) === 0) {
+                                            echo '<tr><td colspan="7" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+                                        } else {
+                                            $isFinal = (($inf['numberSession'] ?? '') === 'sess2' || ($inf['numberExam'] ?? '') === 'F');
+                                            foreach ($numbersList as $r) {
+                                                $courseCode = $r["course_code"];
+                                                $courseLang = $r["course_lang"];
+                                                $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
+                                                if ($profName === "") {
+                                                    // Fallback if joined data missing (though fetchNumberRows should handle it)
+                                                    $profName = $_SESSION["professors"][$r["prof_file_nb"]] ?? "Unknown";
+                                                }
+                                                $secondName = isset($r["second_corrector"]) ? ($_SESSION["professors"][$r["second_corrector"]] ?? "Unknown") : "None";
+                                                
+                                                $val1 = $isFinal ? $r['final_first_corrector'] : $r['partial_first_corrector'];
+                                                $val2 = $isFinal ? $r['final_second_corrector'] : $r['partial_second_corrector'];
+
+                                                echo "<tr>";
+                                                echo "<td>" . htmlspecialchars($courseCode) . "</td>";
+                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "") . "</td>"; 
+                                                echo "<td>" . htmlspecialchars($courseLang) . "</td>"; 
+                                                echo "<td>" . htmlspecialchars($profName) . "</td>";
+                                                echo "<td><input type='number' name='first_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val1 . "' class='number-input premium-number-input' disabled></td>";
+                                                echo "<td>" . htmlspecialchars($secondName) . "</td>";
+                                                echo "<td><input type='number' name='second_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val2 . "' class='number-input premium-number-input' disabled></td>";
+                                                echo "</tr>";
+                                            }
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div><br>
+                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" style="display: none;">
+                            <input type="button" id="editNumbers" class="btn" value="Edit Numbers" style="display: <?php echo ($numbersLoaded && count($numbersList) > 0) ? 'inline-block' : 'none'; ?>;">
+                            <input type="button" id="deleteNumbers" class="btn" value="Delete Numbers" style="display: <?php echo ($numbersLoaded && count($numbersList) > 0) ? 'inline-block' : 'none'; ?>;">
+                        </form>
+                    </div>
                 </details>
                 <?php
                     $viewCorrectors = array_key_exists("view_correctors_data", $_SESSION);
@@ -614,7 +732,16 @@
                             <div class="form-group">
                                 <label for="courseId">Enter the course ID</label>
                                 <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;">
+                                    <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;" value="<?php echo htmlspecialchars($vcf['courseId'] ?? ''); ?>">
+                                    <label for="correctorMajor">Major</label>
+                                    <select name="correctorMajor" id="correctorMajor">
+                                        <?php
+                                            foreach ($_SESSION["majors"] as $id => $name) {
+                                                $selectedMajor = $vcfSel("correctorMajor", $id);
+                                                echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                            }
+                                        ?>
+                                    </select>
                                     <label for="correctorLang">Language</label>
                                     <select id="correctorLang" name="correctorLang">
                                         <option value="E" <?php echo $vcfSel("correctorLang","E") ?> >E</option>

@@ -72,7 +72,11 @@ CREATE TABLE correctors (
   prof_file_nb INT NOT NULL,
   second_corrector_file_nb INT DEFAULT NULL,
   third_corrector_file_nb INT DEFAULT NULL,
-  session_nb VARCHAR(7) DEFAULT NULL,
+  session_nb ENUM('sem1','sem2','sess2') DEFAULT NULL,
   course_lang VARCHAR(2) NOT NULL,
-  major_id VARCHAR(6) NOT NULL
+  major_id VARCHAR(6) NOT NULL,
+  partial_first_corrector INT DEFAULT 0,
+  partial_second_corrector INT DEFAULT 0,
+  final_first_corrector INT DEFAULT 0,
+  final_second_corrector INT DEFAULT 0
 );

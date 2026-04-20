@@ -238,6 +238,32 @@ input[type="radio"] {
     margin-top: 20px;
 }
 
+.premium-number-input {
+    width: 80px;
+    padding: 12px 15px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    background-color: #fbfbfb !important;
+    font-weight: 500;
+    color: #444;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.premium-number-input:focus {
+    border-color: var(--primary-purple) !important;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    outline: none;
+}
+
+.premium-number-input:disabled {
+    background-color: #f8fafc !important;
+    color: #94a3b8;
+    border-color: #f1f5f9 !important;
+    cursor: not-allowed;
+}
+
 .dropdown-menu summary {
     cursor: pointer;
     padding: 15px;

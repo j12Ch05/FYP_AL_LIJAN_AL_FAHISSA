@@ -441,8 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${r.course_name}</td>
                 <td>${r.course_lang}</td>
                 <td>${profName}</td>
-                <td><select name='second_corrector[${courseCode}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
-                <td><select name='third_corrector[${courseCode}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
+                <td><select name='second_corrector[${courseCode}][${r.course_lang}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
+                <td><select name='third_corrector[${courseCode}][${r.course_lang}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
             `;
             tbody.appendChild(tr);
         });
@@ -517,7 +517,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindCorrectorPairGuards();
 
-    // --- View Correctors by Course ID (AJAX) ---
+    // --- 7. Insert Numbers Logic ---
+    const insertNumbersForm = document.getElementById('insertNumbers');
+    const numbersTableBody = document.getElementById('numbersTableBody');
+    const editNumbersBtn = document.getElementById('editNumbers');
+    const deleteNumbersBtn = document.getElementById('deleteNumbers');
+    const applyNumbersBtn = document.getElementById('applyNumbers');
+    const cancelNumberBtn = document.getElementById('cancelNumber');
+
+    function getNumberInputs() {
+        return Array.from(document.querySelectorAll('.number-input'));
+    }
+
+    function setNumberInputsDisabled(disabled) {
+        getNumberInputs().forEach(input => input.disabled = disabled);
+    }
+
+    function setViewModeNumbers() {
+        setNumberInputsDisabled(true);
+        if (applyNumbersBtn) applyNumbersBtn.style.display = 'none';
+        if (editNumbersBtn) editNumbersBtn.style.display = 'inline-block';
+        if (deleteNumbersBtn) deleteNumbersBtn.style.display = 'inline-block';
+    }
+
+    function setEditModeNumbers() {
+        setNumberInputsDisabled(false);
+        if (applyNumbersBtn) applyNumbersBtn.style.display = 'inline-block';
+        if (editNumbersBtn) editNumbersBtn.style.display = 'none';
+        if (deleteNumbersBtn) deleteNumbersBtn.style.display = 'inline-block';
+    }
+
+    function populateNumbersTable(courses, professors, isFinal) {
+        if (!numbersTableBody) return;
+        numbersTableBody.innerHTML = '';
+        if (courses.length === 0) {
+            numbersTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+            return;
+        }
+        courses.forEach(r => {
+            const courseCode = r.course_code;
+            const courseLang = r.course_lang;
+            const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim() || professors[r.prof_file_nb] || 'Unknown';
+            const secondName = r.second_corrector ? (professors[r.second_corrector] || 'Unknown') : 'None';
+            const val1 = isFinal ? r.final_first_corrector : r.partial_first_corrector;
+            const val2 = isFinal ? r.final_second_corrector : r.partial_second_corrector;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${courseCode}</td>
+                <td>${r.course_name}</td>
+                <td>${courseLang}</td>
+                <td>${profName}</td>
+                <td><input type='number' name='first_numbers[${courseCode}][${courseLang}]' value='${val1}' class='number-input premium-number-input' disabled></td>
+                <td>${secondName}</td>
+                <td><input type='number' name='second_numbers[${courseCode}][${courseLang}]' value='${val2}' class='number-input premium-number-input' disabled></td>
+            `;
+            numbersTableBody.appendChild(tr);
+        });
+    }
+
+    if (insertNumbersForm) {
+        insertNumbersForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(insertNumbersForm);
+            formData.set('findNumber', 'true');
+
+            fetch('insertNumbers.php', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData,
+                credentials: 'same-origin',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const session = formData.get('numberSession');
+                        const exam = formData.get('numberExam');
+                        const isFinal = (session === 'sess2' || exam === 'F');
+                        populateNumbersTable(data.courses, data.professors, isFinal);
+                        
+                        const details = document.getElementById('insertNumbersDetails');
+                        if (details) details.open = true;
+                        const tableContainer = document.querySelector('#numbersForm .table-container');
+                        if (tableContainer) tableContainer.style.display = 'block';
+                        
+                        setViewModeNumbers();
+                        if (editNumbersBtn) editNumbersBtn.style.display = 'inline-block';
+                        if (deleteNumbersBtn) deleteNumbersBtn.style.display = 'inline-block';
+                        
+                        showBrowserNotification('Numbers', 'Data loaded successfully.');
+                    } else {
+                        alert(data.message || 'Failed to load numbers.');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error loading numbers.');
+                });
+        });
+    }
+
+    if (editNumbersBtn) {
+        editNumbersBtn.addEventListener('click', () => {
+            setEditModeNumbers();
+        });
+    }
+
+    if (deleteNumbersBtn) {
+        deleteNumbersBtn.addEventListener('click', () => {
+            getNumberInputs().forEach(input => input.value = 0);
+            setEditModeNumbers();
+        });
+    }
+
+    if (cancelNumberBtn) {
+        cancelNumberBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'insertNumbers.php';
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'cancelNumber';
+            hidden.value = '1';
+            form.appendChild(hidden);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+
+    // --- 8. View Correctors by Course ID (AJAX) ---
     const searchCorrectorForm = document.getElementById('searchCorrector');
     if (searchCorrectorForm) {
         searchCorrectorForm.addEventListener('submit', function(e) {
@@ -525,34 +654,36 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const courseId = document.getElementById('courseId')?.value || '';
             const correctorLang = document.getElementById('correctorLang')?.value || 'E';
+            const correctorMajor = document.getElementById('correctorMajor')?.value || '';
             const correctorSession = document.getElementById('correctorSession')?.value || 'sem1';
             
             const formData = new FormData();
             formData.append('courseId', courseId);
             formData.append('correctorLang', correctorLang);
+            formData.append('correctorMajor', correctorMajor);
             formData.append('correctorSession', correctorSession);
             formData.append('searchID', 'true');
             
             fetch('viewCorrectors.php', {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: formData,
                 credentials: 'same-origin'
             })
-                .then(response => {
-                    // Keep the dropdown open instead of closing
-                    const details = searchCorrectorForm.closest('details');
-                    if (details) details.open = true;
-                    
-                    showBrowserNotification('Correctors', 'Search completed. Refreshing page...');
-                    // Small delay to let notification show, then reload
-                    setTimeout(() => location.reload(), 1500);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showBrowserNotification('Correctors', 'Search completed. Refreshing...');
+                        // Redirect with tab parameter to ensure it stays on the correctors tab
+                        location.href = 'AdminPage.php?tab=correctors';
+                    } else {
+                        showBrowserNotification('Error', data.message || 'Search failed');
+                        alert(data.message || 'Search failed');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     showBrowserNotification('Error', 'Failed to search correctors');
-                    // Keep dropdown open on error too
-                    const details = searchCorrectorForm.closest('details');
-                    if (details) details.open = true;
                 });
         });
     }
