@@ -44,7 +44,7 @@
                    WHERE corr.session_nb = ? AND p.dep_id = ? ";
 
     $paramTypes = 'ss';
-    $params = [$sess,$dep];
+    $param = [$sess,$dep];
 
     if($level == "all" && $major == "all"){
         $paramTypes .= "";
