@@ -36,9 +36,9 @@ Jean C. Chamoun
 
 - Log in Page backend(Checked)
 - Professor profile page(fetch data,edit data)(check with the supervisor)
-- Professor Courses Page(fetch data,export to excel format4(edbarat mech majmuo3 el edbarat) li mech 7ateta bl excel format see in the modele)
+- Professor Courses Page(Check with the supervisor)
 - Admin Professors Page(fetching data from a specific query)(Check with the supervisor)
-- Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))
+- Admin Correctors Page(excel Format: na2e format1(Tawzi3 al lijan))(Check with the supervisor)
 - Edit Admin Page(Check with the supervisor)
 
 ### Jean's part:
@@ -52,14 +52,14 @@ Jean C. Chamoun
   * view Courses(fetch all possible data using a specific query)(Checked)
 - Admin Correctors Page (fetch data and send data)
 
-  * Insert Correctors(Checked)
-  * Insert Numbers
+  * Insert Correctors(Check with the supervisor)
+  * Insert Numbers(Check with the supervisor)
   * View Correctors(Checked)
-  * Excel format(format2,format3)(format 3 with number filled)
+  * Excel format(format2,format3)(format 3 with number filled)(Check with the supervisor)
 
 ## Report:
 
-- Introduction
+- Introduction(In Progress)
 - State of art
 - Analysis
 - Development

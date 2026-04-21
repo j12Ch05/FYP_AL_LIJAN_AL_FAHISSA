@@ -42,12 +42,16 @@
     $sql = "SELECT corr.prof_file_nb as prof_file_nb,
                    corr.second_corrector_file_nb as second_corrector,
                    corr.third_corrector_file_nb as third_corrector,
+                   corr.partial_first_corrector ,
+                   corr.partial_second_corrector,
+                   corr.final_first_corrector,
+                   corr.final_second_corrector ,
                    t.uni_year,c.course_level
             FROM correctors corr
             LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.major_id = corr.major_id
             LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
-            LEFT JOIN major m ON m.major_id = c.major_id
-            WHERE m.dep_id = ? and corr.session_nb = ?";
+            LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+            WHERE p.dep_id = ? and corr.session_nb = ?";
 
     $stmt = mysqli_prepare($conn,$sql);
     if(!$stmt){
@@ -98,31 +102,41 @@
         $prof3 = !empty($row['third_corrector']) ? $row['third_corrector'] : null;
         
         if ($isLicense) {
-            if (!isset($corrProfL[$prof1])) { $corrProfL[$prof1] = 0; }
-            $corrProfL[$prof1]++;
-            
+            if (!isset($corrProfL[$prof1])) { $corrProfL[$prof1]["lijan"] = 0;$corrProfL[$prof1]["partial_first"] = 0;$corrProfL[$prof1]["final_first"]=0; }
+            $corrProfL[$prof1]["lijan"]++;
+            $corrProfL[$prof1]["partial_first"] += $row["partial_first_corrector"];
+            $corrProfL[$prof1]["final_first"] += $row["final_first_corrector"];
             if ($prof2 !== null) {
-                if (!isset($corrProfL[$prof2])) { $corrProfL[$prof2] = 0; }
-                $corrProfL[$prof2]++;
+                if (!isset($corrProfL[$prof2])) { $corrProfL[$prof2]["lijan"] = 0;$corrProfL[$prof2]["partial_second"] = 0;$corrProfL[$prof2]["final_second"]=0; }
+                $corrProfL[$prof2]["lijan"]++;
+                $corrProfL[$prof2]["partial_second"] += $row["partial_second_corrector"];
+                $corrProfL[$prof2]["final_second"] += $row["final_second_corrector"];
             }
             
             if ($prof3 !== null) {
-                if (!isset($corrProfL[$prof3])) { $corrProfL[$prof3] = 0; }
-                $corrProfL[$prof3]++;
+                if (!isset($corrProfL[$prof3])) { $corrProfL[$prof3]["lijan"] = 0;$corrProfL[$prof3]["partial_second"] = 0;$corrProfL[$prof3]["final_second"]=0; }
+                $corrProfL[$prof3]["lijan"]++;
+                $corrProfL[$prof3]["partial_second"] += $row["partial_second_corrector"];
+                $corrProfL[$prof3]["final_second"] += $row["final_second_corrector"];
             }
         } else {
             // Master courses
-            if (!isset($corrProfM[$prof1])) { $corrProfM[$prof1] = 0; }
-            $corrProfM[$prof1]++;
-            
+             if (!isset($corrProfM[$prof1])) { $corrProfM[$prof1]["lijan"] = 0;$corrProfM[$prof1]["partial_first"] = 0;$corrProfM[$prof1]["final_first"]=0; }
+            $corrProfM[$prof1]["lijan"]++;
+            $corrProfM[$prof1]["partial_first"] += $row["partial_first_corrector"];
+            $corrProfM[$prof1]["final_first"] += $row["final_first_corrector"];
             if ($prof2 !== null) {
-                if (!isset($corrProfM[$prof2])) { $corrProfM[$prof2] = 0; }
-                $corrProfM[$prof2]++;
+                if (!isset($corrProfM[$prof2])) { $corrProfM[$prof2]["lijan"] = 0;$corrProfM[$prof2]["partial_second"] = 0;$corrProfM[$prof2]["final_second"]=0; }
+                $corrProfM[$prof2]["lijan"]++;
+                $corrProfM[$prof2]["partial_second"] += $row["partial_second_corrector"];
+                $corrProfM[$prof2]["final_second"] += $row["final_second_corrector"];
             }
             
             if ($prof3 !== null) {
-                if (!isset($corrProfM[$prof3])) { $corrProfM[$prof3] = 0; }
-                $corrProfM[$prof3]++;
+                if (!isset($corrProfM[$prof3])) { $corrProfM[$prof3]["lijan"] = 0;$corrProfM[$prof3]["partial_second"] = 0;$corrProfM[$prof3]["final_second"]=0; }
+                $corrProfM[$prof3]["lijan"]++;
+                $corrProfM[$prof3]["partial_second"] += $row["partial_second_corrector"];
+                $corrProfM[$prof3]["final_second"] += $row["final_second_corrector"];
             }
         }
     }
@@ -239,8 +253,12 @@
             $formula = "=ROUNDDOWN((C{$r}*0.5+D{$r}*0.25+E{$r}+F{$r}*0.5),0)";
             $sheet1->setCellValue('A'.$r,$profFileNb);
             $sheet1->setCellValue('B'.$r,$professors[$profFileNb]);
+            $sheet1->setCellValue('C'.$r,$value["partial_first"]);
+            $sheet1->setCellValue('D'.$r,$value["partial_second"]);
+            $sheet1->setCellValue('E'.$r,$value["final_first"]);
+            $sheet1->setCellValue('F'.$r,$value["final_second"]);
             $sheet1->setCellValue('G'.$r,$formula);
-            $sheet1->setCellValue('H'.$r,$value);
+            $sheet1->setCellValue('H'.$r,$value["lijan"]);
             $sheet1->setCellValue('I'.$r,0);
             $sheet1->getRowDimension($r)->setRowHeight(18);
             $sheet1->getStyle('A'.$r.':I'.$r)->getFont()->setSize(13);
@@ -342,8 +360,12 @@
             $formula = "=ROUNDDOWN((C{$r}*0.5+D{$r}*0.25+E{$r}+F{$r}*0.5),0)";
             $sheet2->setCellValue('A'.$r,$profFileNb);
             $sheet2->setCellValue('B'.$r,$professors[$profFileNb]);
+            $sheet2->setCellValue('C'.$r,$value["partial_first"]);
+            $sheet2->setCellValue('D'.$r,$value["partial_second"]);
+            $sheet2->setCellValue('E'.$r,$value["final_first"]);
+            $sheet2->setCellValue('F'.$r,$value["final_second"]);
             $sheet2->setCellValue('G'.$r,$formula);
-            $sheet2->setCellValue('H'.$r,$value);
+            $sheet2->setCellValue('H'.$r,$value["lijan"]);
             $sheet2->setCellValue('I'.$r,0);
             $sheet2->getRowDimension($r)->setRowHeight(18);
             $sheet2->getStyle('A'.$r.':I'.$r)->getFont()->setSize(13);

@@ -33,8 +33,9 @@
     mysqli_stmt_close($stmt_p);
 
     $sql_courses = "SELECT c.course_code,c.course_name,c.course_lang FROM course c 
-                    JOIN major m ON m.major_id = c.major_id
-                    WHERE m.dep_id = ?";
+                    JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
+                    JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+                    WHERE p.dep_id = ?";
     $stmt_c = mysqli_prepare($conn,$sql_courses);
     mysqli_stmt_bind_param($stmt_c,"s",$dep);
     mysqli_stmt_execute($stmt_c);

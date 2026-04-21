@@ -56,27 +56,27 @@
                     AND c.course_lang = t.course_lang
                     AND c.major_id = t.major_id
                     AND t.isActive = 1
-                LEFT JOIN major m ON m.major_id = c.major_id
+                LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
                 ";
         //s is a variable to know which parameters we need
         $s = 0;
 
     if($level == "all" && $major == "all"){
-        $sql .= "WHERE m.dep_id = ?";
+        $sql .= "WHERE p.dep_id = ?";
         $s = 0;
     }
     else if($level == "all"){
-        $sql .= "WHERE c.major_id = ? AND  m.dep_id = ?";
+        $sql .= "WHERE c.major_id = ? AND  p.dep_id = ?";
         $file_name .= $major;
         $s = 1;
     }
     else if($major == "all"){
-        $sql .= "WHERE c.course_level = ? AND  m.dep_id = ?";
+        $sql .= "WHERE c.course_level = ? AND  p.dep_id = ?";
         $file_name .= $level;
         $s = 2;
     }
     else{
-        $sql .= "WHERE c.major_id = ? AND c.course_level = ? AND  m.dep_id = ?";
+        $sql .= "WHERE c.major_id = ? AND c.course_level = ? AND  p.dep_id = ?";
         $file_name .= $level ." - " . $major;
         $s = 3;
     }
