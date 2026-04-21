@@ -142,7 +142,7 @@ if (isset($_POST['exportExcel'])) {
     // ==================== SHEET 5: S2 RATTRAPAGE ====================
     $sheet5 = $spreadsheet->createSheet();
     $sheet5->setRightToLeft(true);
-    $sheet5->setTitle('S2_Rattrapage');
+    $sheet5->setTitle('Session_2');
 
     createCorrectionSheet($sheet5, $professor, $departmentName, array_values($coursesSem2), $correctorsData['sem2'] ?? [], 'إعادة', 'الثانية', 'الثاني', $correctorNames);
 
