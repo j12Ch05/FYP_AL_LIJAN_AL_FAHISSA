@@ -56,39 +56,98 @@ if (isset($_POST['exportExcel'])) {
     }
     mysqli_stmt_close($stmt_courses);
 
+    // Fetch corrector data from database
+    $sql_correctors = "SELECT cr.course_code, cr.course_lang, cr.major_id, cr.session_nb,
+                       cr.partial_first_corrector, cr.partial_second_corrector,
+                       cr.final_first_corrector, cr.final_second_corrector
+                       FROM correctors cr
+                       WHERE cr.prof_file_nb = ?";
+    $stmt_corr = mysqli_prepare($conn, $sql_correctors);
+    mysqli_stmt_bind_param($stmt_corr, 'i', $professor['prof_file_nb']);
+    mysqli_stmt_execute($stmt_corr);
+    $result_corr = mysqli_stmt_get_result($stmt_corr);
+
+    $correctorsData = [];
+    while ($row = mysqli_fetch_assoc($result_corr)) {
+        $key = $row['course_code'] . '_' . $row['course_lang'] . '_' . $row['major_id'];
+        $correctorsData[$row['session_nb']][$key] = $row;
+    }
+    mysqli_stmt_close($stmt_corr);
+
+    // Get professor names for corrector IDs
+    $allCorrectorIds = [];
+    foreach ($correctorsData as $sessionData) {
+        foreach ($sessionData as $corr) {
+            if ($corr['partial_first_corrector']) $allCorrectorIds[] = $corr['partial_first_corrector'];
+            if ($corr['partial_second_corrector']) $allCorrectorIds[] = $corr['partial_second_corrector'];
+            if ($corr['final_first_corrector']) $allCorrectorIds[] = $corr['final_first_corrector'];
+            if ($corr['final_second_corrector']) $allCorrectorIds[] = $corr['final_second_corrector'];
+        }
+    }
+    $allCorrectorIds = array_unique(array_filter($allCorrectorIds));
+
+    $correctorNames = [];
+    if (!empty($allCorrectorIds)) {
+        $placeholders = implode(',', array_fill(0, count($allCorrectorIds), '?'));
+        $sql_profs = "SELECT prof_file_nb, prof_first_name, prof_father_name, prof_last_name FROM professor WHERE prof_file_nb IN ($placeholders)";
+        $stmt_profs = mysqli_prepare($conn, $sql_profs);
+        $types = str_repeat('i', count($allCorrectorIds));
+        mysqli_stmt_bind_param($stmt_profs, $types, ...$allCorrectorIds);
+        mysqli_stmt_execute($stmt_profs);
+        $result_profs = mysqli_stmt_get_result($stmt_profs);
+        while ($row = mysqli_fetch_assoc($result_profs)) {
+            $correctorNames[$row['prof_file_nb']] = $row['prof_first_name'] . ' ' . $row['prof_father_name'] . ' ' . $row['prof_last_name'];
+        }
+        mysqli_stmt_close($stmt_profs);
+    }
+
     if (ob_get_contents()) {
         ob_end_clean();
     }
 
     $spreadsheet = new Spreadsheet();
 
-    // ==================== SHEET 1: PARTIEL (جزئي) ====================
+    // ==================== SHEET 1: S1 PARTIEL ====================
     $sheet1 = $spreadsheet->getActiveSheet();
     $sheet1->setRightToLeft(true);
     $sheet1->setTitle('S1_Partiel');
 
-    createCorrectionSheet($sheet1, $professor, $departmentName, $courses, 'جزئي', 'الأولى', 'الأول');
+    createCorrectionSheet($sheet1, $professor, $departmentName, $courses, $correctorsData['sem1'] ?? [], 'جزئي', 'الأولى', 'الأول', $correctorNames);
 
-    // ==================== SHEET 2: FINAL (نهائي) ====================
+    // ==================== SHEET 2: S1 FINAL ====================
     $sheet2 = $spreadsheet->createSheet();
     $sheet2->setRightToLeft(true);
     $sheet2->setTitle('S1_Final');
 
-    createCorrectionSheet($sheet2, $professor, $departmentName, $courses, 'نهائي', 'الأولى', 'الأول');
+    createCorrectionSheet($sheet2, $professor, $departmentName, $courses, $correctorsData['sem1'] ?? [], 'نهائي', 'الأولى', 'الأول', $correctorNames);
 
-    // ==================== SHEET 3: RATTRAPAGE (إعادة) ====================
+    // ==================== SHEET 3: S2 PARTIEL ====================
     $sheet3 = $spreadsheet->createSheet();
     $sheet3->setRightToLeft(true);
-    $sheet3->setTitle('S2_Rattrapage');
+    $sheet3->setTitle('S2_Partiel');
 
-    createCorrectionSheet($sheet3, $professor, $departmentName, $courses, 'إعادة', 'الثانية', 'الثاني');
+    createCorrectionSheet($sheet3, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'جزئي', 'الثانية', 'الثاني', $correctorNames);
 
-    // ==================== SHEET 4: SUMMARY (ملخص) ====================
+    // ==================== SHEET 4: S2 FINAL ====================
     $sheet4 = $spreadsheet->createSheet();
     $sheet4->setRightToLeft(true);
-    $sheet4->setTitle('ملخص');
+    $sheet4->setTitle('S2_Final');
 
-    createSummarySheet($sheet4, $professor, $departmentName, $courses);
+    createCorrectionSheet($sheet4, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'نهائي', 'الثانية', 'الثاني', $correctorNames);
+
+    // ==================== SHEET 5: S2 RATTRAPAGE ====================
+    $sheet5 = $spreadsheet->createSheet();
+    $sheet5->setRightToLeft(true);
+    $sheet5->setTitle('S2_Rattrapage');
+
+    createCorrectionSheet($sheet5, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'إعادة', 'الثانية', 'الثاني', $correctorNames);
+
+    // ==================== SHEET 6: SUMMARY (ملخص) ====================
+    $sheet6 = $spreadsheet->createSheet();
+    $sheet6->setRightToLeft(true);
+    $sheet6->setTitle('ملخص');
+
+    createSummarySheet($sheet6, $professor, $departmentName, $courses);
 
     $fileName = 'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -100,7 +159,7 @@ if (isset($_POST['exportExcel'])) {
     exit;
 }
 
-function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $examType, $session, $semester) {
+function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $correctorsData, $examType, $session, $semester, $correctorNames = []) {
     // Column widths
     $sheet->getColumnDimension('A')->setWidth(3);
     $sheet->getColumnDimension('B')->setWidth(4);
@@ -178,17 +237,34 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $e
     $startRow = 14;
     $licenseCount = 0;
     $masterCount = 0;
+
     foreach ($courses as $index => $course) {
         $row = $startRow + $index;
+        $key = $course['course_code'] . '_' . $course['course_lang'] . '_' . $course['major_id'];
+        
         $sheet->setCellValue('F' . $row, $course['course_code'] . ' (' . $course['course_lang'] . ')');
-        $sheet->setCellValue('G' . $row, '');
-        $sheet->setCellValue('H' . $row, '');
-        $sheet->setCellValue('I' . $row, '');
-        $sheet->setCellValue('J' . $row, '');
-
+        
+        // Get corrector data for this course
+        $corrData = $correctorsData[$key] ?? null;
+        
+        if ($examType === 'جزئي') {
+            $firstCorrId = $corrData['partial_first_corrector'] ?? null;
+            $secondCorrId = $corrData['partial_second_corrector'] ?? null;
+        } elseif ($examType === 'نهائي' || $examType === 'إعادة') {
+            $firstCorrId = $corrData['final_first_corrector'] ?? null;
+            $secondCorrId = $corrData['final_second_corrector'] ?? null;
+        }
+        
+        $firstCorrName = $firstCorrId && isset($correctorNames[$firstCorrId]) ? $correctorNames[$firstCorrId] : '';
+        $secondCorrName = $secondCorrId && isset($correctorNames[$secondCorrId]) ? $correctorNames[$secondCorrId] : '';
+        
         if (in_array($course['course_level'], ['L1', 'L2', 'L3'], true)) {
+            $sheet->setCellValue('G' . $row, $firstCorrName);
+            $sheet->setCellValue('H' . $row, $secondCorrName);
             $licenseCount++;
         } elseif ($course['course_level'] === 'M1') {
+            $sheet->setCellValue('I' . $row, $firstCorrName);
+            $sheet->setCellValue('J' . $row, $secondCorrName);
             $masterCount++;
         }
     }
