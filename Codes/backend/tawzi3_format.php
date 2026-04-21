@@ -32,7 +32,12 @@
     }
 
     $sql = "SELECT p.prof_file_nb,
-                   CONCAT(p.prof_first_name, ' ', p.prof_father_name, ' ', p.prof_last_name) AS prof_full_name,
+                   CONCAT(p.prof_first_name, ' ', p.prof_father_name, ' ', p.prof_last_name) AS first_full_name,
+                     (SELECT CONCAT(p2.prof_first_name, ' ', p2.prof_father_name, ' ', p2.prof_last_name)
+                      FROM correctors t2
+                      JOIN professor p2 ON t2.prof_file_nb = p2.prof_file_nb
+                      WHERE t2.course_code = t.course_code AND t2.course_lang = t.course_lang AND t2.major_id = t.major_id AND t2.isActive = 1 AND t2.prof_file_nb != t.prof_file_nb
+                      LIMIT 1) AS second_full_name,
                    c.course_code,
                    c.course_name,
                    c.course_lang,
@@ -40,7 +45,7 @@
                    c.course_semester_nb,
                    m.major_name,
                    t.uni_year
-            FROM teaching t
+            FROM correctors t
             JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
             JOIN major m ON c.major_id = m.major_id
             JOIN professor p ON t.prof_file_nb = p.prof_file_nb
@@ -114,8 +119,8 @@
         $sheet->getColumnDimension('F')->setWidth(12);
         $sheet->getColumnDimension('G')->setWidth(20);
 
-        $sheet->setCellValue('A3', 'اسم الأستاذ الثلاثي');
-        $sheet->setCellValue('B3', 'رقم الملف');
+        $sheet->setCellValue('A3', 'اسم المصحح الأول');
+        $sheet->setCellValue('B3', 'اسم المصحح الثاني');
         $sheet->setCellValue('C3', 'اسم المقرر');
         $sheet->setCellValue('D3', 'رمز المقرر');
         $sheet->setCellValue('E3', 'اللغة (F/E)');
@@ -129,8 +134,8 @@
 
         $currentRow = 4;
         foreach ($rows as $row) {
-            $sheet->setCellValue('A' . $currentRow, $row['prof_full_name']);
-            $sheet->setCellValue('B' . $currentRow, $row['prof_file_nb']);
+            $sheet->setCellValue('A' . $currentRow, $row['frist_full_name']);
+            $sheet->setCellValue('B' . $currentRow, $row['second_full_name']);
             $sheet->setCellValue('C' . $currentRow, $row['course_name']);
             $sheet->setCellValue('D' . $currentRow, $row['course_code']);
             $sheet->setCellValue('E' . $currentRow, $row['course_lang']);
