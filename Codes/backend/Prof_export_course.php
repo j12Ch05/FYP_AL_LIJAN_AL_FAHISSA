@@ -150,6 +150,7 @@ if (isset($_POST['exportExcel'])) {
     $sheet6 = $spreadsheet->createSheet();
     $sheet6->setRightToLeft(true);
     $sheet6->setTitle('ملخص');
+   
 
     createSummarySheet($sheet6, $professor, $departmentName, $courses);
 
@@ -170,7 +171,7 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $c
     $sheet->getColumnDimension('C')->setWidth(4);
     $sheet->getColumnDimension('D')->setWidth(7);
     $sheet->getColumnDimension('E')->setWidth(8);
-    $sheet->getColumnDimension('F')->setWidth(14);
+    $sheet->getColumnDimension('F')->setWidth(19.82);
     $sheet->getColumnDimension('G')->setWidth(12);
     $sheet->getColumnDimension('H')->setWidth(14);
     $sheet->getColumnDimension('I')->setWidth(16);
@@ -312,13 +313,13 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $c
 
 function createSummarySheet($sheet, $professor, $departmentName, $courses) {
     // Column widths
-    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('A')->setWidth(11.36);
     $sheet->getColumnDimension('B')->setWidth(15);
-    $sheet->getColumnDimension('C')->setWidth(12);
+    $sheet->getColumnDimension('C')->setWidth(26.45);
     $sheet->getColumnDimension('D')->setWidth(10);
     $sheet->getColumnDimension('E')->setWidth(10);
     $sheet->getColumnDimension('F')->setWidth(12);
-    $sheet->getColumnDimension('G')->setWidth(12);
+    $sheet->getColumnDimension('G')->setWidth(15.64);
 
     // Header
     $sheet->mergeCells('A1:G1');
@@ -346,7 +347,7 @@ function createSummarySheet($sheet, $professor, $departmentName, $courses) {
     $sheet->setCellValue('D8', 'اللغة');
     $sheet->setCellValue('E8', 'المستوى');
     $sheet->setCellValue('F8', 'الوحدات');
-    $sheet->setCellValue('G8', 'القسم');
+    $sheet->setCellValue('G8', 'اختصاص');
 
     $sheet->getStyle('A8:G8')->getFont()->setBold(true);
     $sheet->getStyle('A8:G8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
