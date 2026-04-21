@@ -107,40 +107,44 @@ if (isset($_POST['exportExcel'])) {
 
     $spreadsheet = new Spreadsheet();
 
+    // Filter courses by semester
+    $coursesSem1 = array_filter($courses, function($c) { return $c['course_semester_nb'] == 1; });
+    $coursesSem2 = array_filter($courses, function($c) { return $c['course_semester_nb'] == 2; });
+
     // ==================== SHEET 1: S1 PARTIEL ====================
     $sheet1 = $spreadsheet->getActiveSheet();
     $sheet1->setRightToLeft(true);
     $sheet1->setTitle('S1_Partiel');
 
-    createCorrectionSheet($sheet1, $professor, $departmentName, $courses, $correctorsData['sem1'] ?? [], 'جزئي', 'الأولى', 'الأول', $correctorNames);
+    createCorrectionSheet($sheet1, $professor, $departmentName, array_values($coursesSem1), $correctorsData['sem1'] ?? [], 'جزئي', 'الأولى', 'الأول', $correctorNames);
 
     // ==================== SHEET 2: S1 FINAL ====================
     $sheet2 = $spreadsheet->createSheet();
     $sheet2->setRightToLeft(true);
     $sheet2->setTitle('S1_Final');
 
-    createCorrectionSheet($sheet2, $professor, $departmentName, $courses, $correctorsData['sem1'] ?? [], 'نهائي', 'الأولى', 'الأول', $correctorNames);
+    createCorrectionSheet($sheet2, $professor, $departmentName, array_values($coursesSem1), $correctorsData['sem1'] ?? [], 'نهائي', 'الأولى', 'الأول', $correctorNames);
 
     // ==================== SHEET 3: S2 PARTIEL ====================
     $sheet3 = $spreadsheet->createSheet();
     $sheet3->setRightToLeft(true);
     $sheet3->setTitle('S2_Partiel');
 
-    createCorrectionSheet($sheet3, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'جزئي', 'الثانية', 'الثاني', $correctorNames);
+    createCorrectionSheet($sheet3, $professor, $departmentName, array_values($coursesSem2), $correctorsData['sem2'] ?? [], 'جزئي', 'الثانية', 'الثاني', $correctorNames);
 
     // ==================== SHEET 4: S2 FINAL ====================
     $sheet4 = $spreadsheet->createSheet();
     $sheet4->setRightToLeft(true);
     $sheet4->setTitle('S2_Final');
 
-    createCorrectionSheet($sheet4, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'نهائي', 'الثانية', 'الثاني', $correctorNames);
+    createCorrectionSheet($sheet4, $professor, $departmentName, array_values($coursesSem2), $correctorsData['sem2'] ?? [], 'نهائي', 'الثانية', 'الثاني', $correctorNames);
 
     // ==================== SHEET 5: S2 RATTRAPAGE ====================
     $sheet5 = $spreadsheet->createSheet();
     $sheet5->setRightToLeft(true);
     $sheet5->setTitle('S2_Rattrapage');
 
-    createCorrectionSheet($sheet5, $professor, $departmentName, $courses, $correctorsData['sem2'] ?? [], 'إعادة', 'الثانية', 'الثاني', $correctorNames);
+    createCorrectionSheet($sheet5, $professor, $departmentName, array_values($coursesSem2), $correctorsData['sem2'] ?? [], 'إعادة', 'الثانية', 'الثاني', $correctorNames);
 
     // ==================== SHEET 6: SUMMARY (ملخص) ====================
     $sheet6 = $spreadsheet->createSheet();
