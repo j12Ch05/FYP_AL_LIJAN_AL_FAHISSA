@@ -239,29 +239,35 @@ input[type="radio"] {
 }
 
 .premium-number-input {
-    width: 80px;
-    padding: 12px 15px !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    background-color: #fbfbfb !important;
-    font-weight: 500;
-    color: #444;
-    transition: all 0.3s ease;
-    text-align: center;
-    font-size: 0.95rem;
+     width: 90px;
+  height: 60px;
+  padding: 0 14px;
+  
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f5f5f5;
+
+  outline: none;
+  transition: all 0.2s ease;
 }
 
 .premium-number-input:focus {
-    border-color: var(--primary-purple) !important;
-    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-    outline: none;
+    border-color: #6c63ff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
 }
 
 .premium-number-input:disabled {
-    background-color: #f8fafc !important;
-    color: #94a3b8;
-    border-color: #f1f5f9 !important;
-    cursor: not-allowed;
+      background: #e9e9e9;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #d5d5d5;
+  opacity: 1;
+   
 }
 
 .dropdown-menu summary {

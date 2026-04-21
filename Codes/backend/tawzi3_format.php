@@ -18,6 +18,7 @@
     $major = $filter['excelMajor'] ?? '';
     $level = $filter['excelLevel'] ?? '';
     $d = $departments[$dep] ?? 'غير محدد';
+    $professors = $_SESSION["prof_full_names"];
 
     $file_name = "";
     $title1 = "توزيع اللجان الفاحصة - قسم $d";
@@ -31,40 +32,38 @@
         $title2 = "امتحانات $sem - الدورة الأولى";
     }
 
-    $sql = "SELECT p.prof_file_nb,
-                   CONCAT(p.prof_first_name, ' ', p.prof_father_name, ' ', p.prof_last_name) AS first_full_name,
-                     (SELECT CONCAT(p2.prof_first_name, ' ', p2.prof_father_name, ' ', p2.prof_last_name)
-                      FROM correctors t2
-                      JOIN professor p2 ON t2.prof_file_nb = p2.prof_file_nb
-                      WHERE t2.course_code = t.course_code AND t2.course_lang = t.course_lang AND t2.major_id = t.major_id AND t2.isActive = 1 AND t2.prof_file_nb != t.prof_file_nb
-                      LIMIT 1) AS second_full_name,
-                   c.course_code,
-                   c.course_name,
-                   c.course_lang,
-                   c.course_level,
-                   c.course_semester_nb,
-                   m.major_name,
-                   t.uni_year
-            FROM correctors t
-            JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
-            JOIN major m ON c.major_id = m.major_id
-            JOIN professor p ON t.prof_file_nb = p.prof_file_nb
-            WHERE m.dep_id = ? AND t.isActive = 1";
+    $sql = "SELECT corr.prof_file_nb , corr.second_corrector_file_nb as second_corrector,
+                   corr.course_code,c.course_name,corr.course_lang,c.course_level,corr.session_nb,
+                   m.major_name,t.uni_year
+                   FROM correctors corr
+                   JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.prof_file_nb = corr.prof_file_nb
+                   AND t.major_id = corr.major_id
+                   JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND c.major_id = t.major_id
+                   JOIN major m ON c.major_id = m.major_id  
+                   JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
+                   WHERE corr.session_nb = ? AND p.dep_id = ? ";
 
-    $paramTypes = 's';
-    $params = [$dep];
+    $paramTypes = 'ss';
+    $params = [$sess,$dep];
 
-    if ($major !== '' && $major !== 'all') {
-        $sql .= ' AND c.major_id = ?';
-        $paramTypes .= 's';
-        $params[] = $major;
-        $file_name .= " - $major";
+    if($level == "all" && $major == "all"){
+        $paramTypes .= "";
     }
-    if ($level !== '' && $level !== 'all') {
-        $sql .= ' AND c.course_level = ?';
-        $paramTypes .= 's';
-        $params[] = $level;
-        $file_name .= " - $level";
+    else if($level == "all"){
+        $sql .= " AND c.major_id = ? ";
+        $paramTypes .= "s";
+        $param[] = $major;
+    }
+    else if($major == "all"){
+        $sql .= "AND c.course_level = ? ";
+        $paramTypes .="s";
+        $param[] = $level;
+    }
+    else{
+        $sql .= "AND c.major_id = ? AND c.course_level = ? ";
+        $paramTypes .= "ss";
+        $param[] = $major;
+        $param[] = $level;
     }
 
     $sql .= ' ORDER BY p.prof_file_nb, c.course_code, c.course_lang';
@@ -75,7 +74,7 @@
             throw new RuntimeException('Query prepare failed: ' . mysqli_error($conn));
         }
 
-        mysqli_stmt_bind_param($stmt, $paramTypes, ...$params);
+        mysqli_stmt_bind_param($stmt, $paramTypes,...$param);
         if (!mysqli_stmt_execute($stmt)) {
             throw new RuntimeException('Query execute failed: ' . mysqli_stmt_error($stmt));
         }
@@ -134,13 +133,13 @@
 
         $currentRow = 4;
         foreach ($rows as $row) {
-            $sheet->setCellValue('A' . $currentRow, $row['frist_full_name']);
-            $sheet->setCellValue('B' . $currentRow, $row['second_full_name']);
+            $sheet->setCellValue('A' . $currentRow, $professors[$row["prof_file_nb"]]);
+            $sheet->setCellValue('B' . $currentRow, $professors[$row["second_corrector"]]);
             $sheet->setCellValue('C' . $currentRow, $row['course_name']);
             $sheet->setCellValue('D' . $currentRow, $row['course_code']);
             $sheet->setCellValue('E' . $currentRow, $row['course_lang']);
             $sheet->setCellValue('F' . $currentRow, $row['course_level']);
-            $sheet->setCellValue('G' . $currentRow, $row['major_name']);
+            $sheet->setCellValue('G' . $currentRow, $row["major_name"]);
             $sheet->getStyle('A' . $currentRow . ':G' . $currentRow)
                 ->getAlignment()
                 ->setVertical(Alignment::VERTICAL_TOP)
