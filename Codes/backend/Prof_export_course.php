@@ -5,6 +5,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 session_start();
 include 'database.php';
@@ -43,7 +44,7 @@ if (isset($_POST['exportExcel'])) {
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
                     JOIN major m ON c.major_id = m.major_id
                     WHERE t.prof_file_nb = ?
-                    ORDER BY c.course_code, c.course_lang";
+                    ORDER BY c.course_level, c.course_code, c.course_lang";
     $stmt_courses = mysqli_prepare($conn, $sql_courses);
     mysqli_stmt_bind_param($stmt_courses, 'i', $professor['prof_file_nb']);
     mysqli_stmt_execute($stmt_courses);
@@ -60,10 +61,46 @@ if (isset($_POST['exportExcel'])) {
     }
 
     $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setRightToLeft(true);
-    $sheet->setTitle('Course Export');
 
+    // ==================== SHEET 1: PARTIEL (جزئي) ====================
+    $sheet1 = $spreadsheet->getActiveSheet();
+    $sheet1->setRightToLeft(true);
+    $sheet1->setTitle('S1_Partiel');
+
+    createCorrectionSheet($sheet1, $professor, $departmentName, $courses, 'جزئي', 'الأولى', 'الأول');
+
+    // ==================== SHEET 2: FINAL (نهائي) ====================
+    $sheet2 = $spreadsheet->createSheet();
+    $sheet2->setRightToLeft(true);
+    $sheet2->setTitle('S1_Final');
+
+    createCorrectionSheet($sheet2, $professor, $departmentName, $courses, 'نهائي', 'الأولى', 'الأول');
+
+    // ==================== SHEET 3: RATTRAPAGE (إعادة) ====================
+    $sheet3 = $spreadsheet->createSheet();
+    $sheet3->setRightToLeft(true);
+    $sheet3->setTitle('S2_Rattrapage');
+
+    createCorrectionSheet($sheet3, $professor, $departmentName, $courses, 'إعادة', 'الثانية', 'الثاني');
+
+    // ==================== SHEET 4: SUMMARY (ملخص) ====================
+    $sheet4 = $spreadsheet->createSheet();
+    $sheet4->setRightToLeft(true);
+    $sheet4->setTitle('ملخص');
+
+    createSummarySheet($sheet4, $professor, $departmentName, $courses);
+
+    $fileName = 'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+}
+
+function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $examType, $session, $semester) {
     // Column widths
     $sheet->getColumnDimension('A')->setWidth(3);
     $sheet->getColumnDimension('B')->setWidth(4);
@@ -93,12 +130,12 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('I4', $departmentName);
     $sheet->mergeCells('I4:J4');
     $sheet->setCellValue('J4', 'الدورة:');
-    $sheet->setCellValue('K4', 'الأولى');
+    $sheet->setCellValue('K4', $session);
 
     $sheet->setCellValue('H5', 'العام الجامعي:');
     $sheet->setCellValue('I5', date('Y') . ' - ' . (date('Y') + 1));
     $sheet->setCellValue('J5', 'الفصل:');
-    $sheet->setCellValue('K5', 'الأول');
+    $sheet->setCellValue('K5', $semester);
 
     $sheet->setCellValue('J6', 'الإسم:');
     $sheet->setCellValue('K6', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
@@ -106,7 +143,7 @@ if (isset($_POST['exportExcel'])) {
     $sheet->setCellValue('K7', $professor['prof_file_nb']);
 
     $sheet->setCellValue('F8', 'الامتحان:');
-    $sheet->setCellValue('G8', 'جزئي');
+    $sheet->setCellValue('G8', $examType);
     $sheet->setCellValue('F9', 'وضعه في الكلية:');
     $sheet->setCellValue('G9', 'ملاك');
     $sheet->setCellValue('H9', 'متفرغ');
@@ -134,6 +171,7 @@ if (isset($_POST['exportExcel'])) {
 
     $sheet->getStyle('F12:J13')->getFont()->setBold(true);
     $sheet->getStyle('F12:J13')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getStyle('F12:J13')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('E7E6E6');
     $sheet->getRowDimension(12)->setRowHeight(28);
     $sheet->getRowDimension(13)->setRowHeight(22);
 
@@ -191,13 +229,95 @@ if (isset($_POST['exportExcel'])) {
     foreach (range('A', 'K') as $columnID) {
         $sheet->getColumnDimension($columnID)->setAutoSize(false);
     }
+}
 
-    $fileName = 'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $fileName . '"');
-    header('Cache-Control: max-age=0');
+function createSummarySheet($sheet, $professor, $departmentName, $courses) {
+    // Column widths
+    $sheet->getColumnDimension('A')->setWidth(5);
+    $sheet->getColumnDimension('B')->setWidth(15);
+    $sheet->getColumnDimension('C')->setWidth(12);
+    $sheet->getColumnDimension('D')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('F')->setWidth(12);
+    $sheet->getColumnDimension('G')->setWidth(12);
 
-    $writer = new Xlsx($spreadsheet);
-    $writer->save('php://output');
-    exit;
+    // Header
+    $sheet->mergeCells('A1:G1');
+    $sheet->setCellValue('A1', 'الجامعة اللبنانية - كلية العلوم الفرع الثاني');
+    $sheet->mergeCells('A2:G2');
+    $sheet->setCellValue('A2', 'ملخص المقررات');
+
+    $sheet->getStyle('A1:G2')->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle('A1:G2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+    $sheet->getRowDimension(1)->setRowHeight(25);
+    $sheet->getRowDimension(2)->setRowHeight(22);
+
+    // Professor info
+    $sheet->setCellValue('E4', 'القسم:');
+    $sheet->setCellValue('F4', $departmentName);
+    $sheet->setCellValue('E5', 'الإسم:');
+    $sheet->setCellValue('F5', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
+    $sheet->setCellValue('E6', 'رقم الملف:');
+    $sheet->setCellValue('F6', $professor['prof_file_nb']);
+
+    // Table headers
+    $sheet->setCellValue('A8', 'م');
+    $sheet->setCellValue('B8', 'رمز المقرر');
+    $sheet->setCellValue('C8', 'اسم المقرر');
+    $sheet->setCellValue('D8', 'اللغة');
+    $sheet->setCellValue('E8', 'المستوى');
+    $sheet->setCellValue('F8', 'الوحدات');
+    $sheet->setCellValue('G8', 'القسم');
+
+    $sheet->getStyle('A8:G8')->getFont()->setBold(true);
+    $sheet->getStyle('A8:G8')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle('A8:G8')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9D9D9');
+    $sheet->getRowDimension(8)->setRowHeight(22);
+
+    // Data
+    $startRow = 9;
+    $licenseCourses = [];
+    $masterCourses = [];
+
+    foreach ($courses as $index => $course) {
+        $row = $startRow + $index;
+        $sheet->setCellValue('A' . $row, $index + 1);
+        $sheet->setCellValue('B' . $row, $course['course_code']);
+        $sheet->setCellValue('C' . $row, $course['course_name']);
+        $sheet->setCellValue('D' . $row, $course['course_lang']);
+        $sheet->setCellValue('E' . $row, $course['course_level']);
+        $sheet->setCellValue('F' . $row, $course['course_credit_nb']);
+        $sheet->setCellValue('G' . $row, $course['major_name']);
+
+        if (in_array($course['course_level'], ['L1', 'L2', 'L3'], true)) {
+            $licenseCourses[] = $course;
+        } elseif ($course['course_level'] === 'M1') {
+            $masterCourses[] = $course;
+        }
+    }
+
+    $endRow = $startRow + count($courses) - 1;
+
+    $sheet->getStyle('A' . $startRow . ':G' . $endRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('A' . $startRow . ':G' . $endRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    // Summary section
+    $summaryRow = $endRow + 3;
+    $sheet->setCellValue('A' . $summaryRow, 'ملخص');
+    $sheet->getStyle('A' . $summaryRow)->getFont()->setBold(true)->setSize(12);
+    $sheet->mergeCells('A' . $summaryRow . ':B' . $summaryRow);
+
+    $sheet->setCellValue('A' . ($summaryRow + 1), 'إجمالي المقررات:');
+    $sheet->setCellValue('B' . ($summaryRow + 1), count($courses));
+    $sheet->setCellValue('A' . ($summaryRow + 2), 'مقررات الإجازة:');
+    $sheet->setCellValue('B' . ($summaryRow + 2), count($licenseCourses));
+    $sheet->setCellValue('A' . ($summaryRow + 3), 'مقررات الماستر:');
+    $sheet->setCellValue('B' . ($summaryRow + 3), count($masterCourses));
+
+    $totalCredits = array_sum(array_column($courses, 'course_credit_nb'));
+    $sheet->setCellValue('A' . ($summaryRow + 4), 'إجمالي الوحدات:');
+    $sheet->setCellValue('B' . ($summaryRow + 4), $totalCredits);
+
+    $sheet->getStyle('A' . ($summaryRow + 1) . ':B' . ($summaryRow + 4))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('A' . ($summaryRow + 1) . ':B' . ($summaryRow + 4))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 }
