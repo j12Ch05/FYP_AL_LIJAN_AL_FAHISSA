@@ -39,7 +39,7 @@ if (isset($_POST['exportExcel'])) {
     mysqli_stmt_close($stmt_dep);
     $departmentName = $department['dep_name'] ?? $professor['dep_id'];
 
-    $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb, c.course_level, c.course_lang, c.course_semester_nb, m.major_name
+    $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb, c.course_level, c.course_lang, c.course_semester_nb, m.major_name, m.major_id
                     FROM teaching t
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
                     JOIN major m ON c.major_id = m.major_id
