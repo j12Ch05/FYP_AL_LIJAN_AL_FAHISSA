@@ -244,7 +244,7 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $c
 
             // Find the correct corrector data for this course and professor
             $key = $course['course_code'] . '_' . $course['course_lang'] . '_' . $course['major_id'] . '_' . $professor['prof_file_nb'];
-            $corrData = $correctorsData[$session] && isset($correctorsData[$session][$key]) ? $correctorsData[$session][$key] : null;
+            $corrData = (isset($correctorsData[$session][$key])) ? $correctorsData[$session][$key] : null;
 
             if ($examType === 'جزئي') {
                 $firstCorrId = $corrData['partial_first_corrector'] ?? null;
