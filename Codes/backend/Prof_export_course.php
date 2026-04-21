@@ -238,36 +238,35 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courses, $c
     $licenseCount = 0;
     $masterCount = 0;
 
-    foreach ($courses as $index => $course) {
-        $row = $startRow + $index;
-        $key = $course['course_code'] . '_' . $course['course_lang'] . '_' . $course['major_id'];
-        
-        $sheet->setCellValue('F' . $row, $course['course_code'] . ' (' . $course['course_lang'] . ')');
-        
-        // Get corrector data for this course
-        $corrData = $correctorsData[$key] ?? null;
-        
-        if ($examType === 'جزئي') {
-            $firstCorrId = $corrData['partial_first_corrector'] ?? null;
-            $secondCorrId = $corrData['partial_second_corrector'] ?? null;
-        } elseif ($examType === 'نهائي' || $examType === 'إعادة') {
-            $firstCorrId = $corrData['final_first_corrector'] ?? null;
-            $secondCorrId = $corrData['final_second_corrector'] ?? null;
+        foreach ($courses as $index => $course) {
+            $row = $startRow + $index;
+            $sheet->setCellValue('F' . $row, $course['course_code'] . ' (' . $course['course_lang'] . ')');
+
+            // Find the correct corrector data for this course and professor
+            $key = $course['course_code'] . '_' . $course['course_lang'] . '_' . $course['major_id'] . '_' . $professor['prof_file_nb'];
+            $corrData = $correctorsData[$session] && isset($correctorsData[$session][$key]) ? $correctorsData[$session][$key] : null;
+
+            if ($examType === 'جزئي') {
+                $firstCorrId = $corrData['partial_first_corrector'] ?? null;
+                $secondCorrId = $corrData['partial_second_corrector'] ?? null;
+            } elseif ($examType === 'نهائي' || $examType === 'إعادة') {
+                $firstCorrId = $corrData['final_first_corrector'] ?? null;
+                $secondCorrId = $corrData['final_second_corrector'] ?? null;
+            }
+
+            $firstCorrName = $firstCorrId && isset($correctorNames[$firstCorrId]) ? $correctorNames[$firstCorrId] : '';
+            $secondCorrName = $secondCorrId && isset($correctorNames[$secondCorrId]) ? $correctorNames[$secondCorrId] : '';
+
+            if (in_array($course['course_level'], ['L1', 'L2', 'L3'], true)) {
+                $sheet->setCellValue('G' . $row, $firstCorrName);
+                $sheet->setCellValue('H' . $row, $secondCorrName);
+                $licenseCount++;
+            } elseif ($course['course_level'] === 'M1') {
+                $sheet->setCellValue('I' . $row, $firstCorrName);
+                $sheet->setCellValue('J' . $row, $secondCorrName);
+                $masterCount++;
+            }
         }
-        
-        $firstCorrName = $firstCorrId && isset($correctorNames[$firstCorrId]) ? $correctorNames[$firstCorrId] : '';
-        $secondCorrName = $secondCorrId && isset($correctorNames[$secondCorrId]) ? $correctorNames[$secondCorrId] : '';
-        
-        if (in_array($course['course_level'], ['L1', 'L2', 'L3'], true)) {
-            $sheet->setCellValue('G' . $row, $firstCorrName);
-            $sheet->setCellValue('H' . $row, $secondCorrName);
-            $licenseCount++;
-        } elseif ($course['course_level'] === 'M1') {
-            $sheet->setCellValue('I' . $row, $firstCorrName);
-            $sheet->setCellValue('J' . $row, $secondCorrName);
-            $masterCount++;
-        }
-    }
 
     if (count($courses) > 0) {
         $endRow = $startRow + count($courses) - 1;
