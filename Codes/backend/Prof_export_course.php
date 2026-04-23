@@ -235,7 +235,7 @@ function createSummarySheet($sheet, $professor, $departmentName, $course_details
     $sheet->getColumnDimension('B')->setWidth(26.45);
     $sheet->getColumnDimension('C')->setWidth(15);
     $sheet->getColumnDimension('D')->setWidth(10);
-    $sheet->getColumnDimension('E')->setWidth(10);
+    $sheet->getColumnDimension('E')->setWidth(26.45);
     $sheet->getColumnDimension('F')->setWidth(12);
     $sheet->getColumnDimension('G')->setWidth(15.64);
 
