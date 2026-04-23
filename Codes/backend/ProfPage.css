@@ -27,7 +27,7 @@ body {
     width: 280px;
     background: linear-gradient(180deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
     color: var(--white);
-    position: fixed;
+    position: relative;
     height: 100vh;
     padding: 20px 0;
 }
@@ -176,9 +176,25 @@ td {
     font-weight: 500;
     transition: opacity 0.2s;
 }
+.btn-logout {
+    background-color: #d32f2f; /* Standard red (or use 'red') */
+    color: white;             /* Keep text white for contrast */
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;       /* Keep the rounded corners */
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s; /* Smooth hover effect */
+}
+
+
 
 .btn:hover {
     opacity: 0.9;
+}
+/* Optional: Darken slightly when hovering */
+.btn-logout:hover {
+    background-color: #b71c1c;
 }
 
 .profile-message {

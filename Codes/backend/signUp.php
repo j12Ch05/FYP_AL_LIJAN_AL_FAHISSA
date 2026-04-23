@@ -124,80 +124,90 @@
         ?>
         <h1>Sign Up</h1>
         <form id="signUpForm" action="" method="post">
-            <div class="form-group">
-                <label for="fname">First Name</label>
-                <input type="text" id="fname" name="firstName" placeholder="Enter your first name in arabic" maxlength="20" required />
-            </div>
+    <div class="form-group">
+        <label for="fname">First Name *</label>
+        <input type="text" id="fname" name="firstName" placeholder="Enter your first name in arabic" maxlength="20" required 
+               value="<?php echo isset($_POST['firstName']) ? $_POST['firstName'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="lname">Last Name</label>
-                <input type="text" id="lname" name="lastName" placeholder="Enter your last name in arabic" maxlength="20" required />
-            </div>
-            
-            <div class="form-group">
-                <label for="fatherName">Father Name</label>
-                <input type="text" id="lname" name="fatherName" placeholder="Enter your father name in arabic" maxlength="20" required />
-            </div>
+    <div class="form-group">
+        <label for="lname">Last Name *</label>
+        <input type="text" id="lname" name="lastName" placeholder="Enter your last name in arabic" maxlength="20" required 
+               value="<?php echo isset($_POST['lastName']) ? $_POST['lastName'] : ''; ?>" />
+    </div>
+    
+    <div class="form-group">
+        <label for="fatherName">Father Name *</label>
+        <input type="text" id="fatherName" name="fatherName" placeholder="Enter your father name in arabic" maxlength="20" required 
+               value="<?php echo isset($_POST['fatherName']) ? $_POST['fatherName'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="birthDate">Birth Date</label>
-                <input type="date" id="birthDate" name="birthDate" required />
-            </div>
+    <div class="form-group">
+        <label for="birthDate">Birth Date *</label>
+        <input type="date" id="birthDate" name="birthDate" required 
+               value="<?php echo isset($_POST['birthDate']) ? $_POST['birthDate'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="address">Address</label>
-                <input type="text" id="address" name="address" placeholder="Enter your address" maxlength="20" />
-            </div>
+    <div class="form-group">
+        <label for="address">Address *</label>
+        <input type="text" id="address" name="address" placeholder="Enter your address" maxlength="20" 
+               value="<?php echo isset($_POST['address']) ? $_POST['address'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="phone">Phone</label>
-                <input type="text" id="phone" name="phone" placeholder="xx xxx xxx" maxlength="10" />
-            </div>
+    <div class="form-group">
+        <label for="phone">Phone *</label>
+        <input type="text" id="phone" name="phone" placeholder="xx xxx xxx" maxlength="10" 
+               value="<?php echo isset($_POST['phone']) ? $_POST['phone'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="filenumber">File Number</label>
-                <input type="text" id="filenumber" name="fileNumber" placeholder="Enter your file number" maxlength="10" required/>
-            </div>
+    <div class="form-group">
+        <label for="filenumber">File Number *</label>
+        <input type="text" id="filenumber" name="fileNumber" placeholder="Enter your file number" maxlength="10" required
+               value="<?php echo isset($_POST['fileNumber']) ? $_POST['fileNumber'] : ''; ?>" />
+    </div>
 
-            <div class="form-group">
-                <label for="department">Department</label>
-                <select class="dropdown-select" name="department" id="department" >
-                    <option value="math">Math</option>
-                    <option value="css">Computer Science and Statistics</option>
-                    <option value="pe">Physics and Electronics</option>
-                    <option value="bio">Biology</option>
-                    <option value="bioch">Biochemistry</option>
-                    <option value="che">Chemistry</option>
-                </select>
-            </div>
+    <div class="form-group">
+        <label for="department">Department *</label>
+        <select class="dropdown-select" name="department" id="department">
+            <?php 
+                $depts = ['math' => 'Math', 'css' => 'Computer Science and Statistics', 'pe' => 'Physics and Electronics', 'bio' => 'Biology', 'bioch' => 'Biochemistry', 'che' => 'Chemistry'];
+                foreach($depts as $val => $label) {
+                    $selected = (isset($_POST['department']) && $_POST['department'] == $val) ? 'selected' : '';
+                    echo "<option value='$val' $selected>$label</option>";
+                }
+            ?>
+        </select>
+    </div>
 
-            <div class="form-group">
-                <label for="prof_category">Category</label>
-                <select name="category" id="prof_category" class="dropdown-select">
-                    <option value="متعاقد بالساعة">متعاقد بالساعة</option>
-                    <option value="متفرغ">متفرغ</option>
-                    <option value="ملاك"> ملاك</option>
-                </select>
-            </div>
+    <div class="form-group">
+        <label for="prof_category">Category *</label>
+        <select name="category" id="prof_category" class="dropdown-select">
+            <option value="متعاقد بالساعة" <?php echo (isset($_POST['category']) && $_POST['category'] == 'متعاقد بالساعة') ? 'selected' : ''; ?>>متعاقد بالساعة</option>
+            <option value="متفرغ" <?php echo (isset($_POST['category']) && $_POST['category'] == 'متفرغ') ? 'selected' : ''; ?>>متفرغ</option>
+            <option value="ملاك" <?php echo (isset($_POST['category']) && $_POST['category'] == 'ملاك') ? 'selected' : ''; ?>> ملاك</option>
+        </select>
+    </div>
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="Enter your UL email" required>
-            </div>
+    <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" placeholder="Enter your UL email" required
+               value="<?php echo isset($_POST['email']) ? $_POST['email'] : ''; ?>">
+    </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                    <button type="button" id="togglePassword" class="toggle-btn">Show</button>
-                </div>
-            </div>
+    <div class="form-group">
+        <label for="password">Password *</label>
+        <div class="password-wrapper">
+            <input type="password" id="password" name="password" placeholder="Enter your password" required
+                   value="<?php echo isset($_POST['password']) ? $_POST['password'] : ''; ?>">
+            <button type="button" id="togglePassword" class="toggle-btn">Show</button>
+        </div>
+    </div>
 
-            <button type="submit" class="submit-btn" name="signUp">Sign Up</button>
-            <div class="back">
-                <a href="login.php">Back to Login</a>
-            </div>
-        </form>
+    <button type="submit" class="submit-btn" name="signUp">Sign Up</button>
+    <div class="back">
+        <a href="login.php">Back to Login</a>
+    </div>
+</form>
     </div>
 
     <script>

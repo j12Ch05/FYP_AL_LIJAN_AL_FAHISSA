@@ -2,7 +2,6 @@
     session_start();
     include("database.php");
 
-    $ulDomain = "ul.edu.lb";
     //always define the error variable at the beginning of the code
     $error = "";
     //if email inserted is really in the database 

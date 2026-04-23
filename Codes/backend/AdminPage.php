@@ -3,8 +3,9 @@
     include("database.php");
     
 
-    if(!isset($_SESSION['email'])){
+    if(!isset($_SESSION['email'])||isset($_POST["logout"])){
         header("location: login.php");
+        unset($_SESSION["email"]);
         exit();
     }
     
@@ -33,6 +34,7 @@
 
         if($currentAdmin == $adminFile){
             header("location: login.php");
+            unset($_SESSION["email"]);
             exit;
         }
         
@@ -150,8 +152,17 @@
     </aside>
 
     <main class="main-content">
-        <header class="welcome-header">
-            Welcome Admin
+        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+            
+            <div class="user-info">
+                Welcome Admin
+            </div>
+
+            <form method="post" style="margin: 0;">
+                <input type="submit" name="logout" id="logout-button" value="logout" 
+                    style="background-color: #d32f2f; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+            </form>
+
         </header>
 
         <section id="content-professors" class="tab-content">

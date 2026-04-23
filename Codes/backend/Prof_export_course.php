@@ -56,10 +56,10 @@ if (isset($_POST['exportExcel'])) {
         if (!isset($data[$sess])) $data[$sess] = [];
         
         $full_code = $row["course_code"] . " (" . $row["course_lang"] . ")";
-        
         $data[$sess][] = [
             'display_code' => $full_code,
             'level' => $row["course_level"],
+            'first_corrector' => $row["prof_file_nb"],
             'correctors' => [
                 $row["partial_first_corrector"], 
                 $row["partial_second_corrector"], 
@@ -71,6 +71,7 @@ if (isset($_POST['exportExcel'])) {
         $course_details[$full_code] = [
             'name' => $row["course_name"],
             'level' => $row["course_level"],
+            'major' => $row["major_name"],
             'credits' => $row["course_credit_nb"]
         ];
     }
@@ -99,7 +100,7 @@ if (isset($_POST['exportExcel'])) {
 
     if (ob_get_length()) ob_end_clean();
 
-    $fileName = 'Correction_Report_' . date('Y-m-d_H-i') . '.xlsx';
+    $fileName =  'اضبارة تصحيح مسابقات' . date('Y-m-d_H-i') . '.xlsx';
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $fileName . '"');
     header('Cache-Control: max-age=0');
@@ -187,11 +188,19 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
         $colOffset = $isMaster ? 2 : 0; 
 
         if ($examType == 'جزئي') {
-            $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][0]);
-            $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][1]);
+            if($c['first_corrector'] == $professor["prof_file_nb"]){
+                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][0]);
+            }
+            else{
+                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][1]);
+            }
         } else {
-            $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][2]);
-            $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][3]);
+            if($c['first_corrector'] == $professor["prof_file_nb"]){
+                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][2]);
+            }
+            else{
+                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][3]);
+            }
         }
         $rowNum++;
     }
@@ -247,9 +256,10 @@ function createSummarySheet($sheet, $professor, $departmentName, $course_details
     $sheet->setCellValue('B8', 'اسم المقرر');
     $sheet->setCellValue('C8', 'المستوى');
     $sheet->setCellValue('D8', 'الوحدات');
+    $sheet->setCellValue('E8', 'الاختصاص');
     
-    $sheet->getStyle('A8:D8')->getFont()->setBold(true);
-    $sheet->getStyle('A8:D8')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9D9D9');
+    $sheet->getStyle('A8:E8')->getFont()->setBold(true);
+    $sheet->getStyle('A8:E8')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9D9D9');
 
     $rowNum = 9;
     $totalCredits = 0;
@@ -261,6 +271,7 @@ function createSummarySheet($sheet, $professor, $departmentName, $course_details
         $sheet->setCellValue('B' . $rowNum, $info['name']);
         $sheet->setCellValue('C' . $rowNum, $info['level']);
         $sheet->setCellValue('D' . $rowNum, $info['credits']);
+        $sheet->setCellValue('E' . $rowNum, $info['major']);
         
         if (strpos($info['level'], 'M') === 0) { $mCount++; } else { $lCount++; }
         
@@ -269,7 +280,7 @@ function createSummarySheet($sheet, $professor, $departmentName, $course_details
     }
 
     if($rowNum > 9) {
-        $sheet->getStyle('A8:D' . ($rowNum - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A8:E' . ($rowNum - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     }
     
     // --- SUMMARY TOTALS TABLE AT THE BOTTOM ---

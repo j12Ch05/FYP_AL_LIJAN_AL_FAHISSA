@@ -2,8 +2,9 @@
     session_start();
     include("database.php");
 
-    if (!isset($_SESSION["email"])) {
+    if (!isset($_SESSION["email"])||isset($_POST["logout"])) {
         header("location: login.php");
+        unset($_SESSION["email"]);
         exit();
     }
 
@@ -65,6 +66,7 @@
 
     <input type="radio" name="nav" id="tab-profile" checked>
     <input type="radio" name="nav" id="tab-courses">
+    
 
     <aside class="sidebar">
         <div class="logo-section">
@@ -83,8 +85,17 @@
     </aside>
 
     <main class="main-content">
-        <header class="welcome-header">
-            Welcome Dr. <span><?php echo htmlspecialchars($professor['prof_first_name'] . ' ' . $professor['prof_last_name']); ?></span>
+        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+            
+            <div class="user-info">
+                Welcome Dr. <span><?php echo htmlspecialchars($professor['prof_first_name'] . ' ' . $professor['prof_last_name']); ?></span>
+            </div>
+
+            <form method="post" style="margin: 0;">
+                <input type="submit" name="logout" id="logout-button" value="logout" 
+                    style="background-color: #d32f2f; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+            </form>
+
         </header>
 
         <section id="content-profile" class="tab-content">
