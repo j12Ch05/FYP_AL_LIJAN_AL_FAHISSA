@@ -2,6 +2,7 @@
     session_start();
     include("database.php");
 
+    $ulDomain = "ul.edu.lb";
     //always define the error variable at the beginning of the code
     $error = "";
     //if email inserted is really in the database 
@@ -42,20 +43,21 @@
             }
             if(empty($error)){
                 $_SESSION["email"] = $email;
-                $_SESSION["admin"] = $admin;
                 if($admin){
                     header("location: AdminPage.php");
                 }
                 else{
                     header("location: ProfessorPage.php");
                 }
+                exit();
             }
-            else{
-                $_SESSION["error"] = $error;
-            }
-
+            
         }
+        
     }
+    if(!empty($error)){
+            $_SESSION["error"] = $error;
+        }
     mysqli_close($conn);
 ?>
 
