@@ -32,7 +32,7 @@
                 $mail = require __DIR__ . "/mailer.php";
 
                 $mail->setFrom("noreply@example.com");
-                $mail->addAddress("charbel.otk@gmail.com");
+                $mail->addAddress("receiveralaf@gmail.com");
                 // $mail->addAddress($email)
                 $mail->Subject = "Password Reset";
                 $mail->Body = <<<END
