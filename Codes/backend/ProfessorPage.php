@@ -33,7 +33,7 @@
                     FROM teaching t
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
                     JOIN major m ON c.major_id = m.major_id
-                    WHERE t.prof_file_nb = ?
+                    WHERE t.prof_file_nb = AND t.isActive = 1?
                     ORDER BY t.uni_year DESC, c.course_name";
     $stmt_courses = mysqli_prepare($conn, $sql_courses);
     mysqli_stmt_bind_param($stmt_courses, "i", $professor['prof_file_nb']);
