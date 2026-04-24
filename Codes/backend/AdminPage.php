@@ -158,7 +158,8 @@
                 Welcome Admin
             </div>
 
-            <form method="post" style="margin: 0;">
+            <form method="post" style="margin: 0;" id="logoutForm">
+                <input type="hidden" name="logout" value="1">
                 <button type="button" name="logout" id="logout-button" value="logout" 
                     style="background-color: #d32f2f; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;"
                     onclick="confirmLogout()">
@@ -1060,8 +1061,8 @@
         // Global logout confirmation function
         function confirmLogout() {
             if (confirm('Are you sure you want to logout?')) {
-                // Submit the existing form
-                document.querySelector('form[method="post"]').submit();
+                // Submit the logout form by ID
+                document.getElementById('logoutForm').submit();
             }
         }
     </script>
