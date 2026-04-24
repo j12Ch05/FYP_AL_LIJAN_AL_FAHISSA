@@ -438,7 +438,7 @@
                                 }
                             ?>
                             <input type="submit" id="findViewMajorBtn" class="btn" name="findView" value="Find">
-                            <input type="submit" id="deleteViewMajorBtn" class="btn" name="deleteView" value="Delete"><br>
+                            <input type="submit" id="deleteViewMajorBtn" class="btn" name="deleteView" value="Cancel"><br>
                             <br><div class="table-container" style="<?php echo $viewMajorCoursesLoaded ? "" : "display: none;"; ?>">
                                 <table>
                                     <thead>
