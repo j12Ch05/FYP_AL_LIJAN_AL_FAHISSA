@@ -100,6 +100,14 @@ body {
     border-radius: 12px;
     padding: 25px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* used by <div class="form-container"> */
+.form-container {
+    width: 100%;
 }
 
 /* used by <div class="card-header"> */
@@ -196,6 +204,114 @@ td {
     cursor: pointer;
     font-weight: 500;
     transition: opacity 0.2s;
+}
+
+/* ── Responsive Design ───────────────────── */
+@media screen and (max-width: 1024px) {
+    .sidebar {
+        width: 180px;
+    }
+    .main-content {
+        margin-left: 180px;
+        padding: 20px 20px 30px 20px;
+    }
+    .profile-grid {
+        gap: 15px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        padding: 20px 0;
+    }
+    .logo-section {
+        padding: 15px 10px;
+    }
+    .logo-section h2 {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    .logo-section p {
+        display: none;
+    }
+    .nav-item {
+        padding: 14px 10px;
+        text-align: center;
+    }
+    .nav-item .icon {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+    .nav-item span:not(.icon) {
+        display: none;
+    }
+    .main-content {
+        margin-left: 60px;
+        padding: 15px 15px 30px 15px;
+    }
+    .welcome-header {
+        font-size: 1.4rem;
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+    .card {
+        padding: 20px 15px;
+        border-radius: 10px;
+    }
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .form-group input,
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    table {
+        font-size: 0.85rem;
+    }
+    th, td {
+        padding: 10px 8px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .sidebar {
+        width: 50px;
+    }
+    .main-content {
+        margin-left: 50px;
+        padding: 10px 10px 30px 10px;
+    }
+    .welcome-header {
+        font-size: 1.2rem;
+    }
+    .card {
+        padding: 15px 12px;
+    }
+    .form-group label {
+        font-size: 0.8rem;
+    }
+    .form-group input,
+    .form-group select {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
 }
 
 .btn:hover {

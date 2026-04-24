@@ -106,6 +106,7 @@
                     <button type="submit" form="profile-form" id="applyProfileChanges" class="btn" style="display: none;">Apply Changes</button>
                 </div>
                 
+                <div class="form-container">
                 <form id="profile-form" action="prof_profile.php" method="POST" class="profile-grid">
                     <div class="form-group">
                         <label>First Name</label>
@@ -159,6 +160,7 @@
                         <input type="email" name="email" value="<?php echo htmlspecialchars($professor['prof_email']); ?>" disabled class="profileInput">
                     </div>
                 </form>
+                </div>
             </div>
         </section>
 
