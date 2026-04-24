@@ -195,7 +195,7 @@
     </div>
 
     <div class="form-group">
-        <label for="password">Password *</label>
+        <label for="password">Password*<br>(must at least 8 characters,1 uppercase,1 special character)  </label>
         <div class="password-wrapper">
             <input type="password" id="password" name="password" placeholder="Enter your password" required
                    value="<?php echo isset($_POST['password']) ? $_POST['password'] : ''; ?>">
