@@ -6,6 +6,20 @@
 
 DELIMITER $$
 
+-- Update department chair when a new admin is made
+DROP TRIGGER IF EXISTS `after_professor_make_admin`$$
+CREATE TRIGGER `after_professor_make_admin`
+AFTER UPDATE ON `professor`
+FOR EACH ROW
+BEGIN
+    -- Check if isAdmin was set to 1 and the professor has a department
+    IF NEW.isAdmin = 1 AND OLD.isAdmin = 0 AND NEW.dep_id IS NOT NULL THEN
+        UPDATE department
+        SET chair_person_file_nb = NEW.prof_file_nb
+        WHERE dep_id = NEW.dep_id;
+    END IF;
+END$$
+
 -- Delete teaching rows when the parent course is deleted
 DROP TRIGGER IF EXISTS `delete_teaching_after_course`$$
 CREATE TRIGGER `delete_teaching_after_course`
