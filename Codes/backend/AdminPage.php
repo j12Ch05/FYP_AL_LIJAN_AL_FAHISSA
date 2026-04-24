@@ -1053,19 +1053,17 @@
                     }
                 });
             }
-
-            // --- Logout Confirmation ---
-            function confirmLogout() {
-                if (confirm('Are you sure you want to logout?')) {
-                    // Create and submit a form programmatically
-                    const form = document.createElement('form');
-                    form.method = 'post';
-                    form.innerHTML = '<input type="hidden" name="logout" value="1">';
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            }
         });
+    </script>
+
+    <script>
+        // Global logout confirmation function
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Submit the existing form
+                document.querySelector('form[method="post"]').submit();
+            }
+        }
     </script>
 
     <script src="AdminPage.js?v=1.1">  
