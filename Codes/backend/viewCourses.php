@@ -29,7 +29,7 @@
                 FROM course c
                 LEFT JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
                 LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
-                WHERE c.major_id = ? AND c.course_level = ? AND c.course_semester_nb = ? AND c.course_lang = ?";
+                WHERE c.major_id = ? AND c.course_level = ? AND c.course_semester_nb = ? AND c.course_lang = ? AND t.isActive = 1";
 
         $stmt = mysqli_prepare($conn, $sql);
         if (!$stmt) {

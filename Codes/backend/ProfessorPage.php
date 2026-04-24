@@ -85,7 +85,7 @@
     </aside>
 
     <main class="main-content">
-        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
             
             <div class="user-info">
                 Welcome Dr. <span><?php echo htmlspecialchars($professor['prof_first_name'] . ' ' . $professor['prof_last_name']); ?></span>

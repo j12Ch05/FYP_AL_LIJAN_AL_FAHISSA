@@ -24,12 +24,17 @@ body {
 
 /* Sidebar Styling */
 .sidebar {
-    width: 280px;
+    width: 220px;
     background: linear-gradient(180deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
     color: var(--white);
     position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
     padding: 20px 0;
+    overflow-y: auto;
+    z-index: 100;
+    flex-shrink: 0;
 }
 
 .logo-section {
@@ -73,9 +78,10 @@ body {
 
 /* Main Content Area */
 .main-content {
-    margin-left: 280px;
+    margin-left: 220px;
     flex: 1;
-    padding: 50px;
+    padding: 30px 30px 30px 30px;
+    min-width: 0;
 }
 
 .welcome-header {
@@ -325,4 +331,113 @@ input[type="radio"] {
 
 .dropdown-content .btn {
     margin-right: 10px;
+}
+
+/* =============================================
+   RESPONSIVE DESIGN — ALL DEVICES
+   ============================================= */
+
+/* Large tablets / small laptops (max 1024px) */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 200px;
+    }
+    .main-content {
+        margin-left: 200px;
+        padding: 25px 20px;
+    }
+    .profile-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    .welcome-header {
+        font-size: 1.6rem;
+    }
+}
+
+/* Tablets portrait (max 768px) */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        min-height: unset;
+        padding: 15px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    .logo-section {
+        padding: 10px 20px;
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+    .nav-item {
+        padding: 10px 20px;
+        white-space: nowrap;
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 20px 15px;
+    }
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+    .welcome-header {
+        font-size: 1.4rem;
+    }
+    .card {
+        padding: 20px;
+    }
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .dropdown-menu {
+        margin-top: 10px;
+    }
+    .premium-number-input {
+        width: 90px;
+        height: 50px;
+        font-size: 18px;
+    }
+}
+
+/* Small phones (max 480px) */
+@media (max-width: 480px) {
+    .sidebar {
+        flex-wrap: wrap;
+    }
+    .logo-section h2 {
+        font-size: 1rem;
+    }
+    .nav-item {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    .main-content {
+        padding: 15px 10px;
+    }
+    .welcome-header {
+        font-size: 1.2rem;
+    }
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    th, td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
+    .premium-number-input {
+        width: 75px;
+        height: 44px;
+        font-size: 16px;
+    }
 }

@@ -152,7 +152,7 @@
     </aside>
 
     <main class="main-content">
-        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+        <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
             
             <div class="user-info">
                 Welcome Admin

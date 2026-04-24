@@ -22,36 +22,43 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling */
+/* ── Sidebar ─────────────────────────────── */
 .sidebar {
-    width: 280px;
+    width: 200px;
     background: linear-gradient(180deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
     color: var(--white);
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
     padding: 20px 0;
+    overflow-y: auto;
+    z-index: 100;
+    flex-shrink: 0;
 }
 
 .logo-section {
-    padding: 20px 30px;
-    margin-bottom: 40px;
+    padding: 20px 20px;
+    margin-bottom: 30px;
 }
 
 .logo-section h2 {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 600;
 }
 
 .logo-section p {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0.8;
+    margin-top: 4px;
 }
 
+/* nav-item — used by <label for="tab-*" class="nav-item label-*"> */
 .nav-item {
     display: block;
-    padding: 15px 30px;
+    padding: 14px 20px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.2s ease;
 }
 
@@ -63,17 +70,22 @@ body {
     margin-right: 10px;
 }
 
-/* Main Content Area */
+/* ── Main Content ────────────────────────── */
+/* margin-left matches sidebar width exactly — no gap */
 .main-content {
-    margin-left: 280px;
+    margin-left: 200px;
     flex: 1;
-    padding: 50px;
+    padding: 20px 30px 30px 20px;
+    min-width: 0;
 }
 
+/* welcome-header — used by <header class="welcome-header"> */
 .welcome-header {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 500;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
 }
 
 .welcome-header span {
@@ -81,30 +93,34 @@ body {
     font-weight: 600;
 }
 
-/* Card UI */
+/* ── Card ────────────────────────────────── */
+/* used by <div class="card"> */
 .card {
     background: var(--white);
     border-radius: 12px;
-    padding: 30px;
+    padding: 25px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
 }
 
+/* used by <div class="card-header"> */
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     border-bottom: 1px solid var(--border);
     padding-bottom: 15px;
 }
 
-/* Form Styling */
+/* ── Profile Form ────────────────────────── */
+/* used by <form class="profile-grid"> */
 .profile-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
+    gap: 20px;
 }
 
+/* used by <div class="form-group"> */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -117,8 +133,9 @@ body {
     font-weight: 600;
 }
 
-.form-group input, .form-group select {
-    padding: 12px 15px;
+.form-group input,
+.form-group select {
+    padding: 11px 14px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: #fbfbfb;
@@ -126,12 +143,14 @@ body {
     color: #444;
 }
 
+/* used by <input class="readonly-input"> */
 .readonly-input {
     background-color: #f1f5f9 !important;
     cursor: not-allowed;
 }
 
-/* Table Styling */
+/* ── Table ───────────────────────────────── */
+/* used by <div class="table-container"> */
 .table-container {
     overflow-x: auto;
 }
@@ -145,27 +164,29 @@ th {
     background: var(--primary-purple);
     color: white;
     text-align: left;
-    padding: 15px;
+    padding: 14px 15px;
     font-weight: 500;
     font-size: 0.9rem;
 }
 
 th:first-child { border-radius: 8px 0 0 0; }
-th:last-child { border-radius: 0 8px 0 0; }
+th:last-child  { border-radius: 0 8px 0 0; }
 
 td {
-    padding: 15px;
+    padding: 13px 15px;
     border-bottom: 1px solid var(--border);
     font-size: 0.95rem;
 }
 
+/* used by <a class="code-link"> */
 .code-link {
     color: var(--primary-purple);
     text-decoration: none;
     font-weight: 600;
 }
 
-/* Buttons */
+/* ── Buttons ─────────────────────────────── */
+/* used by <button class="btn"> */
 .btn {
     background: linear-gradient(135deg, #7b61ff, #5a52d4);
     color: white;
@@ -176,64 +197,105 @@ td {
     font-weight: 500;
     transition: opacity 0.2s;
 }
-.btn-logout {
-    background-color: #d32f2f; /* Standard red (or use 'red') */
-    color: white;             /* Keep text white for contrast */
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;       /* Keep the rounded corners */
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s; /* Smooth hover effect */
-}
-
-
 
 .btn:hover {
     opacity: 0.9;
 }
-/* Optional: Darken slightly when hovering */
-.btn-logout:hover {
-    background-color: #b71c1c;
-}
 
-.profile-message {
-    margin: 20px 0;
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    font-size: 0.95rem;
-    line-height: 1.4;
-}
-
-.profile-message.error {
-    background: #ffe8e8;
-    color: #b22222;
-    border-color: #f4c2c2;
-}
-
-.profile-message.success {
-    background: #e8ffef;
-    color: #1e7d34;
-    border-color: #b7e3c8;
-}
-
-/* Tab Logic (No JS) */
+/* ── Tab Logic (CSS-only, no JS) ─────────── */
+/* Hides the radio inputs themselves */
 input[type="radio"] {
     display: none;
 }
 
+/* All tab panels hidden by default */
+/* used by <section class="tab-content"> */
 .tab-content {
     display: none;
 }
 
+/*
+  Radio inputs are siblings of aside.sidebar and main.main-content in body.
+  The ~ (general sibling) combinator reaches both correctly.
+*/
 #tab-profile:checked ~ .main-content #content-profile,
-#tab-courses:checked ~ .main-content #content-courses {
+#tab-courses:checked  ~ .main-content #content-courses {
     display: block;
 }
 
+/* Active nav highlight */
+/* used by <label class="nav-item label-profile"> and label-courses */
 #tab-profile:checked ~ .sidebar .label-profile,
-#tab-courses:checked ~ .sidebar .label-courses {
+#tab-courses:checked  ~ .sidebar .label-courses {
     background: rgba(255, 255, 255, 0.2);
     border-left: 4px solid white;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — all breakpoints
+   ══════════════════════════════════════════ */
+
+/* Small laptops / large tablets */
+@media (max-width: 1024px) {
+    .sidebar { width: 180px; }
+    .main-content { margin-left: 180px; padding: 18px 20px 25px 16px; }
+    .welcome-header { font-size: 1.5rem; }
+    .profile-grid { gap: 15px; }
+}
+
+/* Tablets portrait */
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .logo-section {
+        padding: 8px 16px;
+        margin-bottom: 0;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .nav-item {
+        padding: 10px 16px;
+        white-space: nowrap;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 16px 15px;
+    }
+
+    .profile-grid { grid-template-columns: 1fr; }
+
+    .welcome-header { font-size: 1.3rem; }
+
+    .card { padding: 18px; }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .sidebar { flex-wrap: wrap; }
+    .logo-section h2 { font-size: 0.95rem; }
+    .nav-item { font-size: 0.875rem; padding: 8px 12px; }
+    .main-content { padding: 12px 10px; }
+    .welcome-header { font-size: 1.1rem; }
+    .btn { padding: 8px 14px; font-size: 0.875rem; }
+    th, td { padding: 9px 8px; font-size: 0.8rem; }
 }
