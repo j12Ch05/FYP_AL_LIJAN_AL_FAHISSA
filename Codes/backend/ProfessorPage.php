@@ -92,8 +92,11 @@
             </div>
 
             <form method="post" style="margin: 0;">
-                <input type="submit" name="logout" id="logout-button" value="logout" 
-                    style="background-color: #d32f2f; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                <button type="button" name="logout" id="logout-button" value="logout" 
+                    style="background-color: #d32f2f; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;"
+                    onclick="confirmLogout()">
+                    logout
+                </button>
             </form>
 
         </header>
@@ -257,6 +260,18 @@
                      });
                     }
                 });
+            }
+
+            // --- Logout Confirmation ---
+            function confirmLogout() {
+                if (confirm('Are you sure you want to logout?')) {
+                    // Create and submit a form programmatically
+                    const form = document.createElement('form');
+                    form.method = 'post';
+                    form.innerHTML = '<input type="hidden" name="logout" value="1">';
+                    document.body.appendChild(form);
+                    form.submit();
+                }
             }
         });
     </script>
