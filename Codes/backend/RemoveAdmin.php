@@ -2,14 +2,27 @@
 session_start();
 include("database.php");
 
+function is_chief($conn,$value){
+        $sql_query = "select chair_person_file_nb from department where chair_person_file_nb = ?";
+        $stmt = mysqli_prepare($conn,$sql_query);
+        mysqli_stmt_bind_param($stmt,"s",$value);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        return mysqli_num_rows($result) > 0;
+    }
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     $_SESSION['admin_status_message'] = 'Invalid request.';
     header('Location: AdminPage.php?tab=edit-admins');
     exit();
 }
 
+
 $prof_file_nb = trim($_POST["prof_file_nb"] ?? '');
 $_SESSION["current_admin"] = $prof_file_nb;
+
+
 
 if ($prof_file_nb === '') {
     $_SESSION['admin_status_message'] = 'Please select a professor first.';
@@ -17,7 +30,14 @@ if ($prof_file_nb === '') {
     exit();
 }
 
-$sql = "UPDATE professor SET isAdmin = 0 WHERE prof_file_nb = ?";
+
+
+
+if(is_chief($conn,$prof_file_nb)){
+    $_SESSION['admin_status_message'] = 'Error: You cannot remove the department chief';
+}
+else{
+    $sql = "UPDATE professor SET isAdmin = 0 WHERE prof_file_nb = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "s", $prof_file_nb);
 mysqli_stmt_execute($stmt);
@@ -29,6 +49,7 @@ if (mysqli_stmt_affected_rows($stmt) > 0) {
 }
 
 mysqli_stmt_close($stmt);
+}
 mysqli_close($conn);
 
 header('Location: AdminPage.php?tab=edit-admins');

@@ -12,13 +12,20 @@
     $email = $_SESSION["email"];
 
     //Check if stills admin
-    $sql_admin = "SELECT isAdmin,prof_file_nb FROM professor WHERE prof_email = ?";
+    $sql_admin = "SELECT p.isAdmin,p.prof_file_nb,d.chair_person_file_nb 
+                  FROM professor p
+                  JOIN department d ON d.dep_id = p.dep_id
+                  WHERE prof_email = ?";
     $stmt_a = mysqli_prepare($conn,$sql_admin);
     mysqli_stmt_bind_param($stmt_a,"s",$email);
     mysqli_stmt_execute($stmt_a);
 
     $res_a = mysqli_stmt_get_result($stmt_a);
     $admin = mysqli_fetch_assoc($res_a);
+    $makeAdmin = false;
+    if($admin["chair_person_file_nb"] == $admin["prof_file_nb"]){
+        $makeAdmin = true;
+    }
 
     //If not admin
     if(!$admin || $admin["isAdmin"]!=1){
@@ -876,7 +883,7 @@
             </div>
             <div id="selectedProfessorInfo" style="margin-bottom: 20px; padding: 12px; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600; color: #1f2937; font-size: 16px;">Selected Professor: None</div>
             <div class="form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: inline;">
+                <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: <?php echo $makeAdmin?" inline;":"none;"; ?>">
                     <input type="hidden" id="prof_file_nb_make" name="prof_file_nb" value="">
                     <input type="submit" class="btn" value="Make Admin" id="makeAdminBtn" disabled>
                 </form>
