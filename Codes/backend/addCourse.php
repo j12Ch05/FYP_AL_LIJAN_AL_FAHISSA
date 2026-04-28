@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
 
     
 
@@ -115,4 +115,4 @@
     
 
     mysqli_close($conn);
-?>
+    exit();

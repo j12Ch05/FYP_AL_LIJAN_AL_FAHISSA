@@ -1,9 +1,9 @@
 <?php
 session_start();
-include("database.php");
+include __DIR__ .'/database.php';
 
 if (!isset($_SESSION["email"])) {
-    header("location: login.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -74,4 +74,4 @@ if (mysqli_stmt_execute($stmt)) {
 
 mysqli_stmt_close($stmt);
 mysqli_close($conn);
-?>
+exit();

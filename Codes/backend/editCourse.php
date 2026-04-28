@@ -2,7 +2,7 @@
     error_reporting(E_ALL);
     ini_set('display_errors', 0); // keep output clean
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
 
     header("Content-Type: application/json; charset=utf-8");
 
@@ -215,4 +215,3 @@
     exit();
 
 
-?>

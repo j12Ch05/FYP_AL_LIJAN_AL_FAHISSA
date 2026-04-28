@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ . '/database.php';
 
     //Creating the random code the user should enter
     $d1 = rand(0,9);
@@ -32,7 +32,8 @@
                 $mail = require __DIR__ . "/mailer.php";
 
                 $mail->setFrom("noreply@example.com");
-                $mail->addAddress($email);
+                $mail->addAddress("receiveralaf@gmail.com");
+                // $mail->addAddress($email)
                 $mail->Subject = "Password Reset";
                 $mail->Body = <<<END
 
@@ -50,7 +51,7 @@
             } else {
                 echo "Something went wrong";
             }
-            header("location: enterCode.php");
+            header("Location: enterCode.php");
             $digits = [$d1,$d2,$d3,$d4,$d5,$d6];
             $_SESSION["digits"] = $digits;
         } else {
@@ -65,4 +66,3 @@
     
     mysqli_close($conn);
     exit();
-?>

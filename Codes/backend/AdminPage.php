@@ -1,10 +1,10 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
     
 
     if(!isset($_SESSION['email'])||isset($_POST["logout"])){
-        header("location: login.php");
+        header("Location: login.php");
         unset($_SESSION["email"]);
         exit();
     }
@@ -29,7 +29,7 @@
 
     //If not admin
     if(!$admin || $admin["isAdmin"]!=1){
-        header("location: login.php");
+        header("Location: login.php");
         exit;
     }
 
@@ -40,7 +40,7 @@
         $adminFile = $admin["prof_file_nb"];
 
         if($currentAdmin == $adminFile){
-            header("location: login.php");
+            header("Location: login.php");
             unset($_SESSION["email"]);
             exit;
         }

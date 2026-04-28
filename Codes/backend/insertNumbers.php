@@ -87,7 +87,7 @@
               $_SESSION["insert_numbers_success"]);
         if (isset($conn)) mysqli_close($conn);
         if (ob_get_length()) ob_end_clean();
-        header("location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors");
         exit;
     }
 
@@ -124,14 +124,14 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors");
         exit;
     }
 
     if (isset($_POST["applyNumbers"])) {
         if (!isset($_SESSION["insert_numbers_filter"])) {
             $_SESSION["insert_numbers_error"] = "Session expired. Please search again.";
-            header("location: AdminPage.php?tab=correctors");
+            header("Location: AdminPage.php?tab=correctors");
             exit;
         }
         $first_numbers = $_POST["first_numbers"] ?? [];
@@ -171,7 +171,7 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors");
         exit;
     }
 
@@ -210,12 +210,11 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors");
         exit;
     }
 
     mysqli_close($conn);
     ob_end_clean();
-    header("location: AdminPage.php?tab=correctors");
+    header("Location: AdminPage.php?tab=correctors");
     exit;
-?>

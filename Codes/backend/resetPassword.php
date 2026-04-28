@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
     $passwordFormat = "/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
 
     $email = $_SESSION["email"];
@@ -26,7 +26,7 @@
                 if (mysqli_stmt_execute($stmt)) {
                     
                     if (mysqli_stmt_affected_rows($stmt) > 0) {
-                        header("location: login.php");
+                        header("Location: login.php");
                         exit();
                     } else {
                         echo "Something went wrong";

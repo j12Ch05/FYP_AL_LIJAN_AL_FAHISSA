@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("database.php");
+include __DIR__ .'/database.php';
 
 function is_chief($conn,$value){
         $sql_query = "select chair_person_file_nb from department where chair_person_file_nb = ?";

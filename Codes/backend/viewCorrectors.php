@@ -3,7 +3,7 @@
 
     session_start();
     ob_start();
-    include __DIR__ . "/database.php";
+    include __DIR__ .'/database.php';
 
 
     if (isset($_POST["cancelCorrectors"])) {

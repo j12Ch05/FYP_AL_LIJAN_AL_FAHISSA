@@ -1,7 +1,7 @@
 <?php
     session_start();
     ob_start();
-    include __DIR__ . "/database.php";
+    include __DIR__ . '/database.php';
 
     if (isset($_POST["deleteView"])) {
         unset($_SESSION["view_major_courses"], $_SESSION["view_major_filter"], $_SESSION["view_major_error"]);

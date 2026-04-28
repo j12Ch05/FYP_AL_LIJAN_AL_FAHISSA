@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
 
     
 
@@ -39,7 +39,7 @@
 
     
     if (mysqli_query($conn, $sql_insert)) {
-        header("location: login.php");
+        header("Location: login.php");
         echo "Registration successful!";
     } else {
         echo "Error: " . mysqli_error($conn); 
@@ -48,4 +48,3 @@
     mysqli_close($conn);
 
     exit();
-?>

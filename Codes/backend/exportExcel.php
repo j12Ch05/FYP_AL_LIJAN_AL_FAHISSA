@@ -1,7 +1,7 @@
 <?php
     session_start();
     ob_start();
-    include __DIR__ . "/database.php";
+    include __DIR__ . '/database.php';
 
     $_SESSION["departments"] = [
         "bio" => "علوم الأحياء",
@@ -78,13 +78,13 @@
         //here will be the switch between the excel format
         if(isset($_POST["tawzi3"])){
             //charbel part
-            require __DIR__ . "/tawzi3_format.php";
+            require __DIR__ . '/tawzi3_format.php';
         }
         else if(isset($_POST["ta3in"])){
-            require __DIR__ . "/ta3in_format.php";
+            require __DIR__ . '/ta3in_format.php';
         }
         else if(isset($_POST["edbarat"])){
-            require __DIR__ . "/edbarat_format.php";
+            require __DIR__ . '/edbarat_format.php';
         }
 
 

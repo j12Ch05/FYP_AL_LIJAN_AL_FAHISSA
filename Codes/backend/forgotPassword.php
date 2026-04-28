@@ -1,8 +1,7 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
 
-    
     
 
     //if email inserted is really in the database 
@@ -30,7 +29,7 @@
             $_SESSION["email"] = $email;
 
 
-            header("location: generateCode.php");
+            header("Location: generateCode.php");
             exit();
         }
         else{

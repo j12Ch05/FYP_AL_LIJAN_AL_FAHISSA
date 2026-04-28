@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "database.php";
+include __DIR__ .'/database.php';
 
 header('Content-Type: application/json');
 
@@ -85,4 +85,4 @@ if ($stmt) {
 }
 
 mysqli_close($conn);
-?>
+exit();

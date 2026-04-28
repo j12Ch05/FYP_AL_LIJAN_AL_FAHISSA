@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include("database.php");
+    include __DIR__ .'/database.php';
 
     $ulDomain = "ul.edu.lb";
     $arabicPattern = "/^[\x{0600}-\x{06FF}\s]+$/u";
@@ -91,7 +91,7 @@
             $_SESSION["email"]   = $email;
             $_SESSION["password"]    = $password;
 
-            header("Location: signUpData.php");
+            header("Location: emailCode.php");
             
             exit();
         }

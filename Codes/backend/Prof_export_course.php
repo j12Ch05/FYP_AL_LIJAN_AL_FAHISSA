@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 session_start();
-include 'database.php';
+include __DIR__ .'/database.php';
 
 if (isset($_POST['exportExcel'])) {
     if (!isset($_SESSION['email'])) {
