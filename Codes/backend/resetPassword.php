@@ -3,6 +3,12 @@
     include __DIR__ .'/database.php';
     $passwordFormat = "/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
 
+    if (!isset($_SESSION["email"])) {
+        header("Location: forgotPassword.php");
+        unset($_SESSION["email"]);
+        exit();
+    }
+
     $email = $_SESSION["email"];
 
     if(isset($_POST["changePassword"])){

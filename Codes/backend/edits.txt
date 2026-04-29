@@ -16,10 +16,11 @@ insertNumbers.php:include(4 ' ') and location (90,127,134,174,213,219) has closi
 mailer.php : needs ' ' and has closing
 MakeAdmin.php: include(3)
 Prof_export_course.php: include(12)
-ProfessorPage.php: include(3) and location(6)
+ProfessorPage.php: include(3) and location(6) and the department id che(51)
 RemoveAdmin.php: include(3)
 removeProfessor.php: include(3) and exit(88) has closing
-resetPassword.php:include(3) and location(29)
+resetPassword.php:include(3) and location(29) and unset(6->10) 
 searchCourse.php:include(3) and exit(59)
 viewCorrectors.php:include(6 ' ')
 viewCourses.php:include(4 ' ')
+enterCode.php: unset(4->8)

@@ -1,5 +1,12 @@
 <?php
     session_start();
+
+    if (!isset($_SESSION["email"])) {
+        header("Location: forgotPassword.php");
+        unset($_SESSION["email"]);
+        exit();
+    }
+
     if(isset($_POST["verifyCode"])){
        $is_valid = true;
        //for verifying the code
