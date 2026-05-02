@@ -2,7 +2,7 @@ generateCode.php: include of the database(line 3) and the location header(54) ha
 addCourse.php: include of the database (3) and the exit(118) has closing
 emailCode.php: new file uses the mailer.php
 verifyEmail.php: new file
-signUp.php:include database(3) and the location header(94)
+signUp.php:include database(3) and the location header(94) remove bioch(173)
 signUpData.php:include database(3) and the location header(42) exit(50) has closing
 AdminPage.php: include database (3)
 - location header if email is set(7)
@@ -16,7 +16,7 @@ insertNumbers.php:include(4 ' ') and location (90,127,134,174,213,219) has closi
 mailer.php : needs ' ' and has closing
 MakeAdmin.php: include(3)
 Prof_export_course.php: include(12)
-ProfessorPage.php: include(3) and location(6) and the department id che(51)
+ProfessorPage.php: include(3) and location(6) and the department id che(51) removed(bioch 50)
 RemoveAdmin.php: include(3)
 removeProfessor.php: include(3) and exit(88) has closing
 resetPassword.php:include(3) and location(29) and unset(6->10) 
@@ -24,3 +24,10 @@ searchCourse.php:include(3) and exit(59)
 viewCorrectors.php:include(6 ' ')
 viewCourses.php:include(4 ' ')
 enterCode.php: unset(4->8)
+exportExcel.php: removed bioch(7)
+
+
+
+N.B:
+Remember if we want to change the id of the department with the suggestion of dr Johnny to add the bioch to the chem
+and for the professor category keep it 

@@ -170,7 +170,7 @@
         <label for="department">Department *</label>
         <select class="dropdown-select" name="department" id="department">
             <?php 
-                $depts = ['math' => 'Math', 'css' => 'Computer Science and Statistics', 'pe' => 'Physics and Electronics', 'bio' => 'Biology', 'bioch' => 'Biochemistry', 'che' => 'Chemistry'];
+                $depts = ['math' => 'Math', 'css' => 'Computer Science and Statistics', 'pe' => 'Physics and Electronics', 'bio' => 'Biology',  'che' => 'Chemistry'];
                 foreach($depts as $val => $label) {
                     $selected = (isset($_POST['department']) && $_POST['department'] == $val) ? 'selected' : '';
                     echo "<option value='$val' $selected>$label</option>";

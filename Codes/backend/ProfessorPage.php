@@ -47,7 +47,6 @@
         'math' => 'Math',
         'pe' => 'Physics and Electronics',
         'bio' => 'Biology',
-        'bioch' => 'Biochemistry',
         'che' => 'Chemistry'
     ];
     $dep_display = isset($dep_options[$professor['dep_id']]) ? $dep_options[$professor['dep_id']] : $professor['dep_id'];
