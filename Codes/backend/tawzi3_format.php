@@ -115,21 +115,21 @@
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_CENTER);
 
-        $sheet->getColumnDimension('A')->setWidth(30);
-        $sheet->getColumnDimension('B')->setWidth(16);
-        $sheet->getColumnDimension('C')->setWidth(40);
+        $sheet->getColumnDimension('A')->setWidth(20);
+        $sheet->getColumnDimension('B')->setWidth(12);
+        $sheet->getColumnDimension('C')->setWidth(12);
         $sheet->getColumnDimension('D')->setWidth(18);
-        $sheet->getColumnDimension('E')->setWidth(12);
-        $sheet->getColumnDimension('F')->setWidth(12);
-        $sheet->getColumnDimension('G')->setWidth(20);
+        $sheet->getColumnDimension('E')->setWidth(40);
+        $sheet->getColumnDimension('F')->setWidth(30);
+        $sheet->getColumnDimension('G')->setWidth(16);
 
-        $sheet->setCellValue('A3', 'اسم المصحح الأول');
-        $sheet->setCellValue('B3', 'اسم المصحح الثاني');
-        $sheet->setCellValue('C3', 'اسم المقرر');
+        $sheet->setCellValue('A3', 'الاختصاص');
+        $sheet->setCellValue('B3', 'المرحلة');
+        $sheet->setCellValue('C3', 'اللغة (F/E)');
         $sheet->setCellValue('D3', 'رمز المقرر');
-        $sheet->setCellValue('E3', 'اللغة (F/E)');
-        $sheet->setCellValue('F3', 'المرحلة');
-        $sheet->setCellValue('G3', 'التخصص');
+        $sheet->setCellValue('E3', 'اسم المقرر');
+        $sheet->setCellValue('F3', 'اسم المصحح الأول');
+        $sheet->setCellValue('G3', 'اسم المصحح الثاني');
 
         $sheet->getStyle('A3:G3')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A3:G3')->getAlignment()
@@ -138,13 +138,13 @@
 
         $currentRow = 4;
         foreach ($rows as $row) {
-            $sheet->setCellValue('A' . $currentRow, $professors[$row["prof_file_nb"]]);
-            $sheet->setCellValue('B' . $currentRow, $professors[$row["second_corrector"]]);
-            $sheet->setCellValue('C' . $currentRow, $row['course_name']);
+            $sheet->setCellValue('A' . $currentRow, $row["major_name"]);
+            $sheet->setCellValue('B' . $currentRow, $row['course_level']);
+            $sheet->setCellValue('C' . $currentRow, $row['course_lang']);
             $sheet->setCellValue('D' . $currentRow, $row['course_code']);
-            $sheet->setCellValue('E' . $currentRow, $row['course_lang']);
-            $sheet->setCellValue('F' . $currentRow, $row['course_level']);
-            $sheet->setCellValue('G' . $currentRow, $row["major_name"]);
+            $sheet->setCellValue('E' . $currentRow, $row['course_name']);
+            $sheet->setCellValue('F' . $currentRow, $professors[$row["prof_file_nb"]]);
+            $sheet->setCellValue('G' . $currentRow, $professors[$row["second_corrector"]]);
             $sheet->getStyle('A' . $currentRow . ':G' . $currentRow)
                 ->getAlignment()
                 ->setVertical(Alignment::VERTICAL_TOP)
