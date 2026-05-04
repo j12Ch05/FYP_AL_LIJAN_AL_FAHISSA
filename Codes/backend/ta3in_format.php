@@ -24,29 +24,14 @@
     $major = $filter["excelMajor"];
     $level = $filter["excelLevel"];
 
-    $d = $departments[$dep] ?? "غير محدد";
-    
-
-    $file_name = "";
-    $title1 = "تعيين اللجان الفاحصة  - قسم  $d ";
-    $title2="";
-    if($sess == "sess2"){
-        $file_name = "تعيين اللجان الفاحصة  - قسم  $d  - الدورة  الثانية - ";
-        $title2 = "لامتحانات  - الدورة الثانية  ";
-    }
-    else{
-        $sem = $semesters[$sess];
-        $file_name = "تعيين اللجان الفاحصة - قسم $d - -$sem  ";
-        $title2 = "لامتحانات $sem  - الدورة الاولى ";
-    }
-
     $sql = "SELECT     c.course_code,
                        c.course_name,
                        c.course_lang,
                        corr.prof_file_nb AS prof_file_nb,
                        corr.second_corrector_file_nb,
                        corr.third_corrector_file_nb,
-                       t.uni_year
+                       t.uni_year,
+                       d.dep_name
                 FROM course c
                 LEFT JOIN correctors corr ON c.course_code = corr.course_code
                     AND c.course_lang = corr.course_lang
@@ -57,30 +42,32 @@
                     AND c.major_id = t.major_id
                     AND t.isActive = 1
                 LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
+                LEFT JOIN department d ON d.dep_id = p.dep_id
                 ";
         //s is a variable to know which parameters we need
         $s = 0;
 
     if($level == "all" && $major == "all"){
-        $sql .= "WHERE p.dep_id = ?";
+        $sql .= "WHERE d.dep_id = ?";
         $s = 0;
     }
     else if($level == "all"){
-        $sql .= "WHERE c.major_id = ? AND  p.dep_id = ?";
+        $sql .= "WHERE c.major_id = ? AND  d.dep_id = ?";
         $file_name .= $major;
         $s = 1;
     }
     else if($major == "all"){
-        $sql .= "WHERE c.course_level = ? AND  p.dep_id = ?";
+        $sql .= "WHERE c.course_level = ? AND  d.dep_id = ?";
         $file_name .= $level;
         $s = 2;
     }
     else{
-        $sql .= "WHERE c.major_id = ? AND c.course_level = ? AND  p.dep_id = ?";
+        $sql .= "WHERE c.major_id = ? AND c.course_level = ? AND  d.dep_id = ?";
         $file_name .= $level ." - " . $major;
         $s = 3;
     }
-
+    
+    $d="";
     $rows = [];
     $corrProfs = [];
     $stmt = mysqli_prepare($conn,$sql);
@@ -120,6 +107,7 @@
         $result = mysqli_stmt_get_result($stmt);
         while ($row = mysqli_fetch_assoc($result)) {
             $rows[] = $row;
+            $d = $row["dep_name"];
         }
         // Keys: prof_file_nb. Values: [0] = committee count, [1] = ['E' => course codes, 'F' => course codes]
         $profIds = array_filter(array_unique(array_column($rows, 'prof_file_nb')), static function ($v) {
@@ -134,6 +122,24 @@
         }
         mysqli_stmt_close($stmt);
     }
+
+    
+    
+
+    $file_name = "";
+    $title1 = "تعيين اللجان الفاحصة  - قسم  $d ";
+    $title2="";
+    if($sess == "sess2"){
+        $file_name = "تعيين اللجان الفاحصة  - قسم  $d  - الدورة  الثانية - ";
+        $title2 = "لامتحانات  - الدورة الثانية  ";
+    }
+    else{
+        $sem = $semesters[$sess];
+        $file_name = "تعيين اللجان الفاحصة - قسم $d - -$sem  ";
+        $title2 = "لامتحانات $sem  - الدورة الاولى ";
+    }
+
+    
 
     $addCorrectorAssignment = function (&$map, $profId, $courseCode, $courseLang) use ($sess) {
         if ($profId === null || $profId === '') {

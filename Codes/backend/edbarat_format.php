@@ -16,42 +16,24 @@
     $departments = $_SESSION["departments"];
     $dep = $_SESSION["dep_id"];
     $semesters = $_SESSION["semesters"];
+    $sess = $_SESSION["excel_export_filter"]["sessionId"];
 
     //in this format we need just the session number
-    $sess = $_SESSION["excel_export_filter"]["sessionId"];
-    $d = $departments[$dep] ?? "ﻏﻴﺮ ﻣﺤﺪﺩ";
-
-    $file_name="";
-    $title1= "اﻟﺠﺎﻣﻌﺔ اﻟﻠﺒﻨﺎﻧﻴﺔ -  كلية العلوم الفرع الثاني";
-    $dep_name = "القسم: $d";
-    $title2 = "";
-    $title3 = "";
-    if($sess == "sess2"){
-        $file_name = "ﻣﺠﻤﻮﻉ اﺿﺒﺎﺭاﺕ اﻟﺘﺼﺤﻴﺢ اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ - ﻗﺴﻢ $d ";
-        $title2 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (تصحيح مسابقات سنوات الإجازة) اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
-        $title3 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (ﺗﺼﺤﻴﺢ ﻣﺴﺎﺑﻘﺎﺕ ﻣﺎﺳﺘﺮ1) اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
-    }
-    else{
-        $sem = $semesters[$sess];
-         $file_name = "ﻣﺠﻤﻮﻉ اﺿﺒﺎﺭاﺕ اﻟﺘﺼﺤﻴﺢ $sem - ﻗﺴﻢ $d ";
-        $title2 = " جدول صرف تعويضات لجان فاحصة (تصحيح مسابقات سنوات الإجازة)$sem  ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
-        $title3 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (ﺗﺼﺤﻴﺢ ﻣﺴﺎﺑﻘﺎﺕ ﻣﺎﺳﺘﺮ 1) $sem ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
-    }
-
-
     $sql = "SELECT corr.prof_file_nb as prof_file_nb,
                    corr.second_corrector_file_nb as second_corrector,
                    corr.third_corrector_file_nb as third_corrector,
                    corr.partial_first_corrector ,
                    corr.partial_second_corrector,
                    corr.final_first_corrector,
-                   corr.final_second_corrector ,
-                   t.uni_year,c.course_level
+                   corr.final_second_corrector,
+                   t.uni_year,c.course_level,
+                   d.dep_name
             FROM correctors corr
             LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.major_id = corr.major_id
             LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
             LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
-            WHERE p.dep_id = ? and corr.session_nb = ?";
+            LEFT JOIN department d ON d.dep_id = p.dep_id
+            WHERE d.dep_id = ? and corr.session_nb = ?";
 
     $stmt = mysqli_prepare($conn,$sql);
     if(!$stmt){
@@ -67,7 +49,7 @@
         mysqli_stmt_bind_param($stmt,"ss",$dep,$sess);
     }
 
-
+    $d= "";
     $rows = [];
     $corrProfL = [];//the list of the correctors in L1/L2/L3
     $corrProfM = [];//the list of the correctors in M1
@@ -85,6 +67,7 @@
         $result = mysqli_stmt_get_result($stmt);
         while($row = mysqli_fetch_assoc($result)){
             $rows[] = $row;
+            $d = $row["dep_name"];
         }
 
         mysqli_stmt_close($stmt);
@@ -145,6 +128,25 @@
     if (empty($rows)) {
         die("No data found for the selected session and department.");
     }
+    $file_name="";
+    $title1= "اﻟﺠﺎﻣﻌﺔ اﻟﻠﺒﻨﺎﻧﻴﺔ -  كلية العلوم الفرع الثاني";
+    $dep_name = "القسم: $d";
+    $title2 = "";
+    $title3 = "";
+    if($sess == "sess2"){
+        $file_name = "ﻣﺠﻤﻮﻉ اﺿﺒﺎﺭاﺕ اﻟﺘﺼﺤﻴﺢ اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ - ﻗﺴﻢ $d ";
+        $title2 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (تصحيح مسابقات سنوات الإجازة) اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
+        $title3 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (ﺗﺼﺤﻴﺢ ﻣﺴﺎﺑﻘﺎﺕ ﻣﺎﺳﺘﺮ1) اﻟﺪﻭﺭﺓ اﻟﺜﺎﻧﻴﺔ ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
+    }
+    else{
+        $sem = $semesters[$sess];
+         $file_name = "ﻣﺠﻤﻮﻉ اﺿﺒﺎﺭاﺕ اﻟﺘﺼﺤﻴﺢ $sem - ﻗﺴﻢ $d ";
+        $title2 = " جدول صرف تعويضات لجان فاحصة (تصحيح مسابقات سنوات الإجازة)$sem  ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
+        $title3 = " ﺟﺪﻭﻝ ﺻﺮﻑ ﺗﻌﻮﻳﻀﺎﺕ ﻟﺠﺎﻥ ﻓﺎﺣﺼﺔ (ﺗﺼﺤﻴﺢ ﻣﺴﺎﺑﻘﺎﺕ ﻣﺎﺳﺘﺮ 1) $sem ﻟﻠﻌﺎﻡ اﻟﺠﺎﻣﻌﻲ";
+    }
+
+
+    
 
     $file_name .= " " . $rows[0]["uni_year"];
     $title2 .= " " . $rows[0]["uni_year"];

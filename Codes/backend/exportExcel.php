@@ -3,14 +3,6 @@
     ob_start();
     include __DIR__ . '/database.php';
 
-    $_SESSION["departments"] = [
-        "bio" => "علوم الأحياء",
-        "che" => "كيمياء",
-        "pe" => "الفيزياء والإلكترونيك",
-        "css" => "المعلوماتية والاحصاء",
-        "math" => "الرياضيات"
-    ];
-
     $_SESSION["semesters"] = [
         "sem1" => "الفصل  الأول",
         "sem2" => "الفصل الثاني"

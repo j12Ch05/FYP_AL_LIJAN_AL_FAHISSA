@@ -20,7 +20,7 @@ if (isset($_POST['exportExcel'])) {
     $email = $_SESSION['email'];
 
     // 1. Get Professor Info
-    $sql_prof = "SELECT prof_file_nb, prof_first_name, prof_father_name, prof_last_name, prof_category, dep_id FROM professor WHERE prof_email = ?";
+    $sql_prof = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_father_name, p.prof_last_name, p.prof_category, d.dep_name FROM professor p JOIN department d ON p.dep_id = d.dep_id WHERE p.prof_email = ?";
     $stmt_prof = mysqli_prepare($conn, $sql_prof);
     mysqli_stmt_bind_param($stmt_prof, 's', $email);
     mysqli_stmt_execute($stmt_prof);
@@ -32,7 +32,7 @@ if (isset($_POST['exportExcel'])) {
         die('Professor not found.');
     }
 
-    $departmentName = $_SESSION["departments"][$professor["dep_id"]] ?? 'General';
+    $departmentName = $professor["dep_name"] ?? 'General';
     $prof_id = $professor["prof_file_nb"];
 
     // 2. Get Courses and Correctors

@@ -17,31 +17,22 @@
     $sess = $filter['sessionId'] ?? '';
     $major = $filter['excelMajor'] ?? '';
     $level = $filter['excelLevel'] ?? '';
-    $d = $departments[$dep] ?? 'غير محدد';
+    $d = "";
     $professors = $_SESSION["prof_full_names"];
 
-    $file_name = "";
-    $title1 = "توزيع اللجان الفاحصة - قسم $d";
-    $title2 = "";
-    if ($sess === 'sess2') {
-        $file_name = "توزيع اللجان الفاحصة - قسم $d - الدورة الثانية";
-        $title2 = "امتحانات - الدورة الثانية";
-    } else {
-        $sem = $sess !== '' ? ($_SESSION['semesters'][$sess] ?? 'الفصل الأول') : 'الفصل الأول';
-        $file_name = "توزيع اللجان الفاحصة - قسم $d - $sem";
-        $title2 = "امتحانات $sem - الدورة الأولى";
-    }
+    
 
     $sql = "SELECT corr.prof_file_nb , corr.second_corrector_file_nb as second_corrector,
                    corr.course_code,c.course_name,corr.course_lang,c.course_level,corr.session_nb,
-                   m.major_name,t.uni_year
+                   m.major_name,t.uni_year,d.dep_name
                    FROM correctors corr
                    JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.prof_file_nb = corr.prof_file_nb
                    AND t.major_id = corr.major_id
                    JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND c.major_id = t.major_id
                    JOIN major m ON c.major_id = m.major_id  
                    JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
-                   WHERE corr.session_nb = ? AND p.dep_id = ? ";
+                   JOIN department d ON d.dep_id = p.dep_id
+                   WHERE corr.session_nb = ? AND d.dep_id = ? ";
 
     $paramTypes = 'ss';
     $param = [$sess,$dep];
@@ -83,6 +74,8 @@
         $rows = [];
         while ($row = mysqli_fetch_assoc($result)) {
             $rows[] = $row;
+            $d = $row["dep_name"];
+
         }
         mysqli_stmt_close($stmt);
 
@@ -93,6 +86,18 @@
                 $file_name .= ' ' . $uniYear;
                 $title2 .= ' - ' . $uniYear;
             }
+        }
+
+        $file_name = "";
+        $title1 = "توزيع اللجان الفاحصة - قسم $d";
+        $title2 = "";
+        if ($sess === 'sess2') {
+            $file_name = "توزيع اللجان الفاحصة - قسم $d - الدورة الثانية";
+            $title2 = "امتحانات - الدورة الثانية";
+        } else {
+            $sem = $sess !== '' ? ($_SESSION['semesters'][$sess] ?? 'الفصل الأول') : 'الفصل الأول';
+            $file_name = "توزيع اللجان الفاحصة - قسم $d - $sem";
+            $title2 = "امتحانات $sem - الدورة الأولى";
         }
 
         $spreadsheet = new Spreadsheet();
