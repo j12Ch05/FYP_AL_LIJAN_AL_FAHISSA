@@ -87,7 +87,7 @@
         <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
             
             <div class="user-info">
-                Welcome Dr. <span><?php echo htmlspecialchars($professor['prof_first_name'] . ' ' . $professor['prof_last_name']); ?></span>
+                Welcome <span><?php echo htmlspecialchars($professor['prof_first_name'] . ' ' . $professor['prof_last_name']); ?></span>
             </div>
 
             <form method="post" style="margin: 0;" id="logoutForm">
