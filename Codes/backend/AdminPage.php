@@ -162,7 +162,7 @@
         <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
             
             <div class="user-info">
-                Welcome Admin
+                Welcome Admin, <?php echo htmlspecialchars($professors[$admin["prof_file_nb"]] ?? 'Unknown'); ?>
             </div>
 
             <form method="post" style="margin: 0;" id="logoutForm">
@@ -881,11 +881,11 @@
                                    ?>
                 </select>
             </div>
-            <div id="selectedProfessorInfo" style="margin-bottom: 20px; padding: 12px; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600; color: #1f2937; font-size: 16px;">Selected Professor: None</div>
+            
             <div class="form-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <form id="makeAdminForm" action="MakeAdmin.php" method="post" style="display: <?php echo $makeAdmin?" inline;":"none;"; ?>">
                     <input type="hidden" id="prof_file_nb_make" name="prof_file_nb" value="">
-                    <input type="submit" class="btn" value="Make Admin" id="makeAdminBtn" disabled>
+                    <input type="submit" class="btn" value="Make Department chief" id="makeAdminBtn" disabled>
                 </form>
                 <form id="removeAdminForm" action="RemoveAdmin.php" method="post" style="display: inline;">
                     <input type="hidden" id="prof_file_nb_remove" name="prof_file_nb" value="">
@@ -925,7 +925,19 @@
                 });
             }
 
-            // --- Professors Filter Logic ---
+            // --- Remove Admin Confirmation ---
+            const removeAdminForm = document.getElementById('removeAdminForm');
+            if (removeAdminForm) {
+                removeAdminForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const profFileNb = profFileNbRemove ? profFileNbRemove.value : '';
+                    const profLabel = professorDropdown ? professorDropdown.options[professorDropdown.selectedIndex]?.text || '' : '';
+                    
+                    if (confirm(`Are you sure you want to remove admin privileges from ${profLabel}?`)) {
+                        this.submit();
+                    }
+                });
+            }
             const filterBy = document.getElementById('professorSearchBy');
             const filterInput = document.getElementById('professorFilterValue');
             const categorySelect = document.getElementById('professorCategoryFilter');
