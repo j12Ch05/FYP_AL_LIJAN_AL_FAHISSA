@@ -58,11 +58,13 @@
         $session = $_POST["sessionId"] ?? "";
         $major = $_POST["excelMajor"] ?? "";
         $level = $_POST["excelLevel"] ?? "";
+        $year = $_POST["excelYear"] ?? "";
 
         $_SESSION["excel_export_filter"] = [
             "sessionId" => $session,
             "excelMajor" => $major,
-            "excelLevel" => $level
+            "excelLevel" => $level,
+            "excelYear" => $year
         ];
 
         
