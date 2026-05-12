@@ -96,7 +96,7 @@
                 <label for="confirm">Confirm Password</label>
                 <div class="password-wrapper">
                     <input type="password" id="confirm" name="confirmPassword" placeholder="Confirm your password" required>
-                    <button type="button" id="togglePassword" class="toggle-btn">Show</button>
+                    <button type="button" id="toggleConfirm" class="toggle-btn">Show</button>
                 </div>
             </div>
            <br>
@@ -115,6 +115,16 @@
             // Toggle the type attribute
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
+            
+            // Toggle the button text
+            this.textContent = type === 'password' ? 'Show' : 'Hide';
+        });const toggleConfirm = document.querySelector('#toggleConfirm');
+        const confirmInput = document.querySelector('#confirm');
+
+        toggleConfirm.addEventListener('click', function () {
+            // Toggle the type attribute
+            const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmInput.setAttribute('type', type);
             
             // Toggle the button text
             this.textContent = type === 'password' ? 'Show' : 'Hide';

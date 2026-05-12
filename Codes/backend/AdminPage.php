@@ -47,7 +47,7 @@
         
     }
 
-    $sql_all_profs = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name,p.prof_birth_date, p.prof_email, p.prof_phone, p.isAdmin, p.prof_category FROM professor p JOIN professor a ON a.dep_id = p.dep_id where a.prof_email = ? ";
+    $sql_all_profs = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name,p.prof_birth_date, p.prof_email, p.prof_phone, p.isAdmin, p.prof_category FROM professor p JOIN professor a ON a.dep_id = p.dep_id where a.prof_email = ? ORDER BY p.prof_first_name ASC";
     $stmt_all = mysqli_prepare($conn, $sql_all_profs);
     mysqli_stmt_bind_param($stmt_all,'s',$email);
     mysqli_stmt_execute($stmt_all);
@@ -108,6 +108,12 @@
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
 
+    $addCourseKeeps = $_SESSION["addCourseKeeps"] ?? [];
+    $addCourseYear = $addCourseKeeps['year'] ?? '';
+    $addCourseLevel = $addCourseKeeps['level'] ?? 'L1';
+    $addCourseSemester = isset($addCourseKeeps['semester']) ? (string)$addCourseKeeps['semester'] : '1';
+    $addCourseMajor = isset($addCourseKeeps['major'])?(string)$addCourseKeeps['major']:"";
+    $showAddCourseDropdown = isset($_SESSION["addCourseSuccess"]) || isset($_SESSION["error"]);
 
     mysqli_close($conn);
 ?>
@@ -127,10 +133,12 @@
         $activeTab = $_GET["tab"] ?? "professors";
         $isProfessors = $activeTab === "professors";
         $isCourses = $activeTab === "courses";
+        $isUniYear = $activeTab === "uniyear";
         $isCorrectors = $activeTab === "correctors";
         $isEditAdmins = $activeTab === "edit-admins";
     ?>
     <input type="radio" name="nav" id="tab-professors"<?php echo $isProfessors ? " checked" : ""; ?>>
+    <input type="radio" name="nav" id="tab-uniyear"<?php echo $isUniYear ? " checked" : ""; ?>>
     <input type="radio" name="nav" id="tab-courses"<?php echo $isCourses ? " checked" : ""; ?>>
     <input type="radio" name="nav" id="tab-correctors"<?php echo $isCorrectors ? " checked" : ""; ?>>
     <input type="radio" name="nav" id="tab-edit-admins"<?php echo $isEditAdmins ? " checked" : ""; ?>>
@@ -144,6 +152,9 @@
         <nav>
             <label for="tab-professors" class="nav-item label-professors">
                 <span class="icon">🧑‍🏫</span> Professors
+            </label>
+            <label for="tab-uniyear" class="nav-item label-uniyear">
+                <span class="icon">📅</span> University Year
             </label>
             <label for="tab-courses" class="nav-item label-courses">
                 <span class="icon">📚</span> Courses
@@ -189,6 +200,7 @@
                 </select>
                 <input type="text" id="professorFilterValue" placeholder="Enter filter value" style="width: 260px;" disabled>
                 <select id="professorCategoryFilter" style="width: 260px; display: none;">
+                    <option value="">Select Category</option>
                     <option value="متعاقد بالساعة">متعاقد بالساعة</option>
                     <option value="متفرغ">متفرغ</option>
                     <option value="ملاك">ملاك</option>
@@ -238,32 +250,60 @@
 
         <section id="content-courses" class="tab-content">
             <h1>Courses</h1>
-            <details class="dropdown-menu">
+            <details class="dropdown-menu"<?php echo $showAddCourseDropdown ? ' open' : ''; ?>>
                 <summary>Add Course</summary>
                     <div class="dropdown-content">
 
                         <form id="addCourse" action="addCourse.php" method="post">
                             <div class="form-group">
                                  <?php 
+                                    if (isset($_SESSION["addCourseSuccess"])) {
+                                        echo $_SESSION["addCourseSuccess"];
+                                        unset($_SESSION["addCourseSuccess"]);
+                                    }
                                     if (isset($_SESSION["error"])) {
-                                        
-                                        echo '<p style="color: red; font-weight: bold;">' . $_SESSION["error"] . '</p>';
-                                        
+                                        echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_SESSION["error"], ENT_QUOTES, 'UTF-8') . '</p>';
                                         unset($_SESSION["error"]);
                                     }
                                 ?>
-                                <label for="courseCode">Enter the code of the course</label>
-                                <input type="text" id="courseCode" name="courseCode" maxlength="7" placeholder="I3341,M2250,P1101..." required><br>
-                                <label for="courseName">Enter the name of the course</label>
+                                
+                                
+                                <label for="courseYear">University Year</label>
+                                <input type="text" id="courseYear" name="courseYear" maxlength="15" value="<?php echo htmlspecialchars($addCourseYear, ENT_QUOTES, 'UTF-8'); ?>" required><br>
+                                <label for="courseMajor">Major</label>
+                                <select name="courseMajor" id="courseMajor">
+                                    <?php
+                                        foreach($_SESSION["majors"] as $id => $name) {
+                                            $selected = ((string)$id === $addCourseMajor) ? ' selected' : '';
+                                            echo "<option value='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'{$selected}>" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>";
+                                        }
+                                    ?>
+                                </select><br>
+                                <label for="courseLevel">Level</label>
+                                <select id="courseLevel" name="courseLevel">
+                                    <option value="L1"<?php echo $addCourseLevel === 'L1' ? ' selected' : ''; ?>>L1</option>
+                                    <option value="L2"<?php echo $addCourseLevel === 'L2' ? ' selected' : ''; ?>>L2</option>
+                                    <option value="L3"<?php echo $addCourseLevel === 'L3' ? ' selected' : ''; ?>>L3</option>
+                                    <option value="M1"<?php echo $addCourseLevel === 'M1' ? ' selected' : ''; ?>>M1</option>
+                                </select><br>
+                                <label for="courseSemester">Semester</label>
+                                <select name="courseSemester" id="courseSemester">
+                                    <option value="1"<?php echo $addCourseSemester === '1' ? ' selected' : ''; ?>>Semester 1</option>
+                                    <option value="2"<?php echo $addCourseSemester === '2' ? ' selected' : ''; ?>>Semester 2</option>
+                                </select>
+                                <br>
+                                <label for="courseCode">Course Code</label>
+                                <input type="text" id="courseCode" name="courseCode" maxlength="15" placeholder="I3341,M2250,P1101..." required><br>
+                                <label for="courseName">Course Name</label>
                                 <input type="text" id="courseName" name="courseName" placeholder="Enter the name" required><br>
-                                <label for="courseCredit">Enter the credits of the course</label>
+                                <label for="courseCredit">Course Credits</label>
                                 <input type="number" min="3" max="6" name="courseCredit" id="courseCredit" required><br>
-                                <label for="courseHours">Enter the hours of the course</label>
-                                <input type="number" min="36" max="72" name="courseHours" id="courseHours" required><br>
-                                <label for="courseLang">Enter the language of the course</label>
+                                <label for="courseHours">Course hours</label>
+                                <input type="number" min="0" max="100" name="courseHours" id="courseHours" required><br>
+                                <label for="courseLang">Course Language</label>
                                 <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
                                 <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
-                                <label for="courseProf">Choose the professor of the course</label>
+                                <label for="courseProf">Course Professor</label>
                                 <select name="courseProf" id="courseProf">
                                    <?php
                                         //Preparing the dropdown list for choosing the name of the professor
@@ -273,30 +313,9 @@
                 
                                    ?>
                                 </select><br>
-                                <label for="courseMajor">Choose the major</label>
-                                <select name="courseMajor" id="courseMajor">
-                                    <?php
-                                        foreach($_SESSION["majors"] as $id=>$name){
-                                            echo "<option value='$id'>$name</option>";
-                                        }
-                                    ?>
-                                </select><br>
-                                <label for="courseLevel">Choose the level</label>
-                                <select id="courseLevel" name="courseLevel">
-                                    <option value="L1">L1</option>
-                                    <option value="L2">L2</option>
-                                    <option value="L3">L3</option>
-                                    <option value="M1">M1</option>
-                                </select><br>
-                                <label for="courseSemester">Choose the semester</label>
-                                <select name="courseSemester" id="courseSemester">
-                                    <option value="1">Semester 1</option>
-                                    <option value="2">Semester 2</option>
-                                </select>
-                                <br>
-                                <label for="courseYear">Enter the university year</label>
-                                <input type="text" id="courseYear" name="courseYear" maxlength="15" required><br>
-                                <label for="courseCategory">Choose the category</label>
+                                
+                                
+                                <label for="courseCategory">Category</label>
                                 <select name="courseCategory" id="courseCategory">
                                     <option value="mandatory">Mandatory</option>
                                     <option value="optional">Optional</option>

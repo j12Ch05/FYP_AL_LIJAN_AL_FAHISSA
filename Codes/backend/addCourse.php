@@ -1,5 +1,6 @@
 <?php
     session_start();
+    ob_start();
     include __DIR__ .'/database.php';
 
     
@@ -30,8 +31,14 @@
         $courseSemester = (int)$_POST["courseSemester"];
         $courseCategory = mysqli_real_escape_string($conn, $_POST["courseCategory"]);
         $courseHours = mysqli_real_escape_string($conn, $_POST["courseHours"]);
+        $uniYear = mysqli_real_escape_string($conn, $_POST["courseYear"]);
 
-        $uniYear = mysqli_real_escape_string($conn, $_POST["courseYear"]);;
+        $_SESSION["addCourseKeeps"] = [
+            'year' => $uniYear,
+            'level' => $courseLevel,
+            'semester' => $courseSemester,
+            'major' => $courseMajor
+        ];
 
         if(empty($courseEng) && empty($courseFr)) {
             $error = "You must select at least a language for the course";
@@ -90,10 +97,10 @@
 
             if($ok) {
                 mysqli_commit($conn);
-                echo "Done";
+                $_SESSION["addCourseSuccess"] = "The course was added successfully.";
             } else {
                 mysqli_rollback($conn);
-                echo $errorMsg;
+                $_SESSION["error"] = $errorMsg;
             }
         } else {
             $_SESSION["error"] = $error;
@@ -113,6 +120,9 @@
     $_POST['courseCategory']
     );
     
-
     mysqli_close($conn);
+    if (ob_get_length() !== false) {
+        ob_end_clean();
+    }
+    header("Location: AdminPage.php?tab=courses");
     exit();

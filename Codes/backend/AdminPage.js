@@ -16,26 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 3. Add Course Form (Standard AJAX) ---
+    // --- 3. Add Course Form ---
+    // Removed AJAX submit to allow normal form submission for session persistence
     const addForm = document.getElementById('addCourse');
     if (addForm) {
-        addForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            formData.append('submitCourse', 'true');
-
-            fetch('addCourse.php', { method: 'POST', body: formData })
-                .then(response => response.text())
-                .then(data => {
-                    if (data.includes("Done")) {
-                        showBrowserNotification("Course Added", "The course has been successfully saved.");
-                        this.reset();
-                    } else { 
-                        alert("Message: " + data); 
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
+        // Allow default form submission
     }
 
     // --- 4. Search & Edit Course ---
