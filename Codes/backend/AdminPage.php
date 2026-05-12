@@ -788,7 +788,6 @@
                                             <th>Major</th>
                                             <th>Level</th>
                                             <th>Language</th>
-                                            <th>Uni Year</th>
                                             <th>First Corrector</th>
                                             <th>1st Corr Copies</th>
                                             <th>Second Corrector</th>
@@ -798,7 +797,7 @@
                                     <tbody id="numbersTableBody">
                                         <?php
                                         if ($numbersLoaded && count($numbersList) === 0) {
-                                            echo '<tr><td colspan="10" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+                                            echo '<tr><td colspan="9" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
                                         } else {
                                             $isFinal = (($inf['numberSession'] ?? '') === 'sess2' || ($inf['numberExam'] ?? '') === 'F');
                                             foreach ($numbersList as $r) {
@@ -822,7 +821,6 @@
                                                 echo "<td>" . $majorId . "</td>"; 
                                                 echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
                                                 echo "<td>" . $clEsc . "</td>"; 
-                                                echo "<td>" . htmlspecialchars((string)($r["uni_year"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
                                                 echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
                                                 echo "<td><input type='number' step='1' min='0' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
                                                 echo "<td>" . htmlspecialchars($secondName, ENT_QUOTES, "UTF-8") . "</td>";

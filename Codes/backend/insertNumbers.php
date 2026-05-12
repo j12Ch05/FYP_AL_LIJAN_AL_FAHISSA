@@ -203,7 +203,7 @@
             }
         }
 
-        $_SESSION["insert_numbers_success"] = "Numbers updated successfully ($updated rows).";
+        $_SESSION["insert_numbers_success"] = "Numbers updated successfully.";
         $inf = $_SESSION["insert_numbers_filter"];
         $_SESSION["insert_numbers_data"] = fetchNumberRows(
             $conn,

@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!numbersTableBody) return;
         numbersTableBody.innerHTML = '';
         if (courses.length === 0) {
-            numbersTableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+            numbersTableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
             return;
         }
         courses.forEach(r => {
@@ -545,7 +545,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const courseLang = r.course_lang;
             const majorId = r.major_id != null && r.major_id !== undefined ? String(r.major_id) : '';
             const level = r.course_level != null && r.course_level !== undefined ? String(r.course_level) : '';
-            const uniYear = r.uni_year != null && r.uni_year !== undefined ? String(r.uni_year) : '';
             const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim() || professors[r.prof_file_nb] || 'Unknown';
             const secondName = r.second_corrector ? (professors[r.second_corrector] || 'Unknown') : 'None';
             const val1 = isFinal ? r.final_first_corrector : r.partial_first_corrector;
@@ -558,7 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${escapeHtml(majorId)}</td>
                 <td>${escapeHtml(level)}</td>
                 <td>${escapeHtml(courseLang)}</td>
-                <td>${escapeHtml(uniYear)}</td>
                 <td>${escapeHtml(profName)}</td>
                 <td><input type='number' step='1' min='0' name='first_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val1}' class='number-input premium-number-input' disabled></td>
                 <td>${escapeHtml(secondName)}</td>
