@@ -174,24 +174,49 @@ BEGIN
             );
         END IF;
 
-        IF OLD.prof_file_nb <> NEW.prof_file_nb THEN
+        -- Keep correctors aligned when any teaching key column changes (same logical teaching row)
+        IF OLD.course_code <> NEW.course_code
+           OR OLD.course_lang <> NEW.course_lang
+           OR OLD.major_id <> NEW.major_id
+           OR OLD.uni_year <> NEW.uni_year
+           OR OLD.prof_file_nb <> NEW.prof_file_nb THEN
             UPDATE correctors
-            SET prof_file_nb = NEW.prof_file_nb
-            WHERE course_code  = NEW.course_code
-              AND course_lang  = NEW.course_lang
-              AND major_id     = NEW.major_id
-              AND uni_year     = NEW.uni_year
+            SET course_code  = NEW.course_code,
+                course_lang  = NEW.course_lang,
+                major_id     = NEW.major_id,
+                uni_year     = NEW.uni_year,
+                prof_file_nb = NEW.prof_file_nb
+            WHERE course_code  = OLD.course_code
+              AND course_lang  = OLD.course_lang
+              AND major_id     = OLD.major_id
+              AND uni_year     = OLD.uni_year
               AND prof_file_nb = OLD.prof_file_nb;
         END IF;
     END IF;
 END$$
 
--- Update correctors session_nb when course semester changes
+-- When course PK or related columns change: keep correctors in sync
+-- (teaching rows follow FK ON UPDATE CASCADE from course; correctors must be updated explicitly)
 DROP TRIGGER IF EXISTS `after_course_update`$$
 CREATE TRIGGER `after_course_update`
 AFTER UPDATE ON `course`
 FOR EACH ROW
 BEGIN
+    IF OLD.course_code <> NEW.course_code
+       OR OLD.course_lang <> NEW.course_lang
+       OR OLD.major_id <> NEW.major_id
+       OR OLD.uni_year <> NEW.uni_year THEN
+        UPDATE correctors
+        SET course_code = NEW.course_code,
+            course_lang = NEW.course_lang,
+            major_id    = NEW.major_id,
+            uni_year    = NEW.uni_year
+        WHERE course_code = OLD.course_code
+          AND course_lang = OLD.course_lang
+          AND major_id    = OLD.major_id
+          AND uni_year    = OLD.uni_year;
+    END IF;
+
     IF OLD.course_semester_nb <> NEW.course_semester_nb AND NEW.course_semester_nb IN (1, 2) THEN
         UPDATE correctors
         SET session_nb = CASE
@@ -201,18 +226,9 @@ BEGIN
             END
         WHERE course_code = NEW.course_code
           AND course_lang = NEW.course_lang
-          AND major_id    = OLD.major_id
+          AND major_id    = NEW.major_id
           AND uni_year    = NEW.uni_year
           AND session_nb IN ('sem1', 'sem2');
-    END IF;
-
-    IF OLD.major_id <> NEW.major_id THEN
-        UPDATE correctors
-        SET major_id = NEW.major_id
-        WHERE course_code = NEW.course_code
-          AND course_lang = NEW.course_lang
-          AND major_id    = OLD.major_id
-          AND uni_year    = NEW.uni_year;
     END IF;
 END$$
 
