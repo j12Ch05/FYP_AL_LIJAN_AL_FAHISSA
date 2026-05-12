@@ -649,14 +649,18 @@
                                                 $firstCorrectorId = isset($r["first_corrector_id"]) ? (string)$r["first_corrector_id"] : null;
                                                 $secondSelected = isset($r["second_corrector"]) ? (string)$r["second_corrector"] : "";
                                                 $thirdSelected = isset($r["third_corrector"]) ? (string)$r["third_corrector"] : "";
+                                                $mid = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
+                                                $midRaw = (string)($r["major_id"] ?? "");
+                                                $cc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
+                                                $cl = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
                                                 echo "<tr>";
-                                                echo "<td>" . $courseCode . "</td>";
-                                                echo "<td>" . $r["course_name"] . "</td>"; 
-                                                echo "<td>" . $r["major_id"] . "</td>"; 
-                                                echo "<td>" . $r["course_level"] . "</td>"; 
-                                                echo "<td>" . $r["course_lang"] . "</td>"; 
-                                                echo "<td>" . $profName . "</td>";
-                                                echo "<td><select name='second_corrector[" . $courseCode . "][" . $r["course_lang"] . "]'   class='corrector-select'>";
+                                                echo "<td>" . $cc . "</td>";
+                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>"; 
+                                                echo "<td>" . $mid . "</td>"; 
+                                                echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
+                                                echo "<td>" . $cl . "</td>"; 
+                                                echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
+                                                echo "<td><select name='second_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]'   class='corrector-select'>";
                                                 if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
                                                     $selectedName = $_SESSION["professors"][$secondSelected];
                                                     echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
@@ -672,7 +676,7 @@
                                                     echo "<option value='" . $idStr . "'>" . $name . "</option>";
                                                 }
                                                 echo "</select></td>";
-                                                echo "<td><select name='third_corrector[" . $courseCode . "][" . $r["course_lang"] . "]'   class='corrector-select'>";
+                                                echo "<td><select name='third_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]'   class='corrector-select'>";
                                                 if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
                                                     $selectedName = $_SESSION["professors"][$thirdSelected];
                                                     echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
@@ -749,7 +753,7 @@
                                         <option value="E"<?php echo $infSel("numberLang", "E"); ?>>English</option>
                                         <option value="F"<?php echo $infSel("numberLang", "F"); ?>>French</option>
                                     </select>
-                                    <label for="corrYear">University Year</label>
+                                    <label for="numberYear">University Year</label>
                                     <select name="numberYear" id="numberYear">
                                         <?php 
                                         foreach ($years as $year) {
@@ -781,7 +785,10 @@
                                         <tr>
                                             <th>Course Code</th>
                                             <th>Course Name</th>
+                                            <th>Major</th>
+                                            <th>Level</th>
                                             <th>Language</th>
+                                            <th>Uni Year</th>
                                             <th>First Corrector</th>
                                             <th>1st Corr Copies</th>
                                             <th>Second Corrector</th>
@@ -791,15 +798,17 @@
                                     <tbody id="numbersTableBody">
                                         <?php
                                         if ($numbersLoaded && count($numbersList) === 0) {
-                                            echo '<tr><td colspan="7" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+                                            echo '<tr><td colspan="10" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
                                         } else {
                                             $isFinal = (($inf['numberSession'] ?? '') === 'sess2' || ($inf['numberExam'] ?? '') === 'F');
                                             foreach ($numbersList as $r) {
                                                 $courseCode = $r["course_code"];
                                                 $courseLang = $r["course_lang"];
+                                                $majorId = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
+                                                $ccEsc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
+                                                $clEsc = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
                                                 $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
                                                 if ($profName === "") {
-                                                    // Fallback if joined data missing (though fetchNumberRows should handle it)
                                                     $profName = $_SESSION["professors"][$r["prof_file_nb"]] ?? "Unknown";
                                                 }
                                                 $secondName = isset($r["second_corrector"]) ? ($_SESSION["professors"][$r["second_corrector"]] ?? "Unknown") : "None";
@@ -808,13 +817,16 @@
                                                 $val2 = $isFinal ? $r['final_second_corrector'] : $r['partial_second_corrector'];
 
                                                 echo "<tr>";
-                                                echo "<td>" . htmlspecialchars($courseCode) . "</td>";
-                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "") . "</td>"; 
-                                                echo "<td>" . htmlspecialchars($courseLang) . "</td>"; 
-                                                echo "<td>" . htmlspecialchars($profName) . "</td>";
-                                                echo "<td><input type='number' name='first_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val1 . "' class='number-input premium-number-input' ></td>";
-                                                echo "<td>" . htmlspecialchars($secondName) . "</td>";
-                                                echo "<td><input type='number' name='second_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val2 . "' class='number-input premium-number-input' ></td>";
+                                                echo "<td>" . $ccEsc . "</td>";
+                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>"; 
+                                                echo "<td>" . $majorId . "</td>"; 
+                                                echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
+                                                echo "<td>" . $clEsc . "</td>"; 
+                                                echo "<td>" . htmlspecialchars((string)($r["uni_year"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
+                                                echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
+                                                echo "<td><input type='number' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
+                                                echo "<td>" . htmlspecialchars($secondName, ENT_QUOTES, "UTF-8") . "</td>";
+                                                echo "<td><input type='number' name='second_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val2 . "' class='number-input premium-number-input' ></td>";
                                                 echo "</tr>";
                                             }
                                         }

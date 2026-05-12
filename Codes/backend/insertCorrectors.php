@@ -16,10 +16,9 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
                    corr.second_corrector_file_nb AS second_corrector,
                    corr.third_corrector_file_nb AS third_corrector,
                    corr.session_nb,
-                   m.major_id,c.course_level
+                   corr.major_id AS major_id, c.course_level
             FROM correctors corr
             LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
-            LEFT JOIN major m ON corr.major_id = m.major_id
             LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
             WHERE corr.session_nb = ? AND corr.uni_year = ?
             ";
@@ -64,16 +63,21 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
 
     if ($language === "all") {
         $merged = [];
-        $byCode = [];
+        $byKey = [];
         foreach ($rows as $row) {
-            $byCode[$row['course_code']][] = $row;
+            $key = $row['course_code'] . "\x1f" . ($row['major_id'] ?? '');
+            $byKey[$key][] = $row;
         }
 
-        foreach ($byCode as $code => $group) {
+        foreach ($byKey as $group) {
             if (count($group) === 2) {
                 $r1 = $group[0];
                 $r2 = $group[1];
-                if ($r1['first_corrector_id'] === $r2['first_corrector_id'] && 
+                $langs = [$r1['course_lang'] ?? '', $r2['course_lang'] ?? ''];
+                sort($langs);
+                $isEfPair = ($langs === ['E', 'F']);
+                if ($isEfPair &&
+                    $r1['first_corrector_id'] === $r2['first_corrector_id'] &&
                     $r1['second_corrector'] === $r2['second_corrector'] &&
                     $r1['third_corrector'] === $r2['third_corrector']) {
                     $r1['course_lang'] = "E/F";
@@ -154,66 +158,71 @@ if (isset($_POST["applyCorr"])) {
     $second_correctors = $_POST["second_corrector"] ?? [];
     $third_correctors = $_POST["third_corrector"] ?? [];
     $session = $_SESSION["insert_correctors_filter"]["corrSession"] ?? 'sem1';
-    $major = $_SESSION["insert_correctors_filter"]["corrMajor"] ?? "";
     $year = $_SESSION["insert_correctors_filter"]["corrYear"] ?? "";
 
     $updatedRows = 0;
-    foreach ($second_correctors as $course_code => $langs) {
-        foreach ($langs as $lang_key => $second) {
-            $third = $third_correctors[$course_code][$lang_key] ?? null;
-            $second_val = $second !== '' ? $second : null;
-            $third_val = $third !== '' ? $third : null;
-
-            $langs_to_update = ($lang_key === "E/F") ? ["E", "F"] : [$lang_key];
-
-            foreach ($langs_to_update as $lang) {
-        $sql_check = "SELECT COUNT(*) FROM correctors WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ?";
-        $stmt_check = mysqli_prepare($conn, $sql_check);
-        if (!$stmt_check) {
-            continue;
-        }
-        mysqli_stmt_bind_param($stmt_check, "ssss", $course_code, $lang, $major, $session);
-        mysqli_stmt_execute($stmt_check);
-        mysqli_stmt_bind_result($stmt_check, $count);
-        mysqli_stmt_fetch($stmt_check);
-        mysqli_stmt_close($stmt_check);
-
-        if ($count > 0) {
-            $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ? AND uni_year = ?";
-            $stmt = mysqli_prepare($conn, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "iissss", $second_val, $third_val, $course_code, $lang, $major, $session,$year);
-                mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-                $updatedRows++;
-            }
-        } else {
-            $prof_file_nb = null;
-            $sql_prof = "SELECT prof_file_nb FROM teaching WHERE course_code = ? AND course_lang = ? AND major_id = ? AND isActive = 1 LIMIT 1";
-            $stmt_prof = mysqli_prepare($conn, $sql_prof);
-            if ($stmt_prof) {
-                mysqli_stmt_bind_param($stmt_prof, "sss", $course_code, $lang, $major);
-                mysqli_stmt_execute($stmt_prof);
-                mysqli_stmt_bind_result($stmt_prof, $prof_file_nb);
-                mysqli_stmt_fetch($stmt_prof);
-                mysqli_stmt_close($stmt_prof);
-            }
-
-            if ($prof_file_nb === null) {
+    foreach ($second_correctors as $course_code => $byLang) {
+        foreach ($byLang as $lang_key => $byMajor) {
+            if (!is_array($byMajor)) {
                 continue;
             }
+            foreach ($byMajor as $row_major_id => $second) {
+                $thirdMap = $third_correctors[$course_code][$lang_key] ?? [];
+                $third = is_array($thirdMap) ? ($thirdMap[$row_major_id] ?? null) : null;
+                $second_val = $second !== '' ? (int) $second : null;
+                $third_val = $third !== '' && $third !== null ? (int) $third : null;
 
-            $sql = "INSERT INTO correctors (course_code, course_lang, major_id, prof_file_nb, second_corrector_file_nb, third_corrector_file_nb, session_nb) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "sssiiis", $course_code, $lang, $major, $prof_file_nb, $second_val, $third_val, $session);
-                mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-                $updatedRows++;
+                $langs_to_update = ($lang_key === "E/F") ? ["E", "F"] : [$lang_key];
+
+                foreach ($langs_to_update as $lang) {
+                    $sql_check = "SELECT COUNT(*) FROM correctors WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ? AND uni_year = ?";
+                    $stmt_check = mysqli_prepare($conn, $sql_check);
+                    if (!$stmt_check) {
+                        continue;
+                    }
+                    mysqli_stmt_bind_param($stmt_check, "sssss", $course_code, $lang, $row_major_id, $session, $year);
+                    mysqli_stmt_execute($stmt_check);
+                    mysqli_stmt_bind_result($stmt_check, $count);
+                    mysqli_stmt_fetch($stmt_check);
+                    mysqli_stmt_close($stmt_check);
+
+                    if ($count > 0) {
+                        $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ? AND uni_year = ?";
+                        $stmt = mysqli_prepare($conn, $sql);
+                        if ($stmt) {
+                            mysqli_stmt_bind_param($stmt, "iisssss", $second_val, $third_val, $course_code, $lang, $row_major_id, $session, $year);
+                            mysqli_stmt_execute($stmt);
+                            mysqli_stmt_close($stmt);
+                            $updatedRows++;
+                        }
+                    } else {
+                        $prof_file_nb = null;
+                        $sql_prof = "SELECT prof_file_nb FROM teaching WHERE course_code = ? AND course_lang = ? AND major_id = ? AND isActive = 1 LIMIT 1";
+                        $stmt_prof = mysqli_prepare($conn, $sql_prof);
+                        if ($stmt_prof) {
+                            mysqli_stmt_bind_param($stmt_prof, "sss", $course_code, $lang, $row_major_id);
+                            mysqli_stmt_execute($stmt_prof);
+                            mysqli_stmt_bind_result($stmt_prof, $prof_file_nb);
+                            mysqli_stmt_fetch($stmt_prof);
+                            mysqli_stmt_close($stmt_prof);
+                        }
+
+                        if ($prof_file_nb === null) {
+                            continue;
+                        }
+
+                        $sql = "INSERT INTO correctors (course_code, course_lang, major_id, prof_file_nb, second_corrector_file_nb, third_corrector_file_nb, session_nb, uni_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                        $stmt = mysqli_prepare($conn, $sql);
+                        if ($stmt) {
+                            mysqli_stmt_bind_param($stmt, "sssiiiss", $course_code, $lang, $row_major_id, $prof_file_nb, $second_val, $third_val, $session, $year);
+                            mysqli_stmt_execute($stmt);
+                            mysqli_stmt_close($stmt);
+                            $updatedRows++;
+                        }
+                    }
+                }
             }
         }
-        }
-    }
     }
 
     if ($updatedRows > 0) {
@@ -224,11 +233,16 @@ if (isset($_POST["applyCorr"])) {
         unset($_SESSION["insert_correctors_success"]);
     }
 
-    $major = $_SESSION["insert_correctors_filter"]["corrMajor"] ?? "";
-    $level = $_SESSION["insert_correctors_filter"]["corrLevel"] ?? "";
-    $language = $_SESSION["insert_correctors_filter"]["corrLang"] ?? 'E';
-    if ($major !== "" && $level !== "") {
-        $_SESSION["insert_correctors_data"] = fetchCorrectorsRows($conn, $major, $level, $language, $session,$year);
+    $cf = $_SESSION["insert_correctors_filter"] ?? [];
+    if ($cf !== []) {
+        $_SESSION["insert_correctors_data"] = fetchCorrectorsRows(
+            $conn,
+            (string) ($cf["corrMajor"] ?? "all"),
+            (string) ($cf["corrLevel"] ?? "all"),
+            (string) ($cf["corrLang"] ?? "all"),
+            (string) ($cf["corrSession"] ?? $session),
+            (string) ($cf["corrYear"] ?? $year)
+        );
     }
 
     mysqli_close($conn);

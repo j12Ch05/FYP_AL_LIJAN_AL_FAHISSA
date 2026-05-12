@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function escapeHtml(s) {
+        return String(s ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     // --- 1. Notification Permission Request ---
     if ("Notification" in window) {
         if (Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -358,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editCorrBtn) editCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
         if (deleteCorrBtn) deleteCorrBtn.style.display = hasRows ? 'inline-block' : 'none';
         if (applyCorrBtn) applyCorrBtn.style.display = 'none';
-        const tableContainer = document.querySelector('#content-correctors .table-container');
+        const tableContainer = document.querySelector('#correctorsForm .table-container');
         if (tableContainer) tableContainer.style.display = 'block';
     }
 
@@ -381,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim();
             const courseCode = r.course_code;
             const langKey = r.course_lang;
+            const majorId = r.major_id != null && r.major_id !== undefined ? String(r.major_id) : '';
             const firstCorrectorId = r.first_corrector_id !== undefined && r.first_corrector_id !== null ? String(r.first_corrector_id) : '';
             const secondSelected = r.second_corrector !== undefined && r.second_corrector !== null ? String(r.second_corrector) : '';
             const thirdSelected = r.third_corrector !== undefined && r.third_corrector !== null ? String(r.third_corrector) : '';
@@ -389,38 +398,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const secondOptions = [];
             if (secondSelected && professors[secondSelected]) {
-                secondOptions.push(`<option value='${secondSelected}' selected>${professors[secondSelected]}</option>`);
+                secondOptions.push(`<option value='${secondSelected}' selected>${escapeHtml(professors[secondSelected])}</option>`);
                 secondOptions.push(`<option value=''>null</option>`);
             } else {
                 secondOptions.push(`<option value='' selected>null</option>`);
             }
             Object.entries(professors).forEach(([id, name]) => {
                 if (id === secondSelected || id === firstCorrectorId || id === thirdSelected) return;
-                secondOptions.push(`<option value='${id}'>${name}</option>`);
+                secondOptions.push(`<option value='${id}'>${escapeHtml(name)}</option>`);
             });
 
             const thirdOptions = [];
             if (thirdSelected && professors[thirdSelected]) {
-                thirdOptions.push(`<option value='${thirdSelected}' selected>${professors[thirdSelected]}</option>`);
+                thirdOptions.push(`<option value='${thirdSelected}' selected>${escapeHtml(professors[thirdSelected])}</option>`);
                 thirdOptions.push(`<option value=''>null</option>`);
             } else {
                 thirdOptions.push(`<option value='' selected>null</option>`);
             }
             Object.entries(professors).forEach(([id, name]) => {
                 if (id === thirdSelected || id === firstCorrectorId || id === secondSelected) return;
-                thirdOptions.push(`<option value='${id}'>${name}</option>`);
+                thirdOptions.push(`<option value='${id}'>${escapeHtml(name)}</option>`);
             });
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${courseCode}</td>
-                <td>${r.course_name || ''}</td>
-                <td>${majorLabel}</td>
-                <td>${levelLabel}</td>
-                <td>${langKey}</td>
-                <td>${profName}</td>
-                <td><select name='second_corrector[${courseCode}][${langKey}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
-                <td><select name='third_corrector[${courseCode}][${langKey}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
+                <td>${escapeHtml(courseCode)}</td>
+                <td>${escapeHtml(r.course_name || '')}</td>
+                <td>${escapeHtml(majorLabel)}</td>
+                <td>${escapeHtml(levelLabel)}</td>
+                <td>${escapeHtml(langKey)}</td>
+                <td>${escapeHtml(profName)}</td>
+                <td><select name='second_corrector[${courseCode}][${langKey}][${majorId}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
+                <td><select name='third_corrector[${courseCode}][${langKey}][${majorId}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
             `;
             tbody.appendChild(tr);
         });
@@ -446,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         populateCorrectorsTable(data.courses, data.professors);
                         const details = document.getElementById('insertCorrectorsDetails');
                         if (details) details.open = true;
-                        const tableContainer = document.querySelector('#content-correctors .table-container');
+                        const tableContainer = document.querySelector('#correctorsForm .table-container');
                         if (tableContainer) tableContainer.style.display = 'block';
                         setViewModeCorrectors();
                         bindCorrectorPairGuards();
@@ -529,12 +538,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!numbersTableBody) return;
         numbersTableBody.innerHTML = '';
         if (courses.length === 0) {
-            numbersTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+            numbersTableBody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
             return;
         }
         courses.forEach(r => {
             const courseCode = r.course_code;
             const courseLang = r.course_lang;
+            const majorId = r.major_id != null && r.major_id !== undefined ? String(r.major_id) : '';
+            const level = r.course_level != null && r.course_level !== undefined ? String(r.course_level) : '';
+            const uniYear = r.uni_year != null && r.uni_year !== undefined ? String(r.uni_year) : '';
             const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim() || professors[r.prof_file_nb] || 'Unknown';
             const secondName = r.second_corrector ? (professors[r.second_corrector] || 'Unknown') : 'None';
             const val1 = isFinal ? r.final_first_corrector : r.partial_first_corrector;
@@ -542,13 +554,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${courseCode}</td>
-                <td>${r.course_name}</td>
-                <td>${courseLang}</td>
-                <td>${profName}</td>
-                <td><input type='number' name='first_numbers[${courseCode}][${courseLang}]' value='${val1}' class='number-input premium-number-input' disabled></td>
-                <td>${secondName}</td>
-                <td><input type='number' name='second_numbers[${courseCode}][${courseLang}]' value='${val2}' class='number-input premium-number-input' disabled></td>
+                <td>${escapeHtml(courseCode)}</td>
+                <td>${escapeHtml(r.course_name || '')}</td>
+                <td>${escapeHtml(majorId)}</td>
+                <td>${escapeHtml(level)}</td>
+                <td>${escapeHtml(courseLang)}</td>
+                <td>${escapeHtml(uniYear)}</td>
+                <td>${escapeHtml(profName)}</td>
+                <td><input type='number' name='first_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val1}' class='number-input premium-number-input' disabled></td>
+                <td>${escapeHtml(secondName)}</td>
+                <td><input type='number' name='second_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val2}' class='number-input premium-number-input' disabled></td>
             `;
             numbersTableBody.appendChild(tr);
         });
