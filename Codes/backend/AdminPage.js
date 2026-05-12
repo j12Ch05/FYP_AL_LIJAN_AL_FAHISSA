@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.getElementById(id);
     }
 
+    function setFieldDisabled(el, disabled) {
+        if (el) el.disabled = disabled;
+    }
+
 
 
     function updateToggleActiveButton() {
@@ -54,16 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setViewModeResults() {
-        [...lockedResultIds, ...editableResultIds].forEach((id) => setFieldDisabled(getEl(id), true));
-        if (resEditCourse) resEditCourse.style.display = '';
-        if (resConfirmCourse) resConfirmCourse.style.display = 'none';
+        lockedResultIds.forEach((id) => setFieldDisabled(getEl(id), true));
+        editableResultIds.forEach((id) => setFieldDisabled(getEl(id), false));
+        if (resConfirmCourse) resConfirmCourse.style.display = 'inline-block';
     }
 
     function setEditModeResults() {
         lockedResultIds.forEach((id) => setFieldDisabled(getEl(id), true));
         editableResultIds.forEach((id) => setFieldDisabled(getEl(id), false));
-        if (resEditCourse) resEditCourse.style.display = 'none';
-        if (resConfirmCourse) resConfirmCourse.style.display = '';
+        if (resConfirmCourse) resConfirmCourse.style.display = 'inline-block';
     }
 
     function applyCoursePayload(data) {
@@ -138,16 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBrowserNotification('Search failed', 'Could not load course.');
                     alert('Could not load course.');
                 });
-        });
-    }
-
-    if (resEditCourse) {
-        resEditCourse.addEventListener('click', () => {
-            if (!getEl('hiddenCourseCode').value) {
-                alert('Search for a course first.');
-                return;
-            }
-            setEditModeResults();
         });
     }
 
