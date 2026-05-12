@@ -41,8 +41,9 @@ CREATE TABLE course (
   course_level ENUM('L1','L2','L3','M1') NOT NULL,
   course_category ENUM('common', 'optional', 'mandatory') NOT NULL,
   major_id VARCHAR(6) NOT NULL,
+  uni_year VARCHAR(15) NOT NULL,
   isActive BOOLEAN DEFAULT TRUE,
-  PRIMARY KEY (course_code, course_lang, major_id),
+  PRIMARY KEY (course_code, course_lang, major_id,uni_year),
   CONSTRAINT fk_course_major FOREIGN KEY (major_id) REFERENCES major (major_id)
 );
 
@@ -54,11 +55,11 @@ CREATE TABLE teaching (
   prof_file_nb INT NOT NULL,
   uni_year VARCHAR(15) NOT NULL,
   isActive BOOLEAN DEFAULT 1,
-  PRIMARY KEY (course_code, course_lang, major_id, prof_file_nb),
+  PRIMARY KEY (course_code, course_lang, major_id, prof_file_nb,uni_year),
   -- Foreign Key must now reference all three parts of the Course PK
   CONSTRAINT fk_teaching_course 
-    FOREIGN KEY (course_code, course_lang, major_id) 
-    REFERENCES course (course_code, course_lang, major_id) 
+    FOREIGN KEY (course_code, course_lang, major_id,uni_year) 
+    REFERENCES course (course_code, course_lang, major_id,uni_year) 
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_teaching_prof 
     FOREIGN KEY (prof_file_nb) REFERENCES professor (prof_file_nb) 
@@ -79,6 +80,7 @@ CREATE TABLE correctors (
   partial_second_corrector INT DEFAULT 0,
   final_first_corrector INT DEFAULT 0,
   final_second_corrector INT DEFAULT 0
+  uni_year VARCHAR(15) NOT NULL
 );
 
 Create table uniYear(
