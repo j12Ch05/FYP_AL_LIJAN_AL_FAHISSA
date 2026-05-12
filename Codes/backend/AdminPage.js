@@ -457,8 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (details) details.open = true;
                         const tableContainer = document.querySelector('#correctorsForm .table-container');
                         if (tableContainer) tableContainer.style.display = 'block';
-                        setViewModeCorrectors();
-                        bindCorrectorPairGuards();
+                        setEditModeCorrectors();
                         showBrowserNotification('Correctors', 'Courses loaded successfully.');
                     } else {
                         showBrowserNotification('Correctors', data.message || 'Failed to load courses.');
@@ -561,9 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${escapeHtml(courseLang)}</td>
                 <td>${escapeHtml(uniYear)}</td>
                 <td>${escapeHtml(profName)}</td>
-                <td><input type='number' name='first_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val1}' class='number-input premium-number-input' disabled></td>
+                <td><input type='number' step='1' min='0' name='first_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val1}' class='number-input premium-number-input' disabled></td>
                 <td>${escapeHtml(secondName)}</td>
-                <td><input type='number' name='second_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val2}' class='number-input premium-number-input' disabled></td>
+                <td><input type='number' step='1' min='0' name='second_numbers[${courseCode}][${courseLang}][${majorId}]' value='${val2}' class='number-input premium-number-input' disabled></td>
             `;
             numbersTableBody.appendChild(tr);
         });
@@ -594,8 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const tableContainer = document.querySelector('#numbersForm .table-container');
                         if (tableContainer) tableContainer.style.display = 'block';
                         
-                        setViewModeNumbers();
-                        if (editNumbersBtn) editNumbersBtn.style.display = 'inline-block';
+                        setEditModeNumbers();
                         if (deleteNumbersBtn) deleteNumbersBtn.style.display = 'inline-block';
                         
                         showBrowserNotification('Numbers', 'Data loaded successfully.');

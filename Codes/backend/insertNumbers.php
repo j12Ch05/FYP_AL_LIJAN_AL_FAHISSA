@@ -175,10 +175,20 @@
                     $val_second = $second_numbers[$code][$lang_key][$major_id] ?? 0;
 
                 $langs_to_update = ($lang_key === "E/F") ? ["E", "F"] : [$lang_key];
-                $final_first = ($lang_key === "E/F") ? floor((int) $val_first / 2) : (int) $val_first;
-                $final_second = ($lang_key === "E/F") ? floor((int) $val_second / 2) : (int) $val_second;
 
                 foreach ($langs_to_update as $l) {
+                    if ($lang_key === "E/F") {
+                        if ($l === "E") {
+                            $final_first = (int) ceil((int) $val_first / 2);
+                            $final_second = (int) ceil((int) $val_second / 2);
+                        } else {
+                            $final_first = (int) floor((int) $val_first / 2);
+                            $final_second = (int) floor((int) $val_second / 2);
+                        }
+                    } else {
+                        $final_first = (int) $val_first;
+                        $final_second = (int) $val_second;
+                    }
                     $sql = "UPDATE correctors SET $col_first = ?, $col_second = ? 
                             WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ? AND uni_year = ?";
                     $stmt = mysqli_prepare($conn, $sql);

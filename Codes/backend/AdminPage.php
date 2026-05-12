@@ -824,9 +824,9 @@
                                                 echo "<td>" . $clEsc . "</td>"; 
                                                 echo "<td>" . htmlspecialchars((string)($r["uni_year"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
                                                 echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
-                                                echo "<td><input type='number' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
+                                                echo "<td><input type='number' step='1' min='0' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
                                                 echo "<td>" . htmlspecialchars($secondName, ENT_QUOTES, "UTF-8") . "</td>";
-                                                echo "<td><input type='number' name='second_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val2 . "' class='number-input premium-number-input' ></td>";
+                                                echo "<td><input type='number' step='1' min='0' name='second_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val2 . "' class='number-input premium-number-input' ></td>";
                                                 echo "</tr>";
                                             }
                                         }
