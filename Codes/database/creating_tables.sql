@@ -30,7 +30,7 @@ CREATE TABLE major (
   PRIMARY KEY (major_id)
 );
 
--- 2. Create the course table with the 3-column Primary Key
+-- 2. Create the course table with Primary Key (course_code, course_lang, major_id, uni_year)
 CREATE TABLE course (
   course_code VARCHAR(30) NOT NULL,
   course_name VARCHAR(255) NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE correctors (
   partial_first_corrector INT DEFAULT 0,
   partial_second_corrector INT DEFAULT 0,
   final_first_corrector INT DEFAULT 0,
-  final_second_corrector INT DEFAULT 0
+  final_second_corrector INT DEFAULT 0,
   uni_year VARCHAR(15) NOT NULL
 );
 
