@@ -54,7 +54,7 @@
     }    
 
 
-    if(isset($_POST["tawzi3"]) || isset($_POST["ta3in"]) || isset($_POST["edbarat"])){
+    if(isset($_POST["tawzi3"]) || isset($_POST["ta3in"]) || isset($_POST["edbarat"]) || isset($_POST["ed"])){
         $session = $_POST["sessionId"] ?? "";
         $major = $_POST["excelMajor"] ?? "";
         $level = $_POST["excelLevel"] ?? "";
@@ -81,8 +81,8 @@
         }
         else if(isset($_POST["ed"])){
             require __DIR__ . '/ed_format.php';
+            exit;
         }
-
 
         mysqli_close($conn);
         ob_end_clean();

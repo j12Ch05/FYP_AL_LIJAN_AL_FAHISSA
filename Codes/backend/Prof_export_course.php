@@ -35,16 +35,36 @@ if (isset($_POST['exportExcel'])) {
     $departmentName = $professor["dep_name"] ?? 'General';
     $prof_id = $professor["prof_file_nb"];
 
+    $year = isset($_POST['excelYear']) ? trim((string) $_POST['excelYear']) : '';
+    if ($year === '') {
+        $stmt_y = mysqli_prepare($conn, 'SELECT MAX(corr.uni_year) AS y FROM correctors corr WHERE corr.prof_file_nb = ? OR corr.second_corrector_file_nb = ?');
+        if ($stmt_y) {
+            mysqli_stmt_bind_param($stmt_y, 'ss', $prof_id, $prof_id);
+            mysqli_stmt_execute($stmt_y);
+            $ry = mysqli_stmt_get_result($stmt_y);
+            if ($ry && ($rowy = mysqli_fetch_assoc($ry))) {
+                $year = (string) ($rowy['y'] ?? '');
+            }
+            mysqli_stmt_close($stmt_y);
+        }
+    }
+
     // 2. Get Courses and Correctors
-    $sql_courses = "SELECT corr.*, c.course_name, c.course_level, c.course_credit_nb, m.major_name, t.uni_year
+    $sql_base = "SELECT corr.*, c.course_name, c.course_level, c.course_credit_nb, m.major_name, t.uni_year
                     FROM correctors corr
                     JOIN teaching t ON corr.course_code = t.course_code AND t.course_lang = corr.course_lang AND t.prof_file_nb = corr.prof_file_nb AND t.major_id = corr.major_id
                     JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
                     JOIN major m ON m.major_id = c.major_id
-                    WHERE corr.prof_file_nb = ? OR corr.second_corrector_file_nb = ?";
-    
-    $stmt_c = mysqli_prepare($conn, $sql_courses);
-    mysqli_stmt_bind_param($stmt_c, "ss", $prof_id, $prof_id);
+                    WHERE (corr.prof_file_nb = ? OR corr.second_corrector_file_nb = ?)";
+    if ($year !== '') {
+        $sql_courses = $sql_base . "\n                      AND corr.uni_year = ?";
+        $stmt_c = mysqli_prepare($conn, $sql_courses);
+        mysqli_stmt_bind_param($stmt_c, 'sss', $prof_id, $prof_id, $year);
+    } else {
+        $sql_courses = $sql_base;
+        $stmt_c = mysqli_prepare($conn, $sql_courses);
+        mysqli_stmt_bind_param($stmt_c, 'ss', $prof_id, $prof_id);
+    }
     mysqli_stmt_execute($stmt_c);
     $result_course = mysqli_stmt_get_result($stmt_c);
 

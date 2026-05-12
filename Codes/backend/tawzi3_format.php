@@ -17,6 +17,7 @@
     $sess = $filter['sessionId'] ?? '';
     $major = $filter['excelMajor'] ?? '';
     $level = $filter['excelLevel'] ?? '';
+    $year = $filter['excelYear'] ?? '';
     $d = "";
     $professors = $_SESSION["prof_full_names"];
 
@@ -32,10 +33,10 @@
                    JOIN major m ON c.major_id = m.major_id  
                    JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
                    JOIN department d ON d.dep_id = p.dep_id
-                   WHERE corr.session_nb = ? AND d.dep_id = ? ";
+                   WHERE corr.session_nb = ? AND d.dep_id = ? AND corr.uni_year = ? ";
 
-    $paramTypes = 'ss';
-    $param = [$sess,$dep];
+    $paramTypes = 'sss';
+    $param = [$sess, $dep, $year];
 
     if($level == "all" && $major == "all"){
         $paramTypes .= "";
@@ -79,15 +80,6 @@
         }
         mysqli_stmt_close($stmt);
 
-        $uniYear = '';
-        if (!empty($rows)) {
-            $uniYear = $rows[0]['uni_year'] ?? '';
-            if ($uniYear !== '') {
-                $file_name .= ' ' . $uniYear;
-                $title2 .= ' - ' . $uniYear;
-            }
-        }
-
         $file_name = "";
         $title1 = "توزيع اللجان الفاحصة - قسم $d";
         $title2 = "";
@@ -98,6 +90,10 @@
             $sem = $sess !== '' ? ($_SESSION['semesters'][$sess] ?? 'الفصل الأول') : 'الفصل الأول';
             $file_name = "توزيع اللجان الفاحصة - قسم $d - $sem";
             $title2 = "امتحانات $sem - الدورة الأولى";
+        }
+        if ($year !== '') {
+            $file_name .= ' ' . $year;
+            $title2 .= ' - ' . $year;
         }
 
         $spreadsheet = new Spreadsheet();

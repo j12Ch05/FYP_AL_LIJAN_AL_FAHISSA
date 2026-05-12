@@ -29,6 +29,14 @@
     $result_dep = mysqli_stmt_get_result($stmt_dep);
     $department = mysqli_fetch_assoc($result_dep);
 
+    $years = [];
+    $sql_year = 'SELECT uYear FROM uniyear WHERE 1 ORDER BY uYear DESC';
+    if ($res_year = mysqli_query($conn, $sql_year)) {
+        while ($row_y = mysqli_fetch_assoc($res_year)) {
+            $years[] = $row_y['uYear'];
+        }
+    }
+
     $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb,c.course_level, c.course_lang, c.course_semester_nb, m.major_name
                     FROM teaching t
                     JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
@@ -171,7 +179,20 @@
             <div class="card">
                 <div class="card-header">
                     <h3>My Courses</h3>
-                    <form id="exportExcel" action="Prof_export_course.php" method="post"><button type="submit" class="btn btn-secondary" id="ProfexcelExport" name="exportExcel" >Excel Export</button></form>
+                    <form id="exportExcel" action="Prof_export_course.php" method="post" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label for="profExcelYear" style="display: block; margin-bottom: 4px; font-size: 0.9rem;">University year</label>
+                            <select name="excelYear" id="profExcelYear"<?php echo count($years) > 0 ? ' required' : ''; ?> style="min-width: 140px; padding: 8px;">
+                                <?php if (count($years) === 0): ?>
+                                    <option value="">No years in database</option>
+                                <?php endif; ?>
+                                <?php foreach ($years as $y): ?>
+                                    <option value="<?php echo htmlspecialchars((string) $y); ?>"><?php echo htmlspecialchars((string) $y); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-secondary" id="ProfexcelExport" name="exportExcel">Excel Export</button>
+                    </form>
                 </div>
                 
                 <div class="table-container">

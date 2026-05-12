@@ -19,10 +19,11 @@
     $courses = $_SESSION["courses"];
 
     //fetching the required data to fill the excel 
-    $filter = $_SESSION["excel_export_filter"];
-    $sess = $filter["sessionId"];
-    $major = $filter["excelMajor"];
-    $level = $filter["excelLevel"];
+    $filter = $_SESSION["excel_export_filter"] ?? [];
+    $sess = $filter["sessionId"] ?? "";
+    $major = $filter["excelMajor"] ?? "";
+    $level = $filter["excelLevel"] ?? "";
+    $year = $filter["excelYear"] ?? "";
 
     $sql = "SELECT     c.course_code,
                        c.course_name,
@@ -37,10 +38,12 @@
                     AND c.course_lang = corr.course_lang
                     AND c.major_id = corr.major_id
                     AND corr.session_nb = ?
+                    AND corr.uni_year = ?
                 LEFT JOIN teaching t ON c.course_code = t.course_code
                     AND c.course_lang = t.course_lang
                     AND c.major_id = t.major_id
                     AND t.isActive = 1
+                    AND t.uni_year = ?
                 LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
                 LEFT JOIN department d ON d.dep_id = p.dep_id
                 ";
@@ -81,16 +84,16 @@
         exit;
     }
     else if($s == 1){
-        mysqli_stmt_bind_param($stmt,"sss",$sess,$major,$dep);
+        mysqli_stmt_bind_param($stmt,"sssss",$sess,$year,$year,$major,$dep);
     }
     else if($s == 2){
-        mysqli_stmt_bind_param($stmt,"sss",$sess,$level,$dep);
+        mysqli_stmt_bind_param($stmt,"sssss",$sess,$year,$year,$level,$dep);
     }
     else if($s == 3){
-        mysqli_stmt_bind_param($stmt,"ssss",$sess,$major,$level,$dep);
+        mysqli_stmt_bind_param($stmt,"ssssss",$sess,$year,$year,$major,$level,$dep);
     }
     else {
-        mysqli_stmt_bind_param($stmt,"ss",$sess,$dep);
+        mysqli_stmt_bind_param($stmt,"ssss",$sess,$year,$year,$dep);
     }
 
     if(!mysqli_stmt_execute($stmt)){

@@ -17,6 +17,7 @@
     $dep = $_SESSION["dep_id"];
     $semesters = $_SESSION["semesters"];
     $sess = $_SESSION["excel_export_filter"]["sessionId"];
+    $year = $_SESSION["excel_export_filter"]["excelYear"] ?? "";
 
     //in this format we need just the session number
     $sql = "SELECT corr.prof_file_nb as prof_file_nb,
@@ -33,7 +34,7 @@
             LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
             LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
             LEFT JOIN department d ON d.dep_id = p.dep_id
-            WHERE d.dep_id = ? and corr.session_nb = ?";
+            WHERE d.dep_id = ? and corr.session_nb = ? AND corr.uni_year = ?";
 
     $stmt = mysqli_prepare($conn,$sql);
     if(!$stmt){
@@ -46,7 +47,7 @@
         exit;
     }
     else{
-        mysqli_stmt_bind_param($stmt,"ss",$dep,$sess);
+        mysqli_stmt_bind_param($stmt,"sss",$dep,$sess,$year);
     }
 
     $d= "";
