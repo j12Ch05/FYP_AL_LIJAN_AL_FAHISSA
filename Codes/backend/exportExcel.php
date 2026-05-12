@@ -77,6 +77,9 @@
         else if(isset($_POST["edbarat"])){
             require __DIR__ . '/edbarat_format.php';
         }
+        else if(isset($_POST["ed"])){
+            require __DIR__ . '/ed_format.php';
+        }
 
 
         mysqli_close($conn);

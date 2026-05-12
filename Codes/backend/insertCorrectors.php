@@ -19,7 +19,8 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
             FROM correctors corr
             LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
             LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
-            WHERE c.major_id = ? AND c.course_level = ? AND corr.session_nb = ?";
+            WHERE c.major_id = ? AND c.course_level = ? AND corr.session_nb = ?
+            ORDER BY corr.course_code ASC";
 
     if ($language !== "all") {
         $sql_fetch .= " AND corr.course_lang = ?";

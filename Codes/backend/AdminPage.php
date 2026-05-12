@@ -397,8 +397,8 @@
                             <br>
                             <label for="resCourseLang">Course Language: </label>
                             <select id="resCourseLang" name="resCourseLang" >
-                                <option value="E">E</option>
-                                <option value="F">F</option>
+                                <option value="E">English</option>
+                                <option value="F">French</option>
                             </select>
                             <br>
                             <label for="resCourseName">Course Name: </label>
@@ -408,7 +408,7 @@
                             <input type="number" id="resCourseCredit" min="3" max="6" name="resCourseCredit" value="" >
                             <br>
                             <label for="resCourseHours">Course Hours: </label>
-                            <input type="number" id="resCourseHours" min="36" max="72" name="resCourseHours" value="" >
+                            <input type="number" id="resCourseHours" min="0" max="100" name="resCourseHours" value="" >
                             <br>
                             <label for="resCourseYear">University Year: </label>
                             <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" >
@@ -562,6 +562,7 @@
                                 </select>
                                 <label for="corrMajor">Major</label>
                                 <select name="corrMajor" id="corrMajor">
+                                    <option value="all"<?php echo $icfSel("corrMajor", "all"); ?>>All</option>
                                     <?php
                                         foreach ($_SESSION["majors"] as $id => $name) {
                                             $selectedMajor = $icfSel("corrMajor", $id);
@@ -571,6 +572,7 @@
                                 </select>
                                 <label for="corrLevel">Level</label>
                                 <select name="corrLevel" id="corrLevel">
+                                    <option value="all"<?php echo $icfSel("corrLevel", "all"); ?>>All</option>
                                     <option value="L1"<?php echo $icfSel("corrLevel", "L1"); ?>>L1</option>
                                     <option value="L2"<?php echo $icfSel("corrLevel", "L2"); ?>>L2</option>
                                     <option value="L3"<?php echo $icfSel("corrLevel", "L3"); ?>>L3</option>
@@ -581,6 +583,15 @@
                                     <option value="all"<?php echo $icfSel("corrLang", "all"); ?>>All</option>
                                     <option value="E"<?php echo $icfSel("corrLang", "E"); ?>>English</option>
                                     <option value="F"<?php echo $icfSel("corrLang", "F"); ?>>French</option>
+                                </select>
+                                <label for="corrYear">University Year</label>
+                                <select name="corrYear" id="corrYear">
+                                    <?php 
+                                    foreach ($years as $year) {
+                                            $selectedYear = $icfSel("corrYear", $year);
+                                            echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                        }
+                                    ?>
                                 </select>
                             </search><br>
                     </div>
@@ -618,7 +629,6 @@
                                             echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
                                         } else {
                                             foreach ($correctors as $r) {
-                                                $enabled = isset($_POST["editCorr"]) ? "" : "disabled";
                                                 $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
                                                 $courseCode = $r["course_code"];
                                                 $courseLang = $r["course_lang"];
@@ -630,7 +640,7 @@
                                                 echo "<td>" . $r["course_name"] . "</td>"; 
                                                 echo "<td>" . $r["course_lang"] . "</td>"; 
                                                 echo "<td>" . $profName . "</td>";
-                                                echo "<td><select name='second_corrector[" . $courseCode . "][" . $r["course_lang"] . "]' $enabled  class='corrector-select'>";
+                                                echo "<td><select name='second_corrector[" . $courseCode . "][" . $r["course_lang"] . "]'   class='corrector-select'>";
                                                 if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
                                                     $selectedName = $_SESSION["professors"][$secondSelected];
                                                     echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
@@ -646,7 +656,7 @@
                                                     echo "<option value='" . $idStr . "'>" . $name . "</option>";
                                                 }
                                                 echo "</select></td>";
-                                                echo "<td><select name='third_corrector[" . $courseCode . "][" . $r["course_lang"] . "]' $enabled  class='corrector-select'>";
+                                                echo "<td><select name='third_corrector[" . $courseCode . "][" . $r["course_lang"] . "]'   class='corrector-select'>";
                                                 if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
                                                     $selectedName = $_SESSION["professors"][$thirdSelected];
                                                     echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
@@ -669,9 +679,7 @@
                                     </tbody>
                                 </table>
                             </div><br>
-                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: none;">
-                            <input type="button" id="editCorr" class="btn" value="Edit Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
-                            <input type="button" id="deleteCorr" class="btn" value="Delete Correctors" style="display: <?php echo ($correctorsLoaded && count($correctors) > 0) ? 'inline-block' : 'none'; ?>;">
+                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: inline;">
                              </form>
                 </div>
         </details>
@@ -703,6 +711,7 @@
                                     </select>
                                     <label for="numberMajor">Major</label>
                                     <select name="numberMajor" id="numberMajor">
+                                        <option value="all" <?php echo $infSel("numberMajor", "all"); ?> >All</option>
                                         <?php
                                             foreach ($_SESSION["majors"] as $id => $name) {
                                                 $selectedMajor = $infSel("numberMajor", $id);
@@ -712,6 +721,7 @@
                                     </select>
                                     <label for="numberLevel">Level</label>
                                     <select name="numberLevel" id="numberLevel">
+                                        <option value="all"<?php echo $infSel("numberLevel", "all"); ?>>All</option>
                                         <option value="L1"<?php echo $infSel("numberLevel", "L1"); ?>>L1</option>
                                         <option value="L2"<?php echo $infSel("numberLevel", "L2"); ?>>L2</option>
                                         <option value="L3"<?php echo $infSel("numberLevel", "L3"); ?>>L3</option>
@@ -722,6 +732,15 @@
                                         <option value="all"<?php echo $infSel("numberLang", "all"); ?>>All</option>
                                         <option value="E"<?php echo $infSel("numberLang", "E"); ?>>English</option>
                                         <option value="F"<?php echo $infSel("numberLang", "F"); ?>>French</option>
+                                    </select>
+                                    <label for="corrYear">University Year</label>
+                                    <select name="numberYear" id="numberYear">
+                                        <?php 
+                                        foreach ($years as $year) {
+                                                $selectedYear = $infSel("numberYear", $year);
+                                                echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                            }
+                                        ?>
                                     </select>
                                 </search><br>
                             </div>
@@ -777,9 +796,9 @@
                                                 echo "<td>" . htmlspecialchars($r["course_name"] ?? "") . "</td>"; 
                                                 echo "<td>" . htmlspecialchars($courseLang) . "</td>"; 
                                                 echo "<td>" . htmlspecialchars($profName) . "</td>";
-                                                echo "<td><input type='number' name='first_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val1 . "' class='number-input premium-number-input' disabled></td>";
+                                                echo "<td><input type='number' name='first_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val1 . "' class='number-input premium-number-input' ></td>";
                                                 echo "<td>" . htmlspecialchars($secondName) . "</td>";
-                                                echo "<td><input type='number' name='second_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val2 . "' class='number-input premium-number-input' disabled></td>";
+                                                echo "<td><input type='number' name='second_numbers[" . $courseCode . "][" . $courseLang . "]' value='" . $val2 . "' class='number-input premium-number-input' ></td>";
                                                 echo "</tr>";
                                             }
                                         }
@@ -787,9 +806,7 @@
                                     </tbody>
                                 </table>
                             </div><br>
-                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" style="display: none;">
-                            <input type="button" id="editNumbers" class="btn" value="Edit Numbers" style="display: <?php echo ($numbersLoaded && count($numbersList) > 0) ? 'inline-block' : 'none'; ?>;">
-                            <input type="button" id="deleteNumbers" class="btn" value="Delete Numbers" style="display: <?php echo ($numbersLoaded && count($numbersList) > 0) ? 'inline-block' : 'none'; ?>;">
+                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" style="display: inline;">
                         </form>
                     </div>
                 </details>
@@ -803,67 +820,6 @@
                     };
                     $viewCorrectorsLoaded = array_key_exists("view_correctors_loaded", $_SESSION);
                 ?>
-                <details class="dropdown-menu"<?php echo $viewCorrectorsLoaded ? " open" : ""; ?>>
-                        <summary>View Correctors by the course id</summary>
-                        <form id="searchCorrector" action="viewCorrectors.php" method="post">
-                            <div class="dropdown-content">
-                            <div class="form-group">
-                                <label for="courseId">Enter the course ID</label>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="text" id="courseId" name="courseId" placeholder="Enter the course ID" style="width: 200px;" value="<?php echo htmlspecialchars($vcf['courseId'] ?? ''); ?>">
-                                    <label for="correctorMajor">Major</label>
-                                    <select name="correctorMajor" id="correctorMajor">
-                                        <?php
-                                            foreach ($_SESSION["majors"] as $id => $name) {
-                                                $selectedMajor = $vcfSel("correctorMajor", $id);
-                                                echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
-                                            }
-                                        ?>
-                                    </select>
-                                    <label for="correctorLang">Language</label>
-                                    <select id="correctorLang" name="correctorLang">
-                                        <option value="E" <?php echo $vcfSel("correctorLang","E") ?> >E</option>
-                                        <option value="F" <?php echo $vcfSel("correctorLang","F") ?> >F</option>
-                                    </select>
-                                    <label for="correctorSession">Session</label>
-                                    <select name="correctorSession" id="correctorSession">
-                                        <option value="sem1"<?php echo $vcfSel("correctorSession", "sem1"); ?>>Semester 1</option>
-                                        <option value="sem2"<?php echo $vcfSel("correctorSession", "sem2"); ?>>Semester 2</option>
-                                        <option value="sess2"<?php echo $vcfSel("correctorSession", "sess2"); ?>>Session 2</option>
-                                    </select>
-
-                                    <input type="submit"  id="searchID" name="searchID" value="Search">
-                                </div><br>
-                                <?php 
-
-                                    if ($viewCorrectors && count($correctorsList) === 0) {
-                                            echo '<p style="text-align:center;color:#64748b;">No courses match these filters (check the course id, session, and language).</p>';
-                                    } elseif ($viewCorrectors && count($correctorsList) > 0) {
-                                        $courseCode = $corr["course_code"] ?? "";
-                                        $courseName = $corr["course_name"] ?? "";
-                                        $file1 = isset($corr["prof_file_nb"]) ? $corr["prof_file_nb"] : null;
-                                        $prof1 = ($file1 !== null && $file1 !== "" && isset($professors[$file1])) ? $professors[$file1] : "No corrector assigned";
-                                        $file2 = isset($corr["second_corrector_file_nb"]) ? $corr["second_corrector_file_nb"] : null;
-                                        $prof2 = ($file2 !== null && $file2 !== "" && isset($professors[$file2])) ? $professors[$file2] : "No corrector assigned";
-                                        $file3 = isset($corr["third_corrector_file_nb"]) ? $corr["third_corrector_file_nb"] : null;
-                                        $prof3 = ($file3 !== null && $file3 !== "" && isset($professors[$file3])) ? $professors[$file3] : "No corrector assigned";
-
-                                        echo "<p>Course Code: $courseCode </p><br>";
-                                        echo "<p>Course Name: $courseName </p><br>";
-                                        echo "<p>Corrector1 ID: " . (($file1 !== null && $file1 !== "") ? $file1 : "Not assigned") . " </p><br>";
-                                        echo "<p>Corrector1 Name: $prof1 </p><br>";
-                                        echo "<p>Corrector2 ID: " . (($file2 !== null && $file2 !== "") ? $file2 : "Not assigned") . " </p><br>";
-                                        echo "<p>Corrector2 Name: $prof2 </p><br>";
-                                        echo "<p>Corrector3 ID: " . (($file3 !== null && $file3 !== "") ? $file3 : "Not assigned") . " </p><br>";
-                                        echo "<p>Corrector3 Name: $prof3 </p><br>";
-                                    }
-
-                                ?>
-                                </div>
-                        <input type="submit" id="cancelCorrectors" name="cancelCorrectors" class="btn" value="Cancel Search">
-                        </div>
-                        </form>
-                </details>
                 <details class="dropdown-menu">
                     <summary>Excel Format</summary>
                     <?php
@@ -904,12 +860,22 @@
                                         <option value="L3" <?php echo $eefSel("excelLevel","L3") ?>>L3</option>
                                         <option value="M1" <?php echo $eefSel("excelLevel","M1") ?>>M1</option>
                                     </select>
+                                    <label for="excelYear">University Year</label>
+                                    <select name="excelYear" id="excelYear">
+                                        <?php 
+                                        foreach ($years as $year) {
+                                                $selectedYear = $eefSel("excelYear", $year);
+                                                echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                            }
+                                        ?>
+                                    </select>
                                 </search>
                             </div>
                             <label for="format">Choose the format</label>
                             <input type="submit" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
                             <input type="submit" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
                             <input type="submit" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
+                            <input type="submit" id="format" class="btn" name="ed" value="اضبارة تصحيح مسابقات">
                             <input type="submit" id="format" class="btn" name="cancelExcel" value="Cancel">
                         </div>
                     </form>

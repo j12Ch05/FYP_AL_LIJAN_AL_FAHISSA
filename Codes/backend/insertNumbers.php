@@ -15,7 +15,8 @@
                              corr.session_nb
                       FROM correctors corr
                       LEFT JOIN course c ON corr.course_code = c.course_code AND c.course_lang = corr.course_lang AND c.major_id = corr.major_id
-                      WHERE corr.major_id = ? AND c.course_level = ? AND corr.session_nb = ?";
+                      WHERE corr.major_id = ? AND c.course_level = ? AND corr.session_nb = ?
+                      ORDER BY corr.course_code ASC";
 
         if ($lang !== "all") {
             $sql_fetch .= " AND corr.course_lang = ?";

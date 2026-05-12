@@ -129,9 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.status === 'success') {
                         applyCoursePayload(data);
                         setViewModeResults();
-                        showBrowserNotification('Course found', 'Course data loaded.');
                     } else {
-                        showBrowserNotification('Search', data.message || 'Course not found.');
+                        alert('Search'|| 'Course not found.');
                         alert(data.message || 'Course not found.');
                         clearSearchCourseResults();
                     }
@@ -165,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then((r) => r.json())
                 .then((data) => {
                     if (data.status === 'success') {
-                        showBrowserNotification('Course updated', data.message || 'Changes saved.');
+                        alert('Course updated: Changes saved.');
                         applyCoursePayload({
                             course_code: getEl('hiddenCourseCode').value,
                             course_lang: getEl('hiddenCourseLang').value,
