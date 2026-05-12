@@ -2,6 +2,11 @@
 -- creating_triggers.sql
 -- Run AFTER creating_tables.sql on a fresh database
 -- Uses major_id in all correctors operations
+--
+-- Compatible with deployed schema where:
+--   course PK = (course_code, course_lang, major_id)
+--   teaching has uni_year (not part of course PK); teaching PK includes prof_file_nb
+--   correctors has no uni_year; rows keyed by course + major + prof (+ session_nb)
 -- ============================================================
 
 DELIMITER $$
@@ -55,32 +60,33 @@ BEGIN
     INSERT INTO correctors (
         course_code, prof_file_nb,
         second_corrector_file_nb, third_corrector_file_nb,
-        session_nb, course_lang, major_id,uni_year
+        session_nb, course_lang, major_id
     )
     SELECT
         NEW.course_code, NEW.prof_file_nb,
         NULL, NULL,
         CASE
-            WHEN c.course_semester_nb = 1 THEN 'sem1'
-            WHEN c.course_semester_nb = 2 THEN 'sem2'
+            WHEN k.course_semester_nb = 1 THEN 'sem1'
+            WHEN k.course_semester_nb = 2 THEN 'sem2'
             ELSE NULL
         END,
-        NEW.course_lang, NEW.major_id,NEW.uni_year
+        NEW.course_lang, NEW.major_id
     FROM teaching c
-    JOIN course k ON k.course_code = c.course_code AND k.course_lang=c.course_lang AND k.major_id = c.major_id AND k.uni_year = c.uni_year 
+    JOIN course k ON k.course_code = c.course_code AND k.course_lang = c.course_lang AND k.major_id = c.major_id
     WHERE c.course_code = NEW.course_code
       AND c.course_lang = NEW.course_lang
       AND c.major_id    = NEW.major_id
-      AND K.course_semester_nb IN (1, 2)
+      AND c.prof_file_nb = NEW.prof_file_nb
+      AND k.course_semester_nb IN (1, 2)
       AND NOT EXISTS (
           SELECT 1 FROM correctors x
           WHERE x.course_code = NEW.course_code
             AND x.course_lang = NEW.course_lang
             AND x.major_id    = NEW.major_id
-            AND x.uni_year    = NEW.uni_year
+            AND x.prof_file_nb = NEW.prof_file_nb
             AND x.session_nb  = CASE
-                WHEN c.course_semester_nb = 1 THEN 'sem1'
-                WHEN c.course_semester_nb = 2 THEN 'sem2'
+                WHEN k.course_semester_nb = 1 THEN 'sem1'
+                WHEN k.course_semester_nb = 2 THEN 'sem2'
                 ELSE NULL
             END
       );
@@ -89,19 +95,19 @@ BEGIN
     INSERT INTO correctors (
         course_code, prof_file_nb,
         second_corrector_file_nb, third_corrector_file_nb,
-        session_nb, course_lang, major_id,uni_year
+        session_nb, course_lang, major_id
     )
     SELECT
         NEW.course_code, NEW.prof_file_nb,
         NULL, NULL,
-        'sess2', NEW.course_lang, NEW.major_id,NEW.uni_year
+        'sess2', NEW.course_lang, NEW.major_id
     FROM DUAL
     WHERE NOT EXISTS (
         SELECT 1 FROM correctors x
         WHERE x.course_code = NEW.course_code
           AND x.course_lang = NEW.course_lang
           AND x.major_id    = NEW.major_id
-          AND x.uni_year    = NEW.uni_year
+          AND x.prof_file_nb = NEW.prof_file_nb
           AND x.session_nb  = 'sess2'
     );
 END$$
@@ -117,39 +123,39 @@ BEGIN
         WHERE course_code  = OLD.course_code
           AND course_lang  = OLD.course_lang
           AND major_id     = OLD.major_id
-          AND uni_year     = OLD.uni_year
           AND prof_file_nb = OLD.prof_file_nb;
     ELSE
         IF OLD.isActive = 0 THEN
             INSERT INTO correctors (
                 course_code, prof_file_nb,
                 second_corrector_file_nb, third_corrector_file_nb,
-                session_nb, course_lang, major_id,uni_year
+                session_nb, course_lang, major_id
             )
             SELECT
                 NEW.course_code, NEW.prof_file_nb,
                 NULL, NULL,
                 CASE
-                    WHEN c.course_semester_nb = 1 THEN 'sem1'
-                    WHEN c.course_semester_nb = 2 THEN 'sem2'
+                    WHEN k.course_semester_nb = 1 THEN 'sem1'
+                    WHEN k.course_semester_nb = 2 THEN 'sem2'
                     ELSE NULL
                 END,
-                NEW.course_lang, NEW.major_id,NEW.uni_year
+                NEW.course_lang, NEW.major_id
             FROM teaching c
-            JOIN course k ON k.course_code = c.course_code AND k.course_lang=c.course_lang AND k.major_id = c.major_id AND k.uni_year = c.uni_year
+            JOIN course k ON k.course_code = c.course_code AND k.course_lang = c.course_lang AND k.major_id = c.major_id
             WHERE c.course_code = NEW.course_code
               AND c.course_lang = NEW.course_lang
               AND c.major_id    = NEW.major_id
+              AND c.prof_file_nb = NEW.prof_file_nb
               AND k.course_semester_nb IN (1, 2)
               AND NOT EXISTS (
                   SELECT 1 FROM correctors x
                   WHERE x.course_code = NEW.course_code
                     AND x.course_lang = NEW.course_lang
                     AND x.major_id    = NEW.major_id
-                    AND x.uni_year    = NEW.uni_year
+                    AND x.prof_file_nb = NEW.prof_file_nb
                     AND x.session_nb  = CASE
-                        WHEN c.course_semester_nb = 1 THEN 'sem1'
-                        WHEN c.course_semester_nb = 2 THEN 'sem2'
+                        WHEN k.course_semester_nb = 1 THEN 'sem1'
+                        WHEN k.course_semester_nb = 2 THEN 'sem2'
                         ELSE NULL
                     END
               );
@@ -157,19 +163,19 @@ BEGIN
             INSERT INTO correctors (
                 course_code, prof_file_nb,
                 second_corrector_file_nb, third_corrector_file_nb,
-                session_nb, course_lang, major_id,uni_year
+                session_nb, course_lang, major_id
             )
             SELECT
                 NEW.course_code, NEW.prof_file_nb,
                 NULL, NULL,
-                'sess2', NEW.course_lang, NEW.major_id,NEW.uni_year
+                'sess2', NEW.course_lang, NEW.major_id
             FROM DUAL
             WHERE NOT EXISTS (
                 SELECT 1 FROM correctors x
                 WHERE x.course_code = NEW.course_code
                   AND x.course_lang = NEW.course_lang
                   AND x.major_id    = NEW.major_id
-                  AND x.uni_year    = NEW.uni_year
+                  AND x.prof_file_nb = NEW.prof_file_nb
                   AND x.session_nb  = 'sess2'
             );
         END IF;
@@ -178,24 +184,22 @@ BEGIN
         IF OLD.course_code <> NEW.course_code
            OR OLD.course_lang <> NEW.course_lang
            OR OLD.major_id <> NEW.major_id
-           OR OLD.uni_year <> NEW.uni_year
+           OR IFNULL(OLD.uni_year, '') <> IFNULL(NEW.uni_year, '')
            OR OLD.prof_file_nb <> NEW.prof_file_nb THEN
             UPDATE correctors
             SET course_code  = NEW.course_code,
                 course_lang  = NEW.course_lang,
                 major_id     = NEW.major_id,
-                uni_year     = NEW.uni_year,
                 prof_file_nb = NEW.prof_file_nb
             WHERE course_code  = OLD.course_code
               AND course_lang  = OLD.course_lang
               AND major_id     = OLD.major_id
-              AND uni_year     = OLD.uni_year
               AND prof_file_nb = OLD.prof_file_nb;
         END IF;
     END IF;
 END$$
 
--- When course PK or related columns change: keep correctors in sync
+-- When course PK columns change: keep correctors in sync
 -- (teaching rows follow FK ON UPDATE CASCADE from course; correctors must be updated explicitly)
 DROP TRIGGER IF EXISTS `after_course_update`$$
 CREATE TRIGGER `after_course_update`
@@ -204,17 +208,14 @@ FOR EACH ROW
 BEGIN
     IF OLD.course_code <> NEW.course_code
        OR OLD.course_lang <> NEW.course_lang
-       OR OLD.major_id <> NEW.major_id
-       OR OLD.uni_year <> NEW.uni_year THEN
+       OR OLD.major_id <> NEW.major_id THEN
         UPDATE correctors
         SET course_code = NEW.course_code,
             course_lang = NEW.course_lang,
-            major_id    = NEW.major_id,
-            uni_year    = NEW.uni_year
+            major_id    = NEW.major_id
         WHERE course_code = OLD.course_code
           AND course_lang = OLD.course_lang
-          AND major_id    = OLD.major_id
-          AND uni_year    = OLD.uni_year;
+          AND major_id    = OLD.major_id;
     END IF;
 
     IF OLD.course_semester_nb <> NEW.course_semester_nb AND NEW.course_semester_nb IN (1, 2) THEN
@@ -227,7 +228,6 @@ BEGIN
         WHERE course_code = NEW.course_code
           AND course_lang = NEW.course_lang
           AND major_id    = NEW.major_id
-          AND uni_year    = NEW.uni_year
           AND session_nb IN ('sem1', 'sem2');
     END IF;
 END$$
