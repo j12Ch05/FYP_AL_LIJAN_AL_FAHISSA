@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Search & Edit Course ---
     const searchCourseForm = document.getElementById('searchCourseForm');
     const searchCourseBtn = document.getElementById('searchCourseBtn');
-    const resEditCourse = document.getElementById('resEditCourse');
     const resConfirmCourse = document.getElementById('resConfirmCourse');
     const resDisableCourse = document.getElementById('resDisableCourse');
     const resCancelSearch = document.getElementById('resCancelSearch');
@@ -41,10 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.getElementById(id);
     }
 
-    function setFieldDisabled(el, disabled) {
-        if (!el) return;
-        el.disabled = disabled;
-    }
+
 
     function updateToggleActiveButton() {
         if (!resDisableCourse) return;

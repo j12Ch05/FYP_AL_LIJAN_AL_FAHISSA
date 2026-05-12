@@ -1,0 +1,109 @@
+# Fix: "Confirm Changes" Does Nothing in Search/Edit Course
+
+## Root Cause Analysis
+
+After reading all three files, I found **two bugs** that together break the "Confirm changes" button completely.
+
+---
+
+## Bug 1 — `resEditCourse` is `undefined` (Critical)
+
+In `AdminPage.js`, `setViewModeResults()` and `setEditModeResults()` both reference a variable called `resEditCourse`:
+
+```js
+function setViewModeResults() {
+    [...lockedResultIds, ...editableResultIds].forEach((id) => setFieldDisabled(getEl(id), true));
+    if (resEditCourse) resEditCourse.style.display = '';       // ← uses resEditCourse
+    if (resConfirmCourse) resConfirmCourse.style.display = 'none';
+}
+
+function setEditModeResults() {
+    lockedResultIds.forEach((id) => setFieldDisabled(getEl(id), true));
+    editableResultIds.forEach((id) => setFieldDisabled(getEl(id), false));
+    if (resEditCourse) resEditCourse.style.display = 'none';   // ← uses resEditCourse
+    if (resConfirmCourse) resConfirmCourse.style.display = '';
+}
+```
+
+**`resEditCourse` is never declared anywhere in the file.** It is `undefined`. Because of this:
+- `setViewModeResults()` silently skips the `resEditCourse` guard, but also calls `setFieldDisabled()` which itself **does not exist** anywhere (Bug 2 below).
+- `setEditModeResults()` never properly enables the editable fields.
+
+The "Edit Course" button was removed from `AdminPage.php` (you confirmed this), so `resEditCourse` is expected to be gone — but the JS was never cleaned up to match.
+
+---
+
+## Bug 2 — `setFieldDisabled` is not defined (Critical)
+
+`setViewModeResults()` and `setEditModeResults()` both call:
+```js
+setFieldDisabled(getEl(id), true/false)
+```
+
+This function **does not exist anywhere** in `AdminPage.js`. Calling an undefined function throws a `TypeError` and **stops execution of the entire click handler**, meaning:
+- After search succeeds and `setViewModeResults()` is called → JS crashes silently.
+- When "Confirm changes" is clicked → `resConfirmCourse`'s event listener fires but the form fields may not be in the right state, and because the prior crash may have left things broken, the UI flow is unreliable.
+
+More critically: because `setViewModeResults()` crashes inside `applyCoursePayload`/`setViewModeResults()`, **the `resConfirmCourse` button may never even become visible** (its `display` is set to `'none'` in PHP HTML initially via the `setViewModeResults` call — but since `resConfirmCourse`'s display style is set inline to `display: inline;` in the HTML, it IS visible from page load). So the button is always visible, but clicking it works — it sends the fetch — **however the hidden fields `hiddenCourseCode` and `hiddenCourseMajor` are still empty** because `applyCoursePayload` never completed successfully (it crashed in `setViewModeResults`).
+
+This means `editCourse.php` receives `course_code = ""` and `old_major_id = ""`, hits the guard:
+```php
+if ($code === "" || $lang === "" || $old_major === "") {
+    json_out(["status" => "error", "message" => "Missing course code, language, or original major."]);
+}
+```
+...and returns an error. That error is shown as an `alert("Missing course code...")`, which the user may have already seen or dismissed quickly.
+
+---
+
+## Proposed Fix
+
+### Component: `AdminPage.js`
+
+#### [MODIFY] AdminPage.js
+
+Two targeted fixes:
+
+**Fix 1:** Replace all `setFieldDisabled(el, bool)` calls with inline `el.disabled = bool` (or a locally defined helper). Since the function is missing, we just inline the logic.
+
+**Fix 2:** Remove all references to `resEditCourse` (the removed button). The `const resEditCourse` declaration never exists, but the references inside `setViewModeResults` / `setEditModeResults` are harmless since they're guarded by `if (resEditCourse)` — but only after Fix 1 is applied so those functions no longer crash.
+
+**Summary of changes to `AdminPage.js`:**
+- Add a `setFieldDisabled(el, disabled)` helper function near the top of section 4.
+- Remove the `resEditCourse` references from `setViewModeResults` and `setEditModeResults` (since the button no longer exists in the HTML, they're dead code and slightly confusing).
+- Since the "Confirm changes" button (`resConfirmCourse`) is now **always visible** (its `display: inline` is set directly in the PHP HTML), and there is no "Edit" button, the flow becomes: **Search → fields populate → user edits directly → clicks Confirm Changes**. This means we should remove the `resEditCourse`-based visibility toggling entirely and keep `resConfirmCourse` always visible.
+
+### Component: `AdminPage.php`
+
+No changes needed to the HTML structure — the form fields and buttons are correctly in place.
+
+### Component: `editCourse.php`
+
+No changes needed — the backend logic is correct and complete. It handles `update`, `disable`, and `enable` actions properly.
+
+---
+
+## What the Fixed Flow Will Look Like
+
+1. Admin searches for a course → `searchCourse.php` returns JSON → `applyCoursePayload()` fills hidden fields + visible fields → **no crash**.
+2. Admin edits the fields directly (no "Edit" button needed).
+3. Admin clicks **Confirm Changes** → fetch to `editCourse.php` with `action=update` → hidden fields are correctly set → DB is updated → success message.
+
+---
+
+## Verification Plan
+
+### Automated
+- Search for a course code → confirm all `res*` fields populate.
+- Change a field value → click "Confirm Changes" → check Network tab in DevTools to confirm `editCourse.php` receives non-empty `course_code` and `old_major_id`.
+- Confirm DB row is updated.
+
+### Manual
+- Open browser DevTools Console → confirm no `TypeError: setFieldDisabled is not a function` after clicking Search.
+- Confirm "Disable Course" / "Enable Course" button also works correctly.
+
+---
+
+## Open Questions
+
+None — the fix is straightforward.

@@ -105,6 +105,15 @@
     }
     mysqli_stmt_close($stmt_m); 
 
+    $sql_year ="SELECT uYear FROM uniyear where 1";
+    $stmt_y = mysqli_prepare($conn,$sql_year);
+    mysqli_stmt_execute($stmt_y);
+    $res_y = mysqli_stmt_get_result($stmt_y);
+    $years = [];
+    while($row = mysqli_fetch_assoc($res_y)){
+        $years[] = $row["uYear"];
+    }
+
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
 
@@ -248,6 +257,28 @@
                     </div>
         </section>
 
+        <section id="content-uniyear" class="tab-content">
+            <h1>University Year</h1><br>
+            <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
+                <search><label for="uniYearDropdown">Select Year</label>
+                <select id="uniYearDropdown" name="uniYearDropdown">
+                    <option value="">-- Select a Year --</option>
+                     <?php
+                                        //Preparing the dropdown list for choosing the name of the professor
+                                         foreach($years as $prof){
+                                            echo "<option value='".htmlspecialchars($prof)."'>".htmlspecialchars($prof)."</option>";
+                                        }
+    
+                                   ?>
+                </select>
+                
+                <label for="newYear">Create New Year</label>
+                <input type="text" id="newYear" name="newYear" ></search>
+                
+            </div>
+            <button id="copyButton" name="copyButton" class="btn">Copy</button>
+        </section>
+
         <section id="content-courses" class="tab-content">
             <h1>Courses</h1>
             <details class="dropdown-menu"<?php echo $showAddCourseDropdown ? ' open' : ''; ?>>
@@ -258,7 +289,7 @@
                             <div class="form-group">
                                  <?php 
                                     if (isset($_SESSION["addCourseSuccess"])) {
-                                        echo $_SESSION["addCourseSuccess"];
+                                        echo "<p style='color: green;font-weight: bold;'>{$_SESSION["addCourseSuccess"]}</p>";
                                         unset($_SESSION["addCourseSuccess"]);
                                     }
                                     if (isset($_SESSION["error"])) {
@@ -330,7 +361,7 @@
                     </div>
                 </details>
                 <details class="dropdown-menu">
-                <summary>Search Course</summary>
+                <summary>Search/Edit Course</summary>
                 <form id="searchCourseForm" action="searchCourse.php" method="post" onsubmit="return false;">
                     <div class="dropdown-content">
                         <div class="form-group">
@@ -339,12 +370,19 @@
                                 <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100...." maxlength="7">
                                 <label for="searchCourseLang">Course Language</label>
                                 <select name="searchCourseLang" id="searchCourseLang">
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
+                                    <option value="E">English</option>
+                                    <option value="F">French</option>
                                 </select>
                                 <label for="searchCourseMajor">Course Major</label>
                                 <select name="searchCourseMajor" id="searchCourseMajor">
                                     <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
+                                </select>
+                                <label for="searchUniYear">University Year</label>
+                                <select name="searchUniYear" id="searchUniYear">
+                                    <option value="">Select year</option>
+                                    <?php
+                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
+                                    ?>
                                 </select>
                                 <input type="button" id="searchCourseBtn" name="searchBtn" class="btn" value="Search">
                             </div><br>
@@ -355,25 +393,25 @@
                             <input type="hidden" id="hiddenCourseIsActive" value="">
 
                             <label for="resCourseCode">Course Code: </label>
-                            <input type="text" id="resCourseCode" name="resCourseCode" value="" disabled>
+                            <input type="text" id="resCourseCode" name="resCourseCode" value="" >
                             <br>
                             <label for="resCourseLang">Course Language: </label>
-                            <select id="resCourseLang" name="resCourseLang" disabled>
+                            <select id="resCourseLang" name="resCourseLang" >
                                 <option value="E">E</option>
                                 <option value="F">F</option>
                             </select>
                             <br>
                             <label for="resCourseName">Course Name: </label>
-                            <input type="text" id="resCourseName" name="resCourseName" value="" disabled>
+                            <input type="text" id="resCourseName" name="resCourseName" value="" >
                             <br>
                             <label for="resCourseCredit">Course Credits: </label>
-                            <input type="number" id="resCourseCredit" min="3" max="6" name="resCourseCredit" value="" disabled>
+                            <input type="number" id="resCourseCredit" min="3" max="6" name="resCourseCredit" value="" >
                             <br>
                             <label for="resCourseHours">Course Hours: </label>
-                            <input type="number" id="resCourseHours" min="36" max="72" name="resCourseHours" value="" disabled>
+                            <input type="number" id="resCourseHours" min="36" max="72" name="resCourseHours" value="" >
                             <br>
                             <label for="resCourseYear">University Year: </label>
-                            <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" disabled>
+                            <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" >
                             <br>
                             <label for="resCourseLevel">Course Level: </label>
                             <select id="resCourseLevel" name="resCourseLevel" disabled>
@@ -384,30 +422,29 @@
                             </select>
                             <br>
                             <label for="resCourseSemester">Course Semester:</label>
-                            <select name="resCourseSemester" id="resCourseSemester" disabled>
+                            <select name="resCourseSemester" id="resCourseSemester" >
                                 <option value="1">Semester 1</option>
                                 <option value="2">Semester 2</option>
                             </select>
                             <br>
                             <label for="resCourseMajor">Course Major: </label>
-                            <select name="resCourseMajor" id="resCourseMajor" disabled>
+                            <select name="resCourseMajor" id="resCourseMajor" >
                                 <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
                             </select>
                             <br>
                             <label for="resCourseProf">Course Professor: </label>
-                            <select name="resCourseProf" id="resCourseProf" disabled>
+                            <select name="resCourseProf" id="resCourseProf" >
                                 <?php foreach($_SESSION["professors"] as $file=>$name){ echo "<option value='$file'>$name</option>"; } ?>
                             </select>
                             <br>
                             <label for="resCourseCategory">Course Category</label>
-                            <select name="resCourseCategory" id="resCourseCategory" disabled>
+                            <select name="resCourseCategory" id="resCourseCategory" >
                                 <option value="mandatory">Mandatory</option>
                                 <option value="optional">Optional</option>
                                 <option value="common">Common</option>
                             </select>
                         </div>
-                        <input type="button" id="resEditCourse" class="btn" value="Edit Course">
-                        <input type="button" id="resConfirmCourse" class="btn" value="Confirm changes" style="display: none;">
+                        <input type="button" id="resConfirmCourse" class="btn" value="Confirm changes" style="display: inline;">
                         <input type="button" id="resDisableCourse" class="btn" value="Disable Course">
                         <input type="button" id="resCancelSearch" class="btn" value="Cancel">
                     </div>

@@ -65,6 +65,7 @@ body {
 }
 
 #tab-professors:checked ~ .sidebar .label-professors,
+#tab-uniyear:checked ~ .sidebar .label-uniyear,
 #tab-courses:checked ~ .sidebar .label-courses,
 #tab-correctors:checked ~ .sidebar .label-correctors,
 #tab-edit-admins:checked ~ .sidebar .label-edit-admins {
@@ -219,11 +220,13 @@ input[type="radio"] {
     display: none;
 }
 
-.tab-content {
+.tab-content,
+.tab-uniyear {
     display: none;
 }
 
 #tab-professors:checked ~ aside ~ .main-content #content-professors,
+#tab-uniyear:checked ~ aside ~ .main-content #content-uniyear,
 #tab-courses:checked ~ aside ~ .main-content #content-courses,
 #tab-correctors:checked ~ aside ~ .main-content #content-correctors,
 #tab-edit-admins:checked ~ aside ~ .main-content #content-edit-admins
@@ -232,6 +235,7 @@ input[type="radio"] {
 }
 
 #tab-professors:checked ~ .sidebar .label-professors,
+#tab-uniyear:checked ~ .sidebar .label-uniyear,
 #tab-courses:checked ~ .sidebar .label-courses,
 #tab-correctors:checked ~ .sidebar .label-correctors,
 #tab-edit-admins:checked ~ .sidebar .label-edit-admins {

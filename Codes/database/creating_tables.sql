@@ -80,3 +80,7 @@ CREATE TABLE correctors (
   final_first_corrector INT DEFAULT 0,
   final_second_corrector INT DEFAULT 0
 );
+
+Create table uniYear(
+  uYear VARCHAR(15) DEFAULT null
+);
