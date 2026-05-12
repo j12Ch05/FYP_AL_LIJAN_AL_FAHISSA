@@ -640,7 +640,7 @@
                                     <tbody id="correctorsTableBody">
                                         <?php
                                         if ($correctorsLoaded && count($correctors) === 0) {
-                                            echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
+                                            echo '<tr><td colspan="8" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
                                         } else {
                                             foreach ($correctors as $r) {
                                                 $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));

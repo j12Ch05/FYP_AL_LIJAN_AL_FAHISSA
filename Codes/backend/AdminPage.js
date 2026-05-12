@@ -374,15 +374,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById('correctorsTableBody');
         tbody.innerHTML = '';
         if (courses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
             return;
         }
         courses.forEach(r => {
             const profName = ((r.prof_first_name || '') + ' ' + (r.prof_last_name || '')).trim();
             const courseCode = r.course_code;
+            const langKey = r.course_lang;
             const firstCorrectorId = r.first_corrector_id !== undefined && r.first_corrector_id !== null ? String(r.first_corrector_id) : '';
             const secondSelected = r.second_corrector !== undefined && r.second_corrector !== null ? String(r.second_corrector) : '';
             const thirdSelected = r.third_corrector !== undefined && r.third_corrector !== null ? String(r.third_corrector) : '';
+            const majorLabel = r.major_id !== undefined && r.major_id !== null ? String(r.major_id) : '';
+            const levelLabel = r.course_level !== undefined && r.course_level !== null ? String(r.course_level) : '';
 
             const secondOptions = [];
             if (secondSelected && professors[secondSelected]) {
@@ -411,11 +414,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${courseCode}</td>
-                <td>${r.course_name}</td>
-                <td>${r.course_lang}</td>
+                <td>${r.course_name || ''}</td>
+                <td>${majorLabel}</td>
+                <td>${levelLabel}</td>
+                <td>${langKey}</td>
                 <td>${profName}</td>
-                <td><select name='second_corrector[${courseCode}][${r.course_lang}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
-                <td><select name='third_corrector[${courseCode}][${r.course_lang}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
+                <td><select name='second_corrector[${courseCode}][${langKey}]' disabled class='corrector-select'>${secondOptions.join('')}</select></td>
+                <td><select name='third_corrector[${courseCode}][${langKey}]' disabled class='corrector-select'>${thirdOptions.join('')}</select></td>
             `;
             tbody.appendChild(tr);
         });

@@ -26,35 +26,21 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
     $paramTypes = 'ss';
     $param = [$session,$uniYear];
 
-    if($level == "all" && $major == "all" && $language == "all"){
-        $paramTypes .= "";
-    }
-    else if($level == "all"){
-        $sql_fetch.= " AND corr.major_id = ? AND corr.course_lang = ? ";
-        $paramTypes .= "ss";
+    if ($major !== "all") {
+        $sql_fetch .= " AND corr.major_id = ? ";
+        $paramTypes .= "s";
         $param[] = $major;
-        $param[] = $language;
     }
-    else if($major == "all"){
-        $sql_fetch .= "AND c.course_level = ? AND corr.course_lang = ? ";
-        $paramTypes .="ss";
-        $param[] = $level;
-        $param[] = $language;
-    }
-    else if($language == "all"){
-        $sql_fetch .= "AND corr.major_id = ? AND c.course_level = ?  ";
-        $paramTypes .= "ss";
-        $param[] = $major;
+    if ($level !== "all") {
+        $sql_fetch .= " AND c.course_level = ? ";
+        $paramTypes .= "s";
         $param[] = $level;
     }
-    else{
-        $sql_fetch .= "AND corr.major_id = ? AND c.course_level = ? AND corr.course_lang = ?  ";
-        $paramTypes .= "ss";
-        $param[] = $major;
-        $param[] = $level;
+    if ($language !== "all") {
+        $sql_fetch .= " AND corr.course_lang = ? ";
+        $paramTypes .= "s";
         $param[] = $language;
     }
-    
 
     $sql_fetch .= " ORDER BY corr.course_code ASC";
 
