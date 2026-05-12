@@ -148,10 +148,80 @@ function excelSheetTitle(string $title): string
     return strlen($title) > 31 ? substr($title, 0, 31) : $title;
 }
 
-$spreadsheet = new Spreadsheet();
+    // Determine sheet definitions based on selected session filter
+    $sessionId = $filter['sessionId'] ?? '';
+    // Use professor's first and last name for sheet naming (no father name, no file number)
+        // For each professor, fetch data and create appropriate sheets
+    [$data, $course_details] = fetchProfessorCorrectorData($conn, (string) $profId, (string) $year, (string) $major, (string) $level);
+
+    // Build sheet titles using professor's first and last name (no file number)
+    $profName = $professor['prof_first_name'] . ' ' . $professor['prof_last_name'];
+
+    // Determine which sheets to generate based on selected session filter
+    $sessionId = $filter['sessionId'] ?? '';
+    if ($sessionId === 'sess2') {
+        // Session 2: only final sheets (no partial)
+        $sheetDefs = [
+            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
+            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
+            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
+        ];
+    } else {
+        // Default: both partial and final sheets for each semester
+        $sheetDefs = [
+            [$data['sem1'], 'جزئي', 'الأولى', 'الأول', 'S1_Partiel'],
+            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
+            [$data['sem2'], 'جزئي', 'الثانية', 'الثاني', 'S2_Partiel'],
+            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
+            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
+        ];
+    }
+
+    $firstSheet = true;
+    foreach ($sheetDefs as $def) {
+        [$courseList, $examType, $sessionLabel, $semesterLabel, $suffix] = $def;
+        if ($firstSheet) {
+            $sheet = $spreadsheet->getActiveSheet();
+            $firstSheet = false;
+        } else {
+            $sheet = $spreadsheet->createSheet();
+        }
+        createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $sessionLabel, $semesterLabel);
+        $sheet->setTitle(excelSheetTitle($profName . '_' . $suffix));
+    }
+
+    if ($sessionId === 'sess2') {
+        // Session 2: only final sheets (no partial)
+        $sheetDefs = [
+            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
+            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
+            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
+        ];
+    } else {
+        // Default: partial and final sheets for each semester
+        $sheetDefs = [
+            [$data['sem1'], 'جزئي', 'الأولى', 'الأول', 'S1_Partiel'],
+            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
+            [$data['sem2'], 'جزئي', 'الثانية', 'الثاني', 'S2_Partiel'],
+            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
+            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
+        ];
+    }
+
+    foreach ($sheetDefs as $def) {
+        [$courseList, $examType, $sessionLabel, $semesterLabel, $suffix] = $def;
+        if ($firstSheet) {
+            $sheet = $spreadsheet->getActiveSheet();
+            $firstSheet = false;
+        } else {
+            $sheet = $spreadsheet->createSheet();
+        }
+        createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $sessionLabel, $semesterLabel);
+        $sheet->setTitle(excelSheetTitle($profName . '_' . $suffix));
+    }
 $firstSheet = true;
 
-foreach ($professorsById as $profId => $professor) {
+// Duplicate professor loop removed – sheet generation handled above.
     [$data, $course_details] = fetchProfessorCorrectorData($conn, (string) $profId, (string) $year, (string) $major, (string) $level);
 
     $sheetDefs = [
@@ -174,10 +244,8 @@ foreach ($professorsById as $profId => $professor) {
         $sheet->setTitle(excelSheetTitle($profId . '_' . $suffix));
     }
 
-    $sumSheet = $spreadsheet->createSheet();
-    createSummarySheet($sumSheet, $professor, $departmentName, $course_details);
-    $sumSheet->setTitle(excelSheetTitle($profId . '_ملخص'));
-}
+
+
 
 mysqli_close($conn);
 
