@@ -105,7 +105,7 @@
     }
     mysqli_stmt_close($stmt_m); 
 
-    $sql_year ="SELECT uYear FROM uniyear where 1";
+    $sql_year ="SELECT uYear FROM uniyear where 1 ORDER BY uYear DESC";
     $stmt_y = mysqli_prepare($conn,$sql_year);
     mysqli_stmt_execute($stmt_y);
     $res_y = mysqli_stmt_get_result($stmt_y);
@@ -297,10 +297,15 @@
                                         unset($_SESSION["error"]);
                                     }
                                 ?>
+        
                                 
                                 
                                 <label for="courseYear">University Year</label>
-                                <input type="text" id="courseYear" name="courseYear" maxlength="15" value="<?php echo htmlspecialchars($addCourseYear, ENT_QUOTES, 'UTF-8'); ?>" required><br>
+                                <select name="courseYear" id="courseYear">
+                                    <?php
+                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
+                                    ?>
+                                </select>
                                 <label for="courseMajor">Major</label>
                                 <select name="courseMajor" id="courseMajor">
                                     <?php
@@ -492,6 +497,13 @@
                                     <option value="E"<?php echo $vmfSel("majorLang", "E"); ?>>English</option>
                                     <option value="F"<?php echo $vmfSel("majorLang", "F"); ?>>French</option>
                                 </select>
+                                <label for="majorYear">University Major</label>
+                                <select id="majorYear" name="majorYear">
+                                    <option value="">Select year</option>
+                                    <?php
+                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
+                                    ?>
+                                </select>
                                 </search>
                             </div>
                             <?php
@@ -617,6 +629,8 @@
                                         <tr>
                                             <th>Course Code</th>
                                             <th>Course Name</th>
+                                            <th>Major</th>
+                                            <th>Level</th>
                                             <th>Language</th>
                                             <th>First Corrector</th>
                                             <th>Second Corrector</th>
@@ -638,6 +652,8 @@
                                                 echo "<tr>";
                                                 echo "<td>" . $courseCode . "</td>";
                                                 echo "<td>" . $r["course_name"] . "</td>"; 
+                                                echo "<td>" . $r["major_id"] . "</td>"; 
+                                                echo "<td>" . $r["course_level"] . "</td>"; 
                                                 echo "<td>" . $r["course_lang"] . "</td>"; 
                                                 echo "<td>" . $profName . "</td>";
                                                 echo "<td><select name='second_corrector[" . $courseCode . "][" . $r["course_lang"] . "]'   class='corrector-select'>";
@@ -679,8 +695,8 @@
                                     </tbody>
                                 </table>
                             </div><br>
-                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" style="display: inline;">
-                             </form>
+                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" >
+                            </form>
                 </div>
         </details>
                             
@@ -806,7 +822,7 @@
                                     </tbody>
                                 </table>
                             </div><br>
-                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" style="display: inline;">
+                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" >
                         </form>
                     </div>
                 </details>

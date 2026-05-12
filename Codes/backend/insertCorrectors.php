@@ -8,35 +8,62 @@ function isAjaxRequest(): bool
     return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 }
 
-function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string $language, string $session): array
+function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string $language, string $session,string $uniYear): array
 {
     $sql_fetch = "SELECT corr.course_code, c.course_name, corr.course_lang,
                    p.prof_file_nb AS first_corrector_id,
                    p.prof_first_name, p.prof_last_name,
                    corr.second_corrector_file_nb AS second_corrector,
                    corr.third_corrector_file_nb AS third_corrector,
-                   corr.session_nb
+                   corr.session_nb,
+                   m.major_id,c.course_level
             FROM correctors corr
             LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
+            LEFT JOIN major m ON corr.major_id = m.major_id
             LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
-            WHERE c.major_id = ? AND c.course_level = ? AND corr.session_nb = ?
-            ORDER BY corr.course_code ASC";
+            WHERE corr.session_nb = ? AND corr.uni_year = ?
+            ";
+    $paramTypes = 'ss';
+    $param = [$session,$uniYear];
 
-    if ($language !== "all") {
-        $sql_fetch .= " AND corr.course_lang = ?";
+    if($level == "all" && $major == "all" && $language == "all"){
+        $paramTypes .= "";
     }
+    else if($level == "all"){
+        $sql_fetch.= " AND corr.major_id = ? AND corr.course_lang = ? ";
+        $paramTypes .= "ss";
+        $param[] = $major;
+        $param[] = $language;
+    }
+    else if($major == "all"){
+        $sql_fetch .= "AND c.course_level = ? AND corr.course_lang = ? ";
+        $paramTypes .="ss";
+        $param[] = $level;
+        $param[] = $language;
+    }
+    else if($language == "all"){
+        $sql_fetch .= "AND corr.major_id = ? AND c.course_level = ?  ";
+        $paramTypes .= "ss";
+        $param[] = $major;
+        $param[] = $level;
+    }
+    else{
+        $sql_fetch .= "AND corr.major_id = ? AND c.course_level = ? AND corr.course_lang = ?  ";
+        $paramTypes .= "ss";
+        $param[] = $major;
+        $param[] = $level;
+        $param[] = $language;
+    }
+    
+
+    $sql_fetch .= " ORDER BY corr.course_code ASC";
 
     $stmt = mysqli_prepare($conn, $sql_fetch);
     if (!$stmt) {
         return [];
     }
 
-    if ($language !== "all") {
-        mysqli_stmt_bind_param($stmt, "ssss", $major, $level, $session, $language);
-    } else {
-        mysqli_stmt_bind_param($stmt, "sss", $major, $level, $session);
-    }
-
+    mysqli_stmt_bind_param($stmt,$paramTypes,...$param);
     if (!mysqli_stmt_execute($stmt)) {
         mysqli_stmt_close($stmt);
         return [];
@@ -92,15 +119,17 @@ if (isset($_POST["findBtn"])) {
     $level = $_POST["corrLevel"] ?? "";
     $session = $_POST["corrSession"] ?? "";
     $language = $_POST["corrLang"] ?? "";
+    $year = $_POST["corrYear"]??"";
 
     $_SESSION["insert_correctors_filter"] = [
         "corrMajor" => $major,
         "corrLevel" => $level,
         "corrSession" => $session,
-        "corrLang" => $language
+        "corrLang" => $language,
+        "corrYear" => $year
     ];
 
-    $rows = fetchCorrectorsRows($conn, $major, $level, $language, $session);
+    $rows = fetchCorrectorsRows($conn, $major, $level, $language, $session,$year);
     $ajaxError = null;
     $_SESSION["insert_correctors_data"] = $rows;
     unset($_SESSION["insert_correctors_error"]);
@@ -140,6 +169,7 @@ if (isset($_POST["applyCorr"])) {
     $third_correctors = $_POST["third_corrector"] ?? [];
     $session = $_SESSION["insert_correctors_filter"]["corrSession"] ?? 'sem1';
     $major = $_SESSION["insert_correctors_filter"]["corrMajor"] ?? "";
+    $year = $_SESSION["insert_correctors_filter"]["corrYear"] ?? "";
 
     $updatedRows = 0;
     foreach ($second_correctors as $course_code => $langs) {
@@ -163,10 +193,10 @@ if (isset($_POST["applyCorr"])) {
         mysqli_stmt_close($stmt_check);
 
         if ($count > 0) {
-            $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ?";
+            $sql = "UPDATE correctors SET second_corrector_file_nb = ?, third_corrector_file_nb = ? WHERE course_code = ? AND course_lang = ? AND major_id = ? AND session_nb = ? AND uni_year = ?";
             $stmt = mysqli_prepare($conn, $sql);
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "iissss", $second_val, $third_val, $course_code, $lang, $major, $session);
+                mysqli_stmt_bind_param($stmt, "iissss", $second_val, $third_val, $course_code, $lang, $major, $session,$year);
                 mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
                 $updatedRows++;
@@ -212,7 +242,7 @@ if (isset($_POST["applyCorr"])) {
     $level = $_SESSION["insert_correctors_filter"]["corrLevel"] ?? "";
     $language = $_SESSION["insert_correctors_filter"]["corrLang"] ?? 'E';
     if ($major !== "" && $level !== "") {
-        $_SESSION["insert_correctors_data"] = fetchCorrectorsRows($conn, $major, $level, $language, $session);
+        $_SESSION["insert_correctors_data"] = fetchCorrectorsRows($conn, $major, $level, $language, $session,$year);
     }
 
     mysqli_close($conn);
