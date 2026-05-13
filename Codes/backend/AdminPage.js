@@ -735,4 +735,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 10. Copy Year Courses ---
+    const copyYearBtn = document.getElementById('copyyear');
+    if (copyYearBtn) {
+        copyYearBtn.addEventListener('click', () => {
+            const fromYear = document.getElementById('uniYearFrom').value;
+            const toYear = document.getElementById('uniYearTo').value;
+
+            if (!fromYear || !toYear) {
+                alert('Please select both "From" and "To" years.');
+                return;
+            }
+
+            if (fromYear === toYear) {
+                alert('Source and target years must be different.');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to copy all courses from ${fromYear} to ${toYear}?`)) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('fromYear', fromYear);
+            formData.append('toYear', toYear);
+
+            fetch('copyYearCourses.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.href = 'AdminPage.php?tab=uniyear';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while copying courses.');
+            });
+        });
+    }
+
 });

@@ -281,15 +281,15 @@
                         }
                     ?>
                 </select>
-                <button id="copyyear" name="copyyear" class="btn">Copy</button>
-            </div>
+            </div> 
+            <button id="copyyear" name="copyyear" class="btn">Copy</button>
             
             
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="newYear">Create New Year</label>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="newYear" name="newYear" maxlength="4" placeholder="YYYY" required style="flex: 1;">
-                    <span style="font-weight: bold; font-size: 1.2rem;">/</span>
+                    <span style="font-weight: bold; font-size: 1.2rem;">-</span>
                     <input type="text" id="nextYear" name="nextYear" maxlength="4" placeholder="YYYY" readonly style="flex: 1; background-color: #f1f5f9; cursor: not-allowed;">
                 </div>
             </div>
