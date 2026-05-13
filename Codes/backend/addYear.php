@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nextYear = $_POST['nextYear'] ?? '';
 
     if (empty($newYear) || empty($nextYear)) {
-        echo alert("Both year fields are required.");
+        echo json_encode(['status' => 'error', 'message' => 'Both year fields are required.']);
         exit;
     }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_stmt_store_result($checkStmt);
 
     if (mysqli_stmt_num_rows($checkStmt) > 0) {
-        echo alert("This university year already exists.");
+        echo json_encode(['status' => 'error', 'message' => 'This university year already exists.']);
         mysqli_stmt_close($checkStmt);
         exit;
     }
@@ -33,14 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_stmt_bind_param($insertStmt, "s", $formattedYear);
 
     if (mysqli_stmt_execute($insertStmt)) {
-        echo alert("University year created successfully.");
+        echo json_encode(['status' => 'success', 'message' => 'University year created successfully.']);
     } else {
-        echo alert("Database error: " . mysqli_error($conn));
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . mysqli_error($conn)]);
     }
 
     mysqli_stmt_close($insertStmt);
     mysqli_close($conn);
 } else {
-    echo alert("Invalid request method.");
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request method.']);
 }
 ?>
