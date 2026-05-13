@@ -260,22 +260,38 @@
         <section id="content-uniyear" class="tab-content">
             <h1>University Year</h1><br>
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
-                <search><label for="uniYearDropdown">Select Year</label>
-                <select id="uniYearDropdown" name="uniYearDropdown">
+                <label for="uniYearFrom">Year to copy courses from</label>
+                <select id="uniYearFrom" name="uniYearFrom">
                     <option value="">-- Select a Year --</option>
-                     <?php
-                                        //Preparing the dropdown list for choosing the name of the professor
-                                         foreach($years as $prof){
-                                            echo "<option value='".htmlspecialchars($prof)."'>".htmlspecialchars($prof)."</option>";
-                                        }
-    
-                                   ?>
+                    <?php
+                        foreach($years as $year){
+                            echo "<option value='".htmlspecialchars($year)."'>".htmlspecialchars($year)."</option>";
+                        }
+                    ?>
                 </select>
-                
-                <label for="newYear">Create New Year</label>
-                <input type="text" id="newYear" name="newYear" ></search>
-                
             </div>
+
+            <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
+                <label for="uniYearTo">Year to copy courses to</label>
+                <select id="uniYearTo" name="uniYearTo">
+                    <option value="">-- Select a Year --</option>
+                    <?php
+                        foreach($years as $year){
+                            echo "<option value='".htmlspecialchars($year)."'>".htmlspecialchars($year)."</option>";
+                        }
+                    ?>
+                </select>
+            </div>
+            
+            <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
+                <label for="newYear">Create New Year</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="newYear" name="newYear" maxlength="4" placeholder="YYYY" required style="flex: 1;">
+                    <span style="font-weight: bold; font-size: 1.2rem;">/</span>
+                    <input type="text" id="nextYear" name="nextYear" maxlength="4" placeholder="YYYY" readonly style="flex: 1; background-color: #f1f5f9; cursor: not-allowed;">
+                </div>
+            </div>
+            
             <button id="copyButton" name="copyButton" class="btn">Copy</button>
         </section>
 

@@ -675,6 +675,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBrowserNotification('Error', 'Failed to search correctors');
                 });
         });
+    // --- 9. University Year Auto-increment ---
+    const newYearInput = document.getElementById('newYear');
+    const nextYearInput = document.getElementById('nextYear');
+
+    if (newYearInput && nextYearInput) {
+        newYearInput.addEventListener('input', () => {
+            // Remove non-numeric characters
+            newYearInput.value = newYearInput.value.replace(/\D/g, '');
+            
+            const val = newYearInput.value;
+            if (val.length === 4) {
+                const year = parseInt(val, 10);
+                if (!isNaN(year)) {
+                    nextYearInput.value = year + 1;
+                } else {
+                    nextYearInput.value = '';
+                }
+            } else {
+                nextYearInput.value = '';
+            }
+        });
     }
 
 });
