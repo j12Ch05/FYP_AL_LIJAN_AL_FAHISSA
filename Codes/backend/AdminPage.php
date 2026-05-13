@@ -259,6 +259,7 @@
 
         <section id="content-uniyear" class="tab-content">
             <h1>University Year</h1><br>
+            <search>
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="uniYearFrom">Year to copy courses from</label>
                 <select id="uniYearFrom" name="uniYearFrom">
@@ -281,7 +282,9 @@
                         }
                     ?>
                 </select>
+                <button id="copyyear" name="copyyear" class="btn">Copy</button>
             </div>
+            </search>
             
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="newYear">Create New Year</label>
@@ -292,7 +295,7 @@
                 </div>
             </div>
             
-            <button id="copyButton" name="copyButton" class="btn">Copy</button>
+            <button id="createnewyear" name="createnewyear" class="btn">Create New Year</button>
         </section>
 
         <section id="content-courses" class="tab-content">

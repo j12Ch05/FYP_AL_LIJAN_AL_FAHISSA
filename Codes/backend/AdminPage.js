@@ -675,9 +675,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     showBrowserNotification('Error', 'Failed to search correctors');
                 });
         });
-    // --- 9. University Year Auto-increment ---
+    }
+    // --- 9. University Year Auto-increment & Creation ---
     const newYearInput = document.getElementById('newYear');
     const nextYearInput = document.getElementById('nextYear');
+    const createNewYearBtn = document.getElementById('createnewyear');
 
     if (newYearInput && nextYearInput) {
         newYearInput.addEventListener('input', () => {
@@ -695,6 +697,40 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 nextYearInput.value = '';
             }
+        });
+    }
+
+    if (createNewYearBtn) {
+        createNewYearBtn.addEventListener('click', () => {
+            const newYear = newYearInput.value;
+            const nextYear = nextYearInput.value;
+
+            if (newYear.length !== 4 || nextYear.length !== 4) {
+                alert('Please enter a valid 4-digit year.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('newYear', newYear);
+            formData.append('nextYear', nextYear);
+
+            fetch('addYear.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload(); // Reload to refresh dropdowns with new year
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while creating the university year.');
+            });
         });
     }
 
