@@ -722,7 +722,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data.status === 'success') {
                     alert(data.message);
-                    location.reload(); // Reload to refresh dropdowns with new year
+                    newYearInput.value = ''; // Reload to refresh dropdowns with new year
+                    nextYearInput.value = ''; // Reload to refresh dropdowns with new year
                 } else {
                     alert(data.message);
                 }
