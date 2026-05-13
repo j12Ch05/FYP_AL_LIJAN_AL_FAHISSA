@@ -722,8 +722,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data.status === 'success') {
                     alert(data.message);
-                    newYearInput.value = ''; // Reload to refresh dropdowns with new year
-                    nextYearInput.value = ''; // Reload to refresh dropdowns with new year
+                    location.reload();
+                    location.href = 'AdminPage.php?tab=uniyear'; 
                 } else {
                     alert(data.message);
                 }
