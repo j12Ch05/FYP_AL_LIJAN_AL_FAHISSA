@@ -18,7 +18,7 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
                    corr.session_nb,
                    corr.major_id AS major_id, c.course_level
             FROM correctors corr
-            LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
+            LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id AND c.uni_year = corr.uni_year
             LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
             WHERE corr.session_nb = ? AND corr.uni_year = ?
             ";

@@ -16,20 +16,22 @@
         $level = $_POST["majorLevel"] ?? "";
         $semester = $_POST["majorSemester"] ?? "";
         $language = $_POST["majorLang"] ?? "";
+        $year = $_POST["majorYear"] ?? "";
 
         $_SESSION["view_major_filter"] = [
             "major" => $major,
             "majorLevel" => $level,
             "majorSemester" => $semester,
             "majorLang" => $language,
+            "majorYear" => $year
         ];
 
         $sql = "SELECT c.course_code, c.course_name, c.course_category, c.course_credit_nb,
                        p.prof_first_name, p.prof_last_name
                 FROM course c
-                LEFT JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id
+                LEFT JOIN teaching t ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id AND t.uni_year = c.uni_year
                 LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
-                WHERE c.major_id = ? AND c.course_level = ? AND c.course_semester_nb = ? AND c.course_lang = ? AND t.isActive = 1";
+                WHERE c.major_id = ? AND c.course_level = ? AND c.course_semester_nb = ? AND c.course_lang = ? AND t.uni_year = ? AND  t.isActive = 1";
 
         $stmt = mysqli_prepare($conn, $sql);
         if (!$stmt) {
@@ -37,7 +39,7 @@
             $_SESSION["view_major_error"] = "Query prepare failed: " . mysqli_error($conn);
         } else {
             $semesterInt = (int) $semester;
-            mysqli_stmt_bind_param($stmt, "ssis", $major, $level, $semesterInt, $language);
+            mysqli_stmt_bind_param($stmt, "sssss", $major, $level, $semesterInt, $language,$year);
             if (!mysqli_stmt_execute($stmt)) {
                 $_SESSION["view_major_courses"] = [];
                 $_SESSION["view_major_error"] = "Query failed: " . mysqli_stmt_error($stmt);

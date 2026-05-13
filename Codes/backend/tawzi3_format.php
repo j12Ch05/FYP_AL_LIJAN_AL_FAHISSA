@@ -28,8 +28,8 @@
                    m.major_name,t.uni_year,d.dep_name
                    FROM correctors corr
                    JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.prof_file_nb = corr.prof_file_nb
-                   AND t.major_id = corr.major_id
-                   JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND c.major_id = t.major_id
+                   AND t.major_id = corr.major_id AND t.uni_year = corr.uni_year
+                   JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND c.major_id = t.major_id and c.uni_year = t.uni_year
                    JOIN major m ON c.major_id = m.major_id  
                    JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
                    JOIN department d ON d.dep_id = p.dep_id

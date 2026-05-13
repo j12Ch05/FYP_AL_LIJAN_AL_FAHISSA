@@ -30,8 +30,8 @@
                    t.uni_year,c.course_level,
                    d.dep_name
             FROM correctors corr
-            LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.major_id = corr.major_id
-            LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
+            LEFT JOIN teaching t ON t.course_code = corr.course_code AND t.course_lang = corr.course_lang AND t.major_id = corr.major_id AND t.uni_year = corr.uni_year
+            LEFT JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id AND t.uni_year = c.uni_year
             LEFT JOIN professor p ON p.prof_file_nb = t.prof_file_nb
             LEFT JOIN department d ON d.dep_id = p.dep_id
             WHERE d.dep_id = ? and corr.session_nb = ? AND corr.uni_year = ?";

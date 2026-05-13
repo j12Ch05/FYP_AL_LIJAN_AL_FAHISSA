@@ -16,7 +16,7 @@
                              corr.final_first_corrector, corr.final_second_corrector,
                              corr.session_nb
                       FROM correctors corr
-                      LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id
+                      LEFT JOIN course c ON corr.course_code = c.course_code AND corr.course_lang = c.course_lang AND corr.major_id = c.major_id AND corr.uni_year = c.uni_year
                       LEFT JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
                       WHERE corr.session_nb = ? AND corr.uni_year = ?";
 

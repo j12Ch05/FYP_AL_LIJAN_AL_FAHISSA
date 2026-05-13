@@ -517,9 +517,11 @@
                                 </select>
                                 <label for="majorYear">University Major</label>
                                 <select id="majorYear" name="majorYear">
-                                    <option value="">Select year</option>
-                                    <?php
-                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
+                                     <?php
+                                    foreach($years as $el){ 
+                                        $selectedYear = $vmfSel("majorYear", $el);
+                                        echo "<option value='".htmlspecialchars($el)."'{$selectedYear}>".htmlspecialchars($el)."</option>"; 
+                                    }
                                     ?>
                                 </select>
                                 </search>

@@ -5,11 +5,11 @@
 
     
 
-    function course_exists($conn, $code, $lang,$major) {
+    function course_exists($conn, $code, $lang,$major,$year) {
         if (empty($lang)) return false; 
-        $sql_query = "SELECT course_code from course where course_code = ? and course_lang = ? and major_id = ?";
+        $sql_query = "SELECT course_code from course where course_code = ? and course_lang = ? and major_id = ? AND uni_year = ?";
         $stmt = mysqli_prepare($conn, $sql_query);
-        mysqli_stmt_bind_param($stmt, "sss", $code, $lang,$major);
+        mysqli_stmt_bind_param($stmt, "ssss", $code, $lang,$major,$year);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $exists = mysqli_num_rows($result) > 0;
@@ -44,7 +44,7 @@
             $error = "You must select at least a language for the course";
         }
         
-        if(course_exists($conn, $courseCode, $courseEng,$courseMajor) || course_exists($conn, $courseCode, $courseFr,$courseMajor)) {
+        if(course_exists($conn, $courseCode, $courseEng,$courseMajor,$uniYear) || course_exists($conn, $courseCode, $courseFr,$courseMajor,$uniYear)) {
             $error = "The code you entered is already taken with the selected language or major";
         }
 
@@ -56,8 +56,8 @@
             mysqli_begin_transaction($conn);
 
             if(!empty($courseEng)) {
-                $sql_1 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`) 
-                          VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','E','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1')";
+                $sql_1 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`,`uni_year`) 
+                          VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','E','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1','$uniYear')";
 
                 if(!mysqli_query($conn, $sql_1)) {
                     $ok = false;
@@ -76,8 +76,8 @@
             }
 
             if($ok && !empty($courseFr)) {
-                $sql_2 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`) 
-                          VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','F','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1')";
+                $sql_2 = "INSERT INTO `course`(`course_code`, `course_name`, `course_credit_nb`, `course_hours_nb`, `course_lang`, `course_semester_nb`, `course_level`, `course_category`, `major_id`, `isActive`,`uni_year`) 
+                          VALUES ('$courseCode','$courseName','$courseCredit','$courseHours','F','$courseSemester','$courseLevel','$courseCategory','$courseMajor','1','$uniYear')";
 
                 if(!mysqli_query($conn, $sql_2)) {
                     $ok = false;
