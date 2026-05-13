@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $fetchSql = "SELECT t.*, c.course_name, c.course_credit_nb, c.course_hours_nb, c.course_semester_nb, c.course_level, c.course_category 
                  FROM teaching t 
-                 JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id 
+                 JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id  AND t.uni_year = c.uni_year
                  WHERE t.uni_year = ?";
     $fetchStmt = mysqli_prepare($conn, $fetchSql);
     mysqli_stmt_bind_param($fetchStmt, "s", $fromYear);
@@ -56,7 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_begin_transaction($conn);
     $okCopy = true;
     
-    $courseSql = "INSERT INTO course (course_code, course_name, course_credit_nb, course_hours_nb, course_lang, course_semester_nb, course_level, course_category, major_id, isActive) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $courseSql = "INSERT INTO course (course_code, course_name, course_credit_nb, course_hours_nb, course_lang, course_semester_nb, course_level, course_category, major_id,uni_year, isActive) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
     $courseStmt = mysqli_prepare($conn, $courseSql);
 
     $teachingSql = "INSERT INTO teaching (course_code, course_lang, major_id, prof_file_nb, uni_year, isActive) VALUES (?, ?, ?, ?, ?, ?)";
@@ -65,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($coursesToCopy as $course) {
         mysqli_stmt_bind_param(
             $courseStmt, 
-            "ssiisssssi", 
+            "ssiissssssi", 
             $course['course_code'], 
             $course['course_name'], 
             $course['course_credit_nb'], 
@@ -75,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $course['course_level'], 
             $course['course_category'], 
             $course['major_id'], 
+            $toYear,
             $course['isActive']
         );
         if (!mysqli_stmt_execute($courseStmt)) {
