@@ -5,6 +5,7 @@
  * as Prof_export_course.php (S1 partial/final, S2 partial/final, session 2, summary) with unique tab names.
  */
 ob_start();
+ini_set('display_errors', '0');
 require __DIR__ . '/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -13,7 +14,9 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include __DIR__ . '/database.php';
 
 if (!isset($_SESSION['email'])) {
@@ -24,11 +27,20 @@ if (!isset($_SESSION['email'])) {
     exit;
 }
 
-$email = $_SESSION['email'];
+$dep_id = $_SESSION["dep_id"];
 $filter = $_SESSION['excel_export_filter'] ?? [];
+$sess = $filter['sessionId'] ?? '';
 $year = $filter['excelYear'] ?? '';
 $major = $filter['excelMajor'] ?? 'all';
 $level = $filter['excelLevel'] ?? 'all';
+$sem = "";
+
+if ($sess == "sess2") {
+    $d = "الثانية";
+} else {
+    $d = "الاول";
+    $sem = ($sess == "sem1") ? "الاول" : "الثاني";
+}
 
 if ($year === '') {
     if (ob_get_length()) {
@@ -39,217 +51,106 @@ if ($year === '') {
     exit;
 }
 
-// All professors in the same department as the logged-in user (chair/admin), with full row for export
-$sql_prof = 'SELECT p.prof_file_nb, p.prof_first_name, p.prof_father_name, p.prof_last_name, p.prof_category,
-                     d.dep_id, d.dep_name
-              FROM professor p
-              JOIN department d ON p.dep_id = d.dep_id
-              JOIN professor a ON p.dep_id = a.dep_id
-              WHERE a.prof_email = ?
-              ORDER BY p.prof_last_name, p.prof_first_name';
-$stmt_prof = mysqli_prepare($conn, $sql_prof);
-if (!$stmt_prof) {
-    die('Database error (professors).');
-}
-mysqli_stmt_bind_param($stmt_prof, 's', $email);
-mysqli_stmt_execute($stmt_prof);
-$result_prof = mysqli_stmt_get_result($stmt_prof);
+// 1. Get all professors in the department
+$sql_professors = "SELECT prof_file_nb, prof_first_name, prof_last_name, prof_category FROM professor WHERE dep_id = ?";
+$stmt_p = mysqli_prepare($conn, $sql_professors);
+mysqli_stmt_bind_param($stmt_p, 's', $dep_id);
+mysqli_stmt_execute($stmt_p);
+$res_p = mysqli_stmt_get_result($stmt_p);
 
-$professorsById = [];
-$departmentName = 'General';
-while ($row = mysqli_fetch_assoc($result_prof)) {
-    $professorsById[$row['prof_file_nb']] = $row;
-    $departmentName = $row['dep_name'] ?? $departmentName;
-}
-mysqli_stmt_close($stmt_prof);
-
-if (!$professorsById) {
-    die('No professors found for this department.');
-}
-
-/**
- * Fetch corrector rows for one professor (same logic as Prof_export_course.php) with optional major/level/year filters.
- *
- * @return array{0: array<string, array<int, array>>, 1: array<string, array<string, mixed>>}
- */
-function fetchProfessorCorrectorData(mysqli $conn, string $profId, string $year, string $major, string $level): array
-{
-    $sql = 'SELECT corr.*, c.course_name, c.course_level, c.course_credit_nb, m.major_name, t.uni_year
-            FROM correctors corr
-            JOIN teaching t ON corr.course_code = t.course_code AND t.course_lang = corr.course_lang
-                AND t.prof_file_nb = corr.prof_file_nb AND t.major_id = corr.major_id
-            JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
-            JOIN major m ON m.major_id = c.major_id
-            WHERE (corr.prof_file_nb = ? OR corr.second_corrector_file_nb = ?)
-              AND corr.uni_year = ?';
-    $types = 'sss';
-    $params = [$profId, $profId, $year];
-    if ($major !== 'all') {
-        $sql .= ' AND corr.major_id = ?';
-        $types .= 's';
-        $params[] = $major;
-    }
-    if ($level !== 'all') {
-        $sql .= ' AND c.course_level = ?';
-        $types .= 's';
-        $params[] = $level;
-    }
-
-    $stmt = mysqli_prepare($conn, $sql);
-    if (!$stmt) {
-        return [['sem1' => [], 'sem2' => [], 'sess2' => []], []];
-    }
-    mysqli_stmt_bind_param($stmt, $types, ...$params);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    $data = ['sem1' => [], 'sem2' => [], 'sess2' => []];
-    $course_details = [];
-
-    while ($row = mysqli_fetch_assoc($result)) {
-        $sess = $row['session_nb'];
-        if (!isset($data[$sess])) {
-            $data[$sess] = [];
-        }
-
-        $full_code = $row['course_code'] . ' (' . $row['course_lang'] . ')';
-        $data[$sess][] = [
-            'display_code' => $full_code,
-            'level' => $row['course_level'],
-            'first_corrector' => $row['prof_file_nb'],
-            'correctors' => [
-                $row['partial_first_corrector'],
-                $row['partial_second_corrector'],
-                $row['final_first_corrector'],
-                $row['final_second_corrector'],
-            ],
-        ];
-
-        $course_details[$full_code] = [
-            'name' => $row['course_name'],
-            'level' => $row['course_level'],
-            'major' => $row['major_name'],
-            'credits' => $row['course_credit_nb'],
-        ];
-    }
-    mysqli_stmt_close($stmt);
-
-    return [$data, $course_details];
-}
-
-/** Excel worksheet title max 31 chars; forbidden characters removed. */
-function excelSheetTitle(string $title): string
-{
-    $title = str_replace(['\\', '/', '*', '?', ':', '[', ']'], '-', $title);
-    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
-        return mb_strlen($title) > 31 ? mb_substr($title, 0, 31) : $title;
-    }
-
-    return strlen($title) > 31 ? substr($title, 0, 31) : $title;
-}
-
-    // Determine sheet definitions based on selected session filter
-    $sessionId = $filter['sessionId'] ?? '';
-    // Use professor's first and last name for sheet naming (no father name, no file number)
-        // For each professor, fetch data and create appropriate sheets
-    [$data, $course_details] = fetchProfessorCorrectorData($conn, (string) $profId, (string) $year, (string) $major, (string) $level);
-
-    // Build sheet titles using professor's first and last name (no file number)
-    $profName = $professor['prof_first_name'] . ' ' . $professor['prof_last_name'];
-
-    // Determine which sheets to generate based on selected session filter
-    $sessionId = $filter['sessionId'] ?? '';
-    if ($sessionId === 'sess2') {
-        // Session 2: only final sheets (no partial)
-        $sheetDefs = [
-            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
-            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
-            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
-        ];
-    } else {
-        // Default: both partial and final sheets for each semester
-        $sheetDefs = [
-            [$data['sem1'], 'جزئي', 'الأولى', 'الأول', 'S1_Partiel'],
-            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
-            [$data['sem2'], 'جزئي', 'الثانية', 'الثاني', 'S2_Partiel'],
-            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
-            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
-        ];
-    }
-
-    $firstSheet = true;
-    foreach ($sheetDefs as $def) {
-        [$courseList, $examType, $sessionLabel, $semesterLabel, $suffix] = $def;
-        if ($firstSheet) {
-            $sheet = $spreadsheet->getActiveSheet();
-            $firstSheet = false;
-        } else {
-            $sheet = $spreadsheet->createSheet();
-        }
-        createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $sessionLabel, $semesterLabel);
-        $sheet->setTitle(excelSheetTitle($profName . '_' . $suffix));
-    }
-
-    if ($sessionId === 'sess2') {
-        // Session 2: only final sheets (no partial)
-        $sheetDefs = [
-            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
-            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
-            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
-        ];
-    } else {
-        // Default: partial and final sheets for each semester
-        $sheetDefs = [
-            [$data['sem1'], 'جزئي', 'الأولى', 'الأول', 'S1_Partiel'],
-            [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
-            [$data['sem2'], 'جزئي', 'الثانية', 'الثاني', 'S2_Partiel'],
-            [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
-            [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
-        ];
-    }
-
-    foreach ($sheetDefs as $def) {
-        [$courseList, $examType, $sessionLabel, $semesterLabel, $suffix] = $def;
-        if ($firstSheet) {
-            $sheet = $spreadsheet->getActiveSheet();
-            $firstSheet = false;
-        } else {
-            $sheet = $spreadsheet->createSheet();
-        }
-        createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $sessionLabel, $semesterLabel);
-        $sheet->setTitle(excelSheetTitle($profName . '_' . $suffix));
-    }
-$firstSheet = true;
-
-// Duplicate professor loop removed – sheet generation handled above.
-    [$data, $course_details] = fetchProfessorCorrectorData($conn, (string) $profId, (string) $year, (string) $major, (string) $level);
-
-    $sheetDefs = [
-        [$data['sem1'], 'جزئي', 'الأولى', 'الأول', 'S1_Partiel'],
-        [$data['sem1'], 'نهائي', 'الأولى', 'الأول', 'S1_Final'],
-        [$data['sem2'], 'جزئي', 'الثانية', 'الثاني', 'S2_Partiel'],
-        [$data['sem2'], 'نهائي', 'الثانية', 'الثاني', 'S2_Final'],
-        [$data['sess2'], 'إعادة', 'الثانية', 'الثاني', 'Session_2'],
+$professors = [];
+while ($row = mysqli_fetch_assoc($res_p)) {
+    $professors[$row["prof_file_nb"]] = [
+        "full_name" => $row["prof_first_name"] . " " . $row["prof_last_name"],
+        "category"  => $row["prof_category"]
     ];
+}
 
-    foreach ($sheetDefs as $def) {
-        [$courseList, $examType, $sessionLabel, $semesterLabel, $suffix] = $def;
-        if ($firstSheet) {
-            $sheet = $spreadsheet->getActiveSheet();
-            $firstSheet = false;
-        } else {
-            $sheet = $spreadsheet->createSheet();
-        }
-        createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $sessionLabel, $semesterLabel);
-        $sheet->setTitle(excelSheetTitle($profId . '_' . $suffix));
-    }
+// 2. Build the course query dynamically
+$sql_courses = "SELECT corr.course_code,
+                       corr.course_lang,
+                       corr.prof_file_nb,
+                       corr.second_corrector_file_nb,
+                       corr.partial_first_corrector,
+                       corr.partial_second_corrector,
+                       corr.final_first_corrector,
+                       corr.final_second_corrector,
+                       c.course_level,
+                       d.dep_name,
+                       corr.session_nb
+                FROM correctors corr
+                JOIN course c ON c.course_code = corr.course_code 
+                     AND c.course_lang = corr.course_lang 
+                     AND c.major_id = corr.major_id 
+                     AND c.uni_year = corr.uni_year
+                JOIN professor p ON p.prof_file_nb = corr.prof_file_nb
+                JOIN department d ON d.dep_id = p.dep_id
+                WHERE corr.session_nb = ? AND d.dep_id = ? AND corr.uni_year = ? ";
 
+$paramTypes = 'sss';
+$param = [$sess, $dep_id, $year];
 
+if ($level !== "all") {
+    $sql_courses .= " AND c.course_level = ? ";
+    $paramTypes .= "s";
+    $param[] = $level;
+}
+if ($major !== "all") {
+    $sql_courses .= " AND c.major_id = ? ";
+    $paramTypes .= "s";
+    $param[] = $major;
+}
 
+$sql_courses .= " ORDER BY corr.course_code ASC";
 
+$stmt_c = mysqli_prepare($conn, $sql_courses);
+mysqli_stmt_bind_param($stmt_c, $paramTypes, ...$param);
+mysqli_stmt_execute($stmt_c);
+$res_c = mysqli_stmt_get_result($stmt_c);
+
+$courses = [];
+$dep_name = "Department"; // Default
+while ($row = mysqli_fetch_assoc($res_c)) {
+    $dep_name = $row["dep_name"];
+    $courses[] = [
+        "display_code"     => $row["course_code"] . "(" . $row["course_lang"] . ")",
+        "level"            => $row["course_level"],
+        "first_corrector"  => $row["prof_file_nb"],
+        "second_corrector" => $row["second_corrector_file_nb"],
+        "first_partial"    => $row["partial_first_corrector"],
+        "second_partial"   => $row["partial_second_corrector"],
+        "first_final"      => $row["final_first_corrector"],
+        "second_final"     => $row["final_second_corrector"],
+    ];
+}
 mysqli_close($conn);
 
-if (ob_get_length()) {
+// 3. Generate Spreadsheet
+$spreadsheet = new Spreadsheet();
+$isFirstSheet = true;
+
+foreach ($professors as $profId => $profData) {
+    if ($sess == "sess2") {
+        $sheet = $isFirstSheet ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
+        createCorrectionSheet($sheet, $profId, $profData, $dep_name, $courses, 'نهائي',  $d, $sem, $year);
+        $sheet->setTitle(mb_substr($profData["full_name"], 0, 20, 'UTF-8') . '_SESS2');
+        $isFirstSheet = false;
+    } else {
+        // Partiel Sheet
+        $sheetP = $isFirstSheet ? $spreadsheet->getActiveSheet() : $spreadsheet->createSheet();
+        createCorrectionSheet($sheetP, $profId, $profData, $dep_name, $courses, 'جزئي', $d, $sem, $year);
+        $sheetP->setTitle(mb_substr($profData["full_name"], 0, 20, 'UTF-8') . '_Partiel');
+        
+        // Final Sheet
+        $sheetF = $spreadsheet->createSheet();
+        createCorrectionSheet($sheetF, $profId, $profData, $dep_name, $courses, 'نهائي', $d, $sem, $year);
+        $sheetF->setTitle(mb_substr($profData["full_name"], 0, 20, 'UTF-8') . '_Final');
+        $isFirstSheet = false;
+    }
+}
+
+// Final check: Clear all buffers to ensure no whitespace/notices get into the file
+while (ob_get_level()) {
     ob_end_clean();
 }
 
@@ -262,24 +163,27 @@ $writer = new Xlsx($spreadsheet);
 $writer->save('php://output');
 exit;
 
-// --- Same layout as Prof_export_course.php ---
-
-function createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $session, $semester): void
+/**
+ * --- HELPER FUNCTION ---
+ */
+function createCorrectionSheet($sheet, $profId, $professor, $departmentName, $courseList, $examType, $session, $semester,$year): void
 {
     $sheet->setRightToLeft(true);
 
+    // Column Widths
     $sheet->getColumnDimension('A')->setWidth(3);
     $sheet->getColumnDimension('B')->setWidth(4);
     $sheet->getColumnDimension('C')->setWidth(4);
     $sheet->getColumnDimension('D')->setWidth(7);
     $sheet->getColumnDimension('E')->setWidth(8);
-    $sheet->getColumnDimension('F')->setWidth(19.82);
+    $sheet->getColumnDimension('F')->setWidth(25);
     $sheet->getColumnDimension('G')->setWidth(12);
     $sheet->getColumnDimension('H')->setWidth(14);
     $sheet->getColumnDimension('I')->setWidth(16);
     $sheet->getColumnDimension('J')->setWidth(18);
     $sheet->getColumnDimension('K')->setWidth(20);
 
+    // Header
     $sheet->mergeCells('A1:K1');
     $sheet->setCellValue('A1', 'الجامعة اللبنانية - كلية العلوم الفرع الثاني');
     $sheet->mergeCells('A2:K2');
@@ -293,14 +197,14 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
     $sheet->setCellValue('K4', $session);
 
     $sheet->setCellValue('H5', 'العام الجامعي:');
-    $sheet->setCellValue('I5', date('Y') . ' - ' . (date('Y') + 1));
+    $sheet->setCellValue('I5', $year);
     $sheet->setCellValue('J5', 'الفصل:');
     $sheet->setCellValue('K5', $semester);
 
     $sheet->setCellValue('J6', 'الإسم:');
-    $sheet->setCellValue('K6', $professor['prof_first_name'] . ' ' . $professor['prof_father_name'] . ' ' . $professor['prof_last_name']);
+    $sheet->setCellValue('K6', $professor["full_name"]);
     $sheet->setCellValue('J7', 'رقم الملف:');
-    $sheet->setCellValue('K7', $professor['prof_file_nb']);
+    $sheet->setCellValue('K7', $profId);
 
     $sheet->setCellValue('F8', 'الامتحان:');
     $sheet->setCellValue('G8', $examType);
@@ -309,14 +213,14 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
     $sheet->setCellValue('H9', 'متفرغ');
     $sheet->setCellValue('I9', 'متعاقد بالساعة');
 
-    $sheet->setCellValue('G10', ($professor['prof_category'] ?? '') === 'ملاك' ? 'X' : '');
-    $sheet->setCellValue('H10', ($professor['prof_category'] ?? '') === 'متفرغ' ? 'X' : '');
-    $sheet->setCellValue('I10', ($professor['prof_category'] ?? '') === 'متعاقد بالساعة' ? 'X' : '');
+    $sheet->setCellValue('G10', ($professor['category'] ?? '') === 'ملاك' ? 'X' : '');
+    $sheet->setCellValue('H10', ($professor['category'] ?? '') === 'متفرغ' ? 'X' : '');
+    $sheet->setCellValue('I10', ($professor['category'] ?? '') === 'متعاقد بالساعة' ? 'X' : '');
 
-    $sheet->getStyle('F8:I10')->getFont()->setSize(11);
-    $sheet->getStyle('F8:I10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
     $sheet->getStyle('F8:I10')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('F8:I10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+    // Table Headers
     $sheet->mergeCells('F12:F13');
     $sheet->setCellValue('F12', 'المقرر');
     $sheet->mergeCells('G12:H12');
@@ -334,30 +238,33 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
     $rowNum = 14;
     $licenseCount = 0;
     $masterCount = 0;
+    $totalCoursesFound = 0;
 
     foreach ($courseList as $c) {
-        $sheet->setCellValue('F' . $rowNum, $c['display_code']);
-
-        $isMaster = (strpos($c['level'], 'M') === 0);
-        if ($isMaster) {
-            $masterCount++;
-        } else {
-            $licenseCount++;
+        if ($c['first_corrector'] != $profId && $c['second_corrector'] != $profId) {
+            continue;
         }
+
+        $sheet->setCellValue('F' . $rowNum, $c['display_code']);
+        $isMaster = (strpos($c['level'], 'M') === 0);
+        $isMaster ? $masterCount++ : $licenseCount++;
+        $totalCoursesFound++;
 
         $colOffset = $isMaster ? 2 : 0;
 
-        if ($examType === 'جزئي') {
-            if ($c['first_corrector'] == $professor['prof_file_nb']) {
-                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][0]);
-            } else {
-                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][1]);
+        if ($examType == 'جزئي') {
+            if($c['first_corrector'] == $profId){
+                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['first_partial']);
+            }
+            else{
+                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['second_partial']);
             }
         } else {
-            if ($c['first_corrector'] == $professor['prof_file_nb']) {
-                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['correctors'][2]);
-            } else {
-                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['correctors'][3]);
+            if($c['first_corrector'] == $profId){
+                $sheet->setCellValue([7 + $colOffset, $rowNum], $c['first_final']);
+            }
+            else{
+                $sheet->setCellValue([8 + $colOffset, $rowNum], $c['second_final']);
             }
         }
         $rowNum++;
@@ -369,97 +276,16 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
 
     $summaryRow = $rowNum + 2;
     $sheet->setCellValue('F' . $summaryRow, 'المجموع');
-    $sheet->setCellValue('G' . $summaryRow, count($courseList));
+    $sheet->setCellValue('G' . $summaryRow, $totalCoursesFound);
     $sheet->setCellValue('F' . ($summaryRow + 1), 'العدد الإجمالي (إجازة):');
     $sheet->setCellValue('G' . ($summaryRow + 1), $licenseCount);
     $sheet->setCellValue('F' . ($summaryRow + 2), 'العدد الإجمالي (ماستر):');
     $sheet->setCellValue('G' . ($summaryRow + 2), $masterCount);
-    $sheet->setCellValue('F' . ($summaryRow + 3), 'عدد اللجان المقترحة (إجازة):');
-    $sheet->setCellValue('G' . ($summaryRow + 3), $licenseCount > 0 ? 1 : 0);
-    $sheet->setCellValue('F' . ($summaryRow + 4), 'عدد اللجان المقترحة (ماستر):');
-    $sheet->setCellValue('G' . ($summaryRow + 4), $masterCount > 0 ? 1 : 0);
+    
     $sheet->setCellValue('F' . ($summaryRow + 5), 'التاريخ: ' . date('Y-m-d'));
     $sheet->setCellValue('F' . ($summaryRow + 6), 'توقيع صاحب العلاقة');
     $sheet->setCellValue('F' . ($summaryRow + 7), 'ختم وتوقيع رئيس القسم');
 
-    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 4))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 2))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     $sheet->getStyle('F' . $summaryRow . ':F' . ($summaryRow + 7))->getFont()->setBold(true);
-    $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 7))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-}
-
-function createSummarySheet($sheet, $professor, $departmentName, $course_details): void
-{
-    $sheet->getColumnDimension('A')->setWidth(11.36);
-    $sheet->getColumnDimension('B')->setWidth(26.45);
-    $sheet->getColumnDimension('C')->setWidth(15);
-    $sheet->getColumnDimension('D')->setWidth(10);
-    $sheet->getColumnDimension('E')->setWidth(26.45);
-    $sheet->getColumnDimension('F')->setWidth(12);
-    $sheet->getColumnDimension('G')->setWidth(15.64);
-
-    $sheet->setRightToLeft(true);
-    $sheet->mergeCells('A1:G1');
-    $sheet->setCellValue('A1', 'الجامعة اللبنانية - كلية العلوم الفرع الثاني');
-    $sheet->mergeCells('A2:G2');
-    $sheet->setCellValue('A2', 'ملخص المقررات لعام ' . date('Y') . '-' . (date('Y') + 1));
-
-    $sheet->getStyle('A1:G2')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1:G2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-    $sheet->setCellValue('A3', 'القسم: ' . $departmentName);
-    $sheet->setCellValue('A4', 'رقم الملف: ' . $professor['prof_file_nb']);
-    $sheet->setCellValue('A5', 'الاسم: ' . $professor['prof_first_name'] . ' ' . $professor['prof_last_name']);
-
-    $sheet->setCellValue('A8', 'رمز المقرر');
-    $sheet->setCellValue('B8', 'اسم المقرر');
-    $sheet->setCellValue('C8', 'المستوى');
-    $sheet->setCellValue('D8', 'الوحدات');
-    $sheet->setCellValue('E8', 'الاختصاص');
-
-    $sheet->getStyle('A8:E8')->getFont()->setBold(true);
-    $sheet->getStyle('A8:E8')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9D9D9');
-
-    $rowNum = 9;
-    $totalCredits = 0;
-    $mCount = 0;
-    $lCount = 0;
-
-    foreach ($course_details as $code => $info) {
-        $sheet->setCellValue('A' . $rowNum, $code);
-        $sheet->setCellValue('B' . $rowNum, $info['name']);
-        $sheet->setCellValue('C' . $rowNum, $info['level']);
-        $sheet->setCellValue('D' . $rowNum, $info['credits']);
-        $sheet->setCellValue('E' . $rowNum, $info['major']);
-
-        if (strpos($info['level'], 'M') === 0) {
-            $mCount++;
-        } else {
-            $lCount++;
-        }
-
-        $totalCredits += (int) $info['credits'];
-        $rowNum++;
-    }
-
-    if ($rowNum > 9) {
-        $sheet->getStyle('A8:E' . ($rowNum - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-    }
-
-    $sumStart = $rowNum + 2;
-    $sheet->setCellValue('B' . $sumStart, 'ملخص المقررات:');
-    $sheet->setCellValue('C' . $sumStart, 'العدد');
-
-    $sheet->setCellValue('B' . ($sumStart + 1), 'عدد مقررات الإجازة:');
-    $sheet->setCellValue('C' . ($sumStart + 1), $lCount);
-
-    $sheet->setCellValue('B' . ($sumStart + 2), 'عدد مقررات الماستر:');
-    $sheet->setCellValue('C' . ($sumStart + 2), $mCount);
-
-    $sheet->setCellValue('B' . ($sumStart + 3), 'إجمالي الوحدات:');
-    $sheet->setCellValue('C' . ($sumStart + 3), $totalCredits);
-
-    $sheet->getStyle('B' . $sumStart . ':C' . ($sumStart + 3))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-    $sheet->getStyle('B' . $sumStart . ':B' . ($sumStart + 3))->getFont()->setBold(true);
-    $sheet->getStyle('C' . $sumStart . ':C' . ($sumStart + 3))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-    $sheet->getStyle('C' . $sumStart)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('D9D9D9');
 }
