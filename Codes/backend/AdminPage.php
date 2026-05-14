@@ -263,10 +263,20 @@
 
         <section id="content-uniyear" class="tab-content">
             <h1>University Year</h1><br>
+             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
+                <label for="newYear">Create New Year</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="newYear" name="newYear" maxlength="4" placeholder="YYYY" required style="flex: 1;">
+                    <span style="font-weight: bold; font-size: 1.2rem;">-</span>
+                    <input type="text" id="nextYear" name="nextYear" maxlength="4" placeholder="YYYY" readonly style="flex: 1; background-color: #f1f5f9; cursor: not-allowed;">
+                </div>
+            </div>
+            
+            <button id="createnewyear" name="createnewyear" class="btn">Create New Year</button><br><br>
+            
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="uniYearFrom">Year to copy courses from</label>
                 <select id="uniYearFrom" name="uniYearFrom">
-                    <option value="">-- Select a Year --</option>
                     <?php
                         foreach($years as $year){
                             echo "<option value='".htmlspecialchars($year)."'>".htmlspecialchars($year)."</option>";
@@ -277,28 +287,15 @@
 
             <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
                 <label for="uniYearTo">Year to copy courses to</label>
-                <select id="uniYearTo" name="uniYearTo">
-                    <option value="">-- Select a Year --</option>
-                    <?php
-                        foreach($years as $year){
-                            echo "<option value='".htmlspecialchars($year)."'>".htmlspecialchars($year)."</option>";
-                        }
-                    ?>
-                </select>
+                <input id="uniYearTo" name="uniYearTo" value="<?php
+                        echo "$years[0]";
+                    ?>" disabled>
+                    
             </div> 
             <button id="copyyear" name="copyyear" class="btn">Copy</button>
             
             
-            <div class="form-group" style="width: 100%; max-width: 650px; margin-bottom: 20px;">
-                <label for="newYear">Create New Year</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="newYear" name="newYear" maxlength="4" placeholder="YYYY" required style="flex: 1;">
-                    <span style="font-weight: bold; font-size: 1.2rem;">-</span>
-                    <input type="text" id="nextYear" name="nextYear" maxlength="4" placeholder="YYYY" readonly style="flex: 1; background-color: #f1f5f9; cursor: not-allowed;">
-                </div>
-            </div>
-            
-            <button id="createnewyear" name="createnewyear" class="btn">Create New Year</button>
+           
         </section>
 
         <section id="content-courses" class="tab-content">
@@ -419,6 +416,24 @@
                             <input type="hidden" id="hiddenCourseMajor" name="old_major_id" value="">
                             <input type="hidden" id="hiddenCourseIsActive" value="">
 
+                            <label for="resCourseYear">University Year: </label>
+                            <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" disabled>
+                            <label for="resCourseMajor">Course Major: </label>
+                            <select name="resCourseMajor" id="resCourseMajor" >
+                                <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
+                            </select>
+                            <label for="resCourseLevel">Course Level: </label>
+                            <select id="resCourseLevel" name="resCourseLevel" disabled>
+                                <option value="L1">L1</option>
+                                <option value="L2">L2</option>
+                                <option value="L3">L3</option>
+                                <option value="M1">M1</option>
+                            </select>
+                            <label for="resCourseSemester">Course Semester:</label>
+                            <select name="resCourseSemester" id="resCourseSemester" >
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                            </select>
                             <label for="resCourseCode">Course Code: </label>
                             <input type="text" id="resCourseCode" name="resCourseCode" value="" >
                             <br>
@@ -437,27 +452,9 @@
                             <label for="resCourseHours">Course Hours: </label>
                             <input type="number" id="resCourseHours" min="0" max="100" name="resCourseHours" value="" >
                             <br>
-                            <label for="resCourseYear">University Year: </label>
-                            <input type="text" id="resCourseYear" name="resCourseYear" maxlength="15" value="" >
                             <br>
-                            <label for="resCourseLevel">Course Level: </label>
-                            <select id="resCourseLevel" name="resCourseLevel" disabled>
-                                <option value="L1">L1</option>
-                                <option value="L2">L2</option>
-                                <option value="L3">L3</option>
-                                <option value="M1">M1</option>
-                            </select>
                             <br>
-                            <label for="resCourseSemester">Course Semester:</label>
-                            <select name="resCourseSemester" id="resCourseSemester" >
-                                <option value="1">Semester 1</option>
-                                <option value="2">Semester 2</option>
-                            </select>
                             <br>
-                            <label for="resCourseMajor">Course Major: </label>
-                            <select name="resCourseMajor" id="resCourseMajor" >
-                                <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
-                            </select>
                             <br>
                             <label for="resCourseProf">Course Professor: </label>
                             <select name="resCourseProf" id="resCourseProf" >
@@ -519,7 +516,7 @@
                                     <option value="E"<?php echo $vmfSel("majorLang", "E"); ?>>English</option>
                                     <option value="F"<?php echo $vmfSel("majorLang", "F"); ?>>French</option>
                                 </select>
-                                <label for="majorYear">University Major</label>
+                                <label for="majorYear">University Year</label>
                                 <select id="majorYear" name="majorYear">
                                      <?php
                                     foreach($years as $el){ 
