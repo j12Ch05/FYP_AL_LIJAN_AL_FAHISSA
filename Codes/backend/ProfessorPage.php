@@ -36,15 +36,16 @@
             $years[] = $row_y['uYear'];
         }
     }
-
+    $year = $_GET['year'] ?? $_POST["excelYear"] ?? $years[0];
+    $active_tab = isset($_GET['year']) ? 'courses' : 'profile';
     $sql_courses = "SELECT c.course_code, c.course_name, c.course_credit_nb,c.course_level, c.course_lang, c.course_semester_nb, m.major_name
                     FROM teaching t
-                    JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang
+                    JOIN course c ON t.course_code = c.course_code AND t.course_lang = c.course_lang AND t.major_id = c.major_id AND t.uni_year = c.uni_year
                     JOIN major m ON c.major_id = m.major_id
-                    WHERE t.prof_file_nb = ? AND t.isActive = 1
+                    WHERE t.prof_file_nb = ? AND t.isActive = 1 AND t.uni_year = ? 
                     ORDER BY t.uni_year DESC, c.course_name";
     $stmt_courses = mysqli_prepare($conn, $sql_courses);
-    mysqli_stmt_bind_param($stmt_courses, "i", $professor['prof_file_nb']);
+    mysqli_stmt_bind_param($stmt_courses, "ss", $professor['prof_file_nb'],$year);
     mysqli_stmt_execute($stmt_courses);
     $result_courses = mysqli_stmt_get_result($stmt_courses);
 
@@ -71,8 +72,8 @@
 </head>
 <body>
 
-    <input type="radio" name="nav" id="tab-profile" checked>
-    <input type="radio" name="nav" id="tab-courses">
+    <input type="radio" name="nav" id="tab-profile" <?php echo $active_tab == 'profile' ? 'checked' : ''; ?>>
+    <input type="radio" name="nav" id="tab-courses" <?php echo $active_tab == 'courses' ? 'checked' : ''; ?>>
     
 
     <aside class="sidebar">
@@ -182,12 +183,14 @@
                     <form id="exportExcel" action="Prof_export_course.php" method="post" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px;">
                         <div class="form-group" style="margin: 0;">
                             <label for="profExcelYear" style="display: block; margin-bottom: 4px; font-size: 0.9rem;">University year</label>
-                            <select name="excelYear" id="profExcelYear"<?php echo count($years) > 0 ? ' required' : ''; ?> style="min-width: 140px; padding: 8px;">
+                            <select name="excelYear" id="profExcelYear"<?php echo count($years) > 0 ? ' required' : ''; ?> style="min-width: 140px; padding: 8px;" onchange="location.href='ProfessorPage.php?year=' + this.value">
                                 <?php if (count($years) === 0): ?>
                                     <option value="">No years in database</option>
                                 <?php endif; ?>
                                 <?php foreach ($years as $y): ?>
-                                    <option value="<?php echo htmlspecialchars((string) $y); ?>"><?php echo htmlspecialchars((string) $y); ?></option>
+                                    <option value="<?php echo htmlspecialchars((string) $y); ?>" <?php echo $y == $year ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars((string) $y); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

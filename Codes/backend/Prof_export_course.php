@@ -50,14 +50,14 @@ if (isset($_POST['exportExcel'])) {
     }
 
     // 2. Get Courses and Correctors
-    $sql_base = "SELECT corr.*, c.course_name, c.course_level, c.course_credit_nb, m.major_name, t.uni_year
+    $sql_base = "SELECT corr.*, c.course_name, c.course_level, c.course_credit_nb, m.major_name
                     FROM correctors corr
-                    JOIN teaching t ON corr.course_code = t.course_code AND t.course_lang = corr.course_lang AND t.prof_file_nb = corr.prof_file_nb AND t.major_id = corr.major_id
-                    JOIN course c ON c.course_code = t.course_code AND c.course_lang = t.course_lang AND c.major_id = t.major_id
+                    JOIN course c ON c.course_code = corr.course_code AND c.course_lang = corr.course_lang AND c.major_id = corr.major_id AND c.uni_year = corr.uni_year
                     JOIN major m ON m.major_id = c.major_id
                     WHERE (corr.prof_file_nb = ? OR corr.second_corrector_file_nb = ?)";
+    
     if ($year !== '') {
-        $sql_courses = $sql_base . "\n                      AND corr.uni_year = ?";
+        $sql_courses = $sql_base . " AND corr.uni_year = ?";
         $stmt_c = mysqli_prepare($conn, $sql_courses);
         mysqli_stmt_bind_param($stmt_c, 'sss', $prof_id, $prof_id, $year);
     } else {
@@ -100,22 +100,22 @@ if (isset($_POST['exportExcel'])) {
     $spreadsheet = new Spreadsheet();
 
     // Generate Sheets
-    createCorrectionSheet($spreadsheet->getActiveSheet(), $professor, $departmentName, $data["sem1"], 'جزئي', 'الأولى', 'الأول');
+    createCorrectionSheet($spreadsheet->getActiveSheet(), $professor, $departmentName, $data["sem1"], 'جزئي', 'الأولى', 'الأول', $year);
     $spreadsheet->getActiveSheet()->setTitle('S1_Partiel');
 
-    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem1"], 'نهائي', 'الأولى', 'الأول');
+    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem1"], 'نهائي', 'الأولى', 'الأول', $year);
     $spreadsheet->getActiveSheet()->setTitle('S1_Final');
 
-    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem2"], 'جزئي', 'الثانية', 'الثاني');
+    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem2"], 'جزئي', 'الثانية', 'الثاني', $year);
     $spreadsheet->getActiveSheet()->setTitle('S2_Partiel');
 
-    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem2"], 'نهائي', 'الثانية', 'الثاني');
+    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sem2"], 'نهائي', 'الثانية', 'الثاني', $year);
     $spreadsheet->getActiveSheet()->setTitle('S2_Final');
 
-    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sess2"], 'إعادة', 'الثانية', 'الثاني');
+    createCorrectionSheet($spreadsheet->createSheet(), $professor, $departmentName, $data["sess2"], 'إعادة', 'الثانية', 'الثاني', $year);
     $spreadsheet->getActiveSheet()->setTitle('Session_2');
 
-    createSummarySheet($spreadsheet->createSheet(), $professor, $departmentName, $course_details);
+    createSummarySheet($spreadsheet->createSheet(), $professor, $departmentName, $course_details, $year);
     $spreadsheet->getActiveSheet()->setTitle('ملخص');
 
     if (ob_get_length()) ob_end_clean();
@@ -130,7 +130,7 @@ if (isset($_POST['exportExcel'])) {
     exit;
 }
 
-function createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $session, $semester) {
+function createCorrectionSheet($sheet, $professor, $departmentName, $courseList, $examType, $session, $semester, $year) {
     $sheet->setRightToLeft(true);
     
     // Column Widths
@@ -161,7 +161,7 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
     $sheet->setCellValue('K4', $session);
 
     $sheet->setCellValue('H5', 'العام الجامعي:');
-    $sheet->setCellValue('I5', date('Y') . ' - ' . (date('Y') + 1));
+    $sheet->setCellValue('I5', $year);
     $sheet->setCellValue('J5', 'الفصل:');
     $sheet->setCellValue('K5', $semester);
 
@@ -250,7 +250,7 @@ function createCorrectionSheet($sheet, $professor, $departmentName, $courseList,
     $sheet->getStyle('F' . $summaryRow . ':G' . ($summaryRow + 7))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 }
 
-function createSummarySheet($sheet, $professor, $departmentName, $course_details) {
+function createSummarySheet($sheet, $professor, $departmentName, $course_details, $year) {
     $sheet->getColumnDimension('A')->setWidth(11.36);
     $sheet->getColumnDimension('B')->setWidth(26.45);
     $sheet->getColumnDimension('C')->setWidth(15);
@@ -263,7 +263,7 @@ function createSummarySheet($sheet, $professor, $departmentName, $course_details
     $sheet->mergeCells('A1:G1');
     $sheet->setCellValue('A1', 'الجامعة اللبنانية - كلية العلوم الفرع الثاني');
     $sheet->mergeCells('A2:G2');
-    $sheet->setCellValue('A2', 'ملخص المقررات لعام ' . date('Y') . '-' . (date('Y') + 1));
+    $sheet->setCellValue('A2', 'ملخص المقررات لعام ' . $year);
 
     $sheet->getStyle('A1:G2')->getFont()->setBold(true)->setSize(14);
     $sheet->getStyle('A1:G2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
