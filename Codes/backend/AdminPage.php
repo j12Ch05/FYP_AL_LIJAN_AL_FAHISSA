@@ -47,6 +47,15 @@
         
     }
 
+    $sql_year ="SELECT uYear FROM uniyear where 1 ORDER BY uYear DESC";
+    $stmt_y = mysqli_prepare($conn,$sql_year);
+    mysqli_stmt_execute($stmt_y);
+    $res_y = mysqli_stmt_get_result($stmt_y);
+    $years = [];
+    while($row = mysqli_fetch_assoc($res_y)){
+        $years[] = $row["uYear"];
+    }
+
     $sql_all_profs = "SELECT p.prof_file_nb, p.prof_first_name, p.prof_last_name,p.prof_birth_date, p.prof_email, p.prof_phone, p.isAdmin, p.prof_category FROM professor p JOIN professor a ON a.dep_id = p.dep_id where a.prof_email = ? ORDER BY p.prof_first_name ASC";
     $stmt_all = mysqli_prepare($conn, $sql_all_profs);
     mysqli_stmt_bind_param($stmt_all,'s',$email);
@@ -65,14 +74,16 @@
         $professors[$prof["prof_file_nb"]] = $prof["prof_first_name"] . " " . $prof["prof_last_name"];
     }
 
+    $year = $years[0];
+
     //this query to fetch the course of the professor for the view professor
     $sql_teaching = "SELECT t.course_code,t.course_lang,t.prof_file_nb
                      FROM teaching t
                      JOIN professor p ON p.prof_file_nb = t.prof_file_nb
                      JOIN professor a ON a.dep_id = p.dep_id
-                     WHERE a.prof_email = ? and t.isActive = 1";  
+                     WHERE t.isActive = 1 and a.prof_email = ? and t.uni_year = ?";  
     $stmt_t = mysqli_prepare($conn,$sql_teaching);
-    mysqli_stmt_bind_param($stmt_t,"s",$email);
+    mysqli_stmt_bind_param($stmt_t,"ss",$email,$year);
     mysqli_stmt_execute($stmt_t);
     $res_t = mysqli_stmt_get_result($stmt_t);
     $teaching_courses = [];
@@ -105,14 +116,7 @@
     }
     mysqli_stmt_close($stmt_m); 
 
-    $sql_year ="SELECT uYear FROM uniyear where 1 ORDER BY uYear DESC";
-    $stmt_y = mysqli_prepare($conn,$sql_year);
-    mysqli_stmt_execute($stmt_y);
-    $res_y = mysqli_stmt_get_result($stmt_y);
-    $years = [];
-    while($row = mysqli_fetch_assoc($res_y)){
-        $years[] = $row["uYear"];
-    }
+    
 
     $_SESSION["professors"] = !empty($professors) ? $professors : [];
     $_SESSION["majors"] = !empty($majors) ? $majors : [];
