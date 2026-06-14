@@ -7,7 +7,7 @@
         unset($_SESSION["view_major_courses"], $_SESSION["view_major_filter"], $_SESSION["view_major_error"]);
         mysqli_close($conn);
         ob_end_clean();
-        header("Location: AdminPage.php?tab=courses");
+        header("Location: AdminPage.php?tab=courses&courseAction=view-major");
         exit;
     }
 
@@ -57,11 +57,11 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("Location: AdminPage.php?tab=courses");
+        header("Location: AdminPage.php?tab=courses&courseAction=view-major");
         exit;
     }
 
     mysqli_close($conn);
     ob_end_clean();
-    header("Location: AdminPage.php?tab=courses");
+    header("Location: AdminPage.php?tab=courses&courseAction=view-major");
     exit;

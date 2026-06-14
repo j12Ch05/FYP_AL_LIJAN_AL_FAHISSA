@@ -66,15 +66,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setViewModeResults() {
+        // In view mode: keep locked fields disabled, but allow editing of result fields
         lockedResultIds.forEach((id) => setFieldDisabled(getEl(id), true));
+        // Enable editable result fields by default (except university year)
         editableResultIds.forEach((id) => setFieldDisabled(getEl(id), false));
+        // Ensure university year remains readonly
+        setFieldDisabled(getEl('resCourseYear'), true);
+        // Show confirm changes button by default
         if (resConfirmCourse) resConfirmCourse.style.display = 'inline-block';
     }
 
     function setEditModeResults() {
+        // In edit mode: locked fields remain disabled, editable fields become enabled
         lockedResultIds.forEach((id) => setFieldDisabled(getEl(id), true));
         editableResultIds.forEach((id) => setFieldDisabled(getEl(id), false));
         if (resConfirmCourse) resConfirmCourse.style.display = 'inline-block';
+        // Keep university year always readonly even in edit mode
+        setFieldDisabled(getEl('resCourseYear'), true);
     }
 
     function applyCoursePayload(data) {
@@ -203,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // No explicit Edit button: fields are editable by default (except year)
+
     if (resDisableCourse) {
         resDisableCourse.addEventListener('click', () => {
             const code = getEl('hiddenCourseCode').value;
@@ -226,6 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fd.append('course_code', code);
             fd.append('course_lang', lang);
             fd.append('major_id', major);
+            // uni_year is required by editCourse.php for enable/disable operations
+            const uniYearVal = getEl('resCourseYear') ? getEl('resCourseYear').value : '';
+            fd.append('uni_year', uniYearVal);
 
             fetch('editCourse.php', { method: 'POST', body: fd })
                 .then((r) => r.text().then((text) => ({ status: r.status, text })))
@@ -778,6 +791,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('An error occurred while copying courses.');
             });
         });
+    }
+
+    const courseToggle = document.querySelector('.courses-dropdown-toggle');
+    const coursesSidebarOptions = document.getElementById('coursesSidebarOptions');
+    const correctorToggle = document.querySelector('.correctors-dropdown-toggle');
+    const correctorsSidebarOptions = document.getElementById('correctorsSidebarOptions');
+
+    if (courseToggle && coursesSidebarOptions) {
+        courseToggle.addEventListener('click', () => {
+            coursesSidebarOptions.classList.toggle('open');
+        });
+    }
+
+    if (correctorToggle && correctorsSidebarOptions) {
+        correctorToggle.addEventListener('click', () => {
+            correctorsSidebarOptions.classList.toggle('open');
+        });
+    }
+
+    // Keep the submenus open when their tab is active.
+    const coursesRadio = document.getElementById('tab-courses');
+    if (coursesRadio && coursesRadio.checked && coursesSidebarOptions) {
+        coursesSidebarOptions.classList.add('open');
+    }
+
+    const correctorsRadio = document.getElementById('tab-correctors');
+    if (correctorsRadio && correctorsRadio.checked && correctorsSidebarOptions) {
+        correctorsSidebarOptions.classList.add('open');
     }
 
 });

@@ -149,6 +149,12 @@
         $isUniYear = $activeTab === "uniyear";
         $isCorrectors = $activeTab === "correctors";
         $isEditAdmins = $activeTab === "edit-admins";
+        $courseAction = $_GET["courseAction"] ?? "";
+        $validCourseActions = ["add", "search-edit", "view-major"];
+        $courseAction = in_array($courseAction, $validCourseActions, true) ? $courseAction : "";
+        $correctorAction = $_GET["correctorAction"] ?? "";
+        $validCorrectorActions = ["insert", "insert-numbers", "excel"];
+        $correctorAction = in_array($correctorAction, $validCorrectorActions, true) ? $correctorAction : "";
     ?>
     <input type="radio" name="nav" id="tab-professors"<?php echo $isProfessors ? " checked" : ""; ?>>
     <input type="radio" name="nav" id="tab-uniyear"<?php echo $isUniYear ? " checked" : ""; ?>>
@@ -169,12 +175,24 @@
             <label for="tab-uniyear" class="nav-item label-uniyear">
                 <span class="icon">📅</span> University Year
             </label>
-            <label for="tab-courses" class="nav-item label-courses">
+            <label for="tab-courses" class="nav-item label-courses courses-dropdown-toggle">
                 <span class="icon">📚</span> Courses
+                <span class="dropdown-arrow">▾</span>
             </label>
-            <label for="tab-correctors" class="nav-item label-correctors">
+            <div id="coursesSidebarOptions" class="sidebar-submenu">
+                <a href="AdminPage.php?tab=courses&courseAction=add" class="sidebar-course-option<?php echo $courseAction === 'add' ? ' active' : ''; ?>">Add Course</a>
+                <a href="AdminPage.php?tab=courses&courseAction=search-edit" class="sidebar-course-option<?php echo $courseAction === 'search-edit' ? ' active' : ''; ?>">Search/Edit Course</a>
+                <a href="AdminPage.php?tab=courses&courseAction=view-major" class="sidebar-course-option<?php echo $courseAction === 'view-major' ? ' active' : ''; ?>">View Courses of The Major</a>
+            </div>
+            <label for="tab-correctors" class="nav-item label-correctors correctors-dropdown-toggle">
                 <span class="icon">✍️</span> Correctors
+                <span class="dropdown-arrow">▾</span>
             </label>
+            <div id="correctorsSidebarOptions" class="sidebar-submenu">
+                <a href="AdminPage.php?tab=correctors&correctorAction=insert" class="sidebar-course-option<?php echo $correctorAction === 'insert' ? ' active' : ''; ?>">Insert Correctors</a>
+                <a href="AdminPage.php?tab=correctors&correctorAction=insert-numbers" class="sidebar-course-option<?php echo $correctorAction === 'insert-numbers' ? ' active' : ''; ?>">Insert copies number of each corrector</a>
+                <a href="AdminPage.php?tab=correctors&correctorAction=excel" class="sidebar-course-option<?php echo $correctorAction === 'excel' ? ' active' : ''; ?>">Excel Format</a>
+            </div>
             <label for="tab-edit-admins" class="nav-item label-edit-admins">
                 <span class="icon">⚙️</span> Edit Admins
             </label>
@@ -186,7 +204,7 @@
         <header class="welcome-header" style="display: flex; justify-content: space-between; align-items: center;">
             
             <div class="user-info">
-                Welcome Admin, <?php echo htmlspecialchars($professors[$admin["prof_file_nb"]] ?? 'Unknown'); ?>
+                Welcome Admin <span><?php echo htmlspecialchars($professors[$admin["prof_file_nb"]] ?? 'Unknown'); ?></span>
             </div>
 
             <form method="post" style="margin: 0;" id="logoutForm">
@@ -298,119 +316,127 @@
            
         </section>
 
+        <?php
+            $viewMajorCoursesLoaded = array_key_exists("view_major_courses", $_SESSION);
+            $viewMajorCourses = $_SESSION["view_major_courses"] ?? [];
+            $vmf = $_SESSION["view_major_filter"] ?? [];
+            $vmfSel = function ($key, $value) use ($vmf) {
+                return isset($vmf[$key]) && (string) $vmf[$key] === (string) $value ? " selected" : "";
+            };
+        ?>
         <section id="content-courses" class="tab-content">
-            <h1>Courses</h1>
-            <details class="dropdown-menu"<?php echo $showAddCourseDropdown ? ' open' : ''; ?>>
-                <summary>Add Course</summary>
-                    <div class="dropdown-content">
-
-                        <form id="addCourse" action="addCourse.php" method="post">
-                            <div class="form-group">
-                                 <?php 
-                                    if (isset($_SESSION["addCourseSuccess"])) {
-                                        echo "<p style='color: green;font-weight: bold;'>{$_SESSION["addCourseSuccess"]}</p>";
-                                        unset($_SESSION["addCourseSuccess"]);
-                                    }
-                                    if (isset($_SESSION["error"])) {
-                                        echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_SESSION["error"], ENT_QUOTES, 'UTF-8') . '</p>';
-                                        unset($_SESSION["error"]);
+            <h1>Courses</h1><br>
+            <?php if ($courseAction === ''): ?>
+                 <div class="course-action-list">
+                        <a href="AdminPage.php?tab=courses&courseAction=add" class="course-action-card<?php echo $courseAction === 'add' ? ' active' : ''; ?>">Add Course</a>
+                        <a href="AdminPage.php?tab=courses&courseAction=search-edit" class="course-action-card<?php echo $courseAction === 'search-edit' ? ' active' : ''; ?>">Search/Edit Course</a>
+                        <a href="AdminPage.php?tab=courses&courseAction=view-major" class="course-action-card<?php echo $courseAction === 'view-major' ? ' active' : ''; ?>">View Courses of The Major</a>
+                    </div>
+            <?php elseif ($courseAction === 'add'): ?>
+                <div class="course-action-page">
+                    <h2>Add Course</h2>
+                    <form id="addCourse" action="addCourse.php" method="post">
+                        <div class="form-group">
+                            <?php 
+                                if (isset($_SESSION["addCourseSuccess"])) {
+                                    echo "<p style='color: green;font-weight: bold;'>{$_SESSION["addCourseSuccess"]}</p>";
+                                    unset($_SESSION["addCourseSuccess"]);
+                                }
+                                if (isset($_SESSION["error"])) {
+                                    echo '<p style="color: red; font-weight: bold;">' . htmlspecialchars($_SESSION["error"], ENT_QUOTES, 'UTF-8') . '</p>';
+                                    unset($_SESSION["error"]);
+                                }
+                            ?>
+                            <label for="courseYear">University Year</label>
+                            <select name="courseYear" id="courseYear">
+                                <?php foreach($years as $el){ echo "<option value='$el'>$el</option>"; } ?>
+                            </select>
+                            <label for="courseMajor">Major</label>
+                            <select name="courseMajor" id="courseMajor">
+                                <?php
+                                    foreach($_SESSION["majors"] as $id => $name) {
+                                        $selected = ((string)$id === $addCourseMajor) ? ' selected' : '';
+                                        echo "<option value='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'{$selected}>" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>";
                                     }
                                 ?>
-        
-                                
-                                
-                                <label for="courseYear">University Year</label>
-                                <select name="courseYear" id="courseYear">
-                                    <?php
-                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
-                                    ?>
-                                </select>
-                                <label for="courseMajor">Major</label>
-                                <select name="courseMajor" id="courseMajor">
-                                    <?php
-                                        foreach($_SESSION["majors"] as $id => $name) {
-                                            $selected = ((string)$id === $addCourseMajor) ? ' selected' : '';
-                                            echo "<option value='" . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "'{$selected}>" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>";
-                                        }
-                                    ?>
-                                </select><br>
-                                <label for="courseLevel">Level</label>
-                                <select id="courseLevel" name="courseLevel">
-                                    <option value="L1"<?php echo $addCourseLevel === 'L1' ? ' selected' : ''; ?>>L1</option>
-                                    <option value="L2"<?php echo $addCourseLevel === 'L2' ? ' selected' : ''; ?>>L2</option>
-                                    <option value="L3"<?php echo $addCourseLevel === 'L3' ? ' selected' : ''; ?>>L3</option>
-                                    <option value="M1"<?php echo $addCourseLevel === 'M1' ? ' selected' : ''; ?>>M1</option>
-                                </select><br>
-                                <label for="courseSemester">Semester</label>
-                                <select name="courseSemester" id="courseSemester">
-                                    <option value="1"<?php echo $addCourseSemester === '1' ? ' selected' : ''; ?>>Semester 1</option>
-                                    <option value="2"<?php echo $addCourseSemester === '2' ? ' selected' : ''; ?>>Semester 2</option>
-                                </select>
-                                <br>
-                                <label for="courseCode">Course Code</label>
-                                <input type="text" id="courseCode" name="courseCode" maxlength="15" placeholder="I3341,M2250,P1101..." required><br>
-                                <label for="courseName">Course Name</label>
-                                <input type="text" id="courseName" name="courseName" placeholder="Enter the name" required><br>
-                                <label for="courseCredit">Course Credits</label>
-                                <input type="number" min="3" max="6" name="courseCredit" id="courseCredit" required><br>
-                                <label for="courseHours">Course hours</label>
-                                <input type="number" min="0" max="100" name="courseHours" id="courseHours" required><br>
-                                <label for="courseLang">Course Language</label>
-                                <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
-                                <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
-                                <label for="courseProf">Course Professor</label>
-                                <select name="courseProf" id="courseProf">
-                                   <?php
-                                        //Preparing the dropdown list for choosing the name of the professor
-                                        foreach($_SESSION["professors"] as $file=>$name){
-                                            echo "<option value='$file'>$name</option>";
-                                        }
-                
-                                   ?>
-                                </select><br>
-                                
-                                
-                                <label for="courseCategory">Category</label>
-                                <select name="courseCategory" id="courseCategory">
-                                    <option value="mandatory">Mandatory</option>
-                                    <option value="optional">Optional</option>
-                                    <option value="common">Common</option>
-                                </select><br>
-
-                            </div>
-                            
-                            <input type="submit" name="submitCourse" class="btn" value="Submit">
-                            <input type="reset" name="cancelCourse" class="btn" value="Cancel">
-                        </form>
-                    </div>
-                </details>
-                <details class="dropdown-menu">
-                <summary>Search/Edit Course</summary>
-                <form id="searchCourseForm" action="searchCourse.php" method="post" onsubmit="return false;">
-                    <div class="dropdown-content">
+                            </select><br>
+                            <label for="courseLevel">Level</label>
+                            <select id="courseLevel" name="courseLevel">
+                                <option value="L1"<?php echo $addCourseLevel === 'L1' ? ' selected' : ''; ?>>L1</option>
+                                <option value="L2"<?php echo $addCourseLevel === 'L2' ? ' selected' : ''; ?>>L2</option>
+                                <option value="L3"<?php echo $addCourseLevel === 'L3' ? ' selected' : ''; ?>>L3</option>
+                                <option value="M1"<?php echo $addCourseLevel === 'M1' ? ' selected' : ''; ?>>M1</option>
+                            </select><br>
+                            <label for="courseSemester">Semester</label>
+                            <select name="courseSemester" id="courseSemester">
+                                <option value="1"<?php echo $addCourseSemester === '1' ? ' selected' : ''; ?>>Semester 1</option>
+                                <option value="2"<?php echo $addCourseSemester === '2' ? ' selected' : ''; ?>>Semester 2</option>
+                            </select>
+                            <br>
+                            <label for="courseCode">Course Code</label>
+                            <input type="text" id="courseCode" name="courseCode" maxlength="15" placeholder="I3341,M2250,P1101..." required><br>
+                            <label for="courseName">Course Name</label>
+                            <input type="text" id="courseName" name="courseName" placeholder="Enter the name" required><br>
+                            <label for="courseCredit">Course Credits</label>
+                            <input type="number" min="3" max="6" name="courseCredit" id="courseCredit" required><br>
+                            <label for="courseHours">Course hours</label>
+                            <input type="number" min="0" max="100" name="courseHours" id="courseHours" required><br>
+                            <label for="courseLang">Course Language</label>
+                            <label class="checkbox-label" id="courseEng"><input type="checkbox" id="courseEng" name="courseEng"> English</label>
+                            <label for="courseFr" class="checkbox-label"><input type="checkbox" id="courseFr" name="courseFr">French</label>
+                            <label for="courseProf">Course Professor</label>
+                            <select name="courseProf" id="courseProf">
+                                <?php
+                                    foreach($_SESSION["professors"] as $file=>$name){
+                                        echo "<option value='$file'>$name</option>";
+                                    }
+                                ?>
+                            </select><br>
+                            <label for="courseCategory">Category</label>
+                            <select name="courseCategory" id="courseCategory">
+                                <option value="mandatory">Mandatory</option>
+                                <option value="optional">Optional</option>
+                                <option value="common">Common</option>
+                            </select><br>
+                        </div>
+                        <br>
+                        <input type="submit" name="submitCourse" class="btn" value="Submit">
+                        <input type="reset" name="cancelCourse" class="btn" value="Cancel">
+                    </form>
+                </div>
+            <?php elseif ($courseAction === 'search-edit'): ?>
+                <div class="course-action-page">
+                    <h2>Search/Edit Course</h2>
+                    <form id="searchCourseForm" action="searchCourse.php" method="post" onsubmit="return false;">
                         <div class="form-group">
-                            <div>
-                                <label for="searchCode">Course Code</label>
-                                <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100...." maxlength="7">
-                                <label for="searchCourseLang">Course Language</label>
-                                <select name="searchCourseLang" id="searchCourseLang">
-                                    <option value="E">English</option>
-                                    <option value="F">French</option>
-                                </select>
-                                <label for="searchCourseMajor">Course Major</label>
-                                <select name="searchCourseMajor" id="searchCourseMajor">
-                                    <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
-                                </select>
-                                <label for="searchUniYear">University Year</label>
-                                <select name="searchUniYear" id="searchUniYear">
-                                    <option value="">Select year</option>
-                                    <?php
-                                    foreach($years as $el){ echo "<option value='$el'>$el</option>"; }
-                                    ?>
-                                </select>
-                                <input type="button" id="searchCourseBtn" name="searchBtn" class="btn" value="Search">
-                            </div><br>
-
+                            <div class="course-filter-grid">
+                                <div class="form-control">
+                                    <label for="searchCode">Course Code</label>
+                                    <input type="text" id="searchCode" name="searchCode" placeholder="I3350,P1100...." maxlength="7">
+                                </div>
+                                <div class="form-control">
+                                    <label for="searchCourseLang">Course Language</label>
+                                    <select name="searchCourseLang" id="searchCourseLang">
+                                        <option value="E">English</option>
+                                        <option value="F">French</option>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="searchCourseMajor">Course Major</label>
+                                    <select name="searchCourseMajor" id="searchCourseMajor">
+                                        <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="searchUniYear">University Year</label>
+                                    <select name="searchUniYear" id="searchUniYear">
+                                        <?php foreach($years as $el){ echo "<option value='$el'>$el</option>"; } ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="button" id="searchCourseBtn" name="searchBtn" class="btn" value="Search">
+                            <br>
+                            <br>
                             <input type="hidden" id="hiddenCourseCode" name="course_code" value="">
                             <input type="hidden" id="hiddenCourseLang" name="course_lang" value="">
                             <input type="hidden" id="hiddenCourseMajor" name="old_major_id" value="">
@@ -423,7 +449,7 @@
                                 <?php foreach($_SESSION["majors"] as $id=>$name){ echo "<option value='$id'>$name</option>"; } ?>
                             </select>
                             <label for="resCourseLevel">Course Level: </label>
-                            <select id="resCourseLevel" name="resCourseLevel" disabled>
+                            <select id="resCourseLevel" name="resCourseLevel" >
                                 <option value="L1">L1</option>
                                 <option value="L2">L2</option>
                                 <option value="L3">L3</option>
@@ -452,10 +478,6 @@
                             <label for="resCourseHours">Course Hours: </label>
                             <input type="number" id="resCourseHours" min="0" max="100" name="resCourseHours" value="" >
                             <br>
-                            <br>
-                            <br>
-                            <br>
-                            <br>
                             <label for="resCourseProf">Course Professor: </label>
                             <select name="resCourseProf" id="resCourseProf" >
                                 <?php foreach($_SESSION["professors"] as $file=>$name){ echo "<option value='$file'>$name</option>"; } ?>
@@ -467,142 +489,143 @@
                                 <option value="optional">Optional</option>
                                 <option value="common">Common</option>
                             </select>
-                        </div>
+                        </div><br>
                         <input type="button" id="resConfirmCourse" class="btn" value="Confirm changes" style="display: inline;">
                         <input type="button" id="resDisableCourse" class="btn" value="Disable Course">
                         <input type="button" id="resCancelSearch" class="btn" value="Cancel">
-                    </div>
-                </form>
-            </details>
-                <?php
-                    $viewMajorCoursesLoaded = array_key_exists("view_major_courses", $_SESSION);
-                    $viewMajorCourses = $_SESSION["view_major_courses"] ?? [];
-                    $vmf = $_SESSION["view_major_filter"] ?? [];
-
-                    // to keep the filter after the rendering
-                    $vmfSel = function ($key, $value) use ($vmf) {
-                        return isset($vmf[$key]) && (string) $vmf[$key] === (string) $value ? " selected" : "";
-                    };
-                ?>
-                <details class="dropdown-menu"<?php echo $viewMajorCoursesLoaded ? " open" : ""; ?>>
-                    <summary>View Courses of The Major</summary>
+                    </form>
+                </div>
+            <?php elseif ($courseAction === 'view-major'): ?>
+                <div class="course-action-page">
+                    <h2>View Courses of The Major</h2>
                     <form id="viewMajorCourses" action="viewCourses.php" method="post">
-                        <div class="dropdown-content">
-                            <div class="form-group">
-                                <search>
-                                <label for="majorName">Major Name</label>
-                                <select id="majorName" name="major">
-                                    <?php
-                                        foreach ($_SESSION["majors"] as $id => $name) {
-                                            $selectedMajor = $vmfSel("major" ,$id );
-                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
-                                        }
-                                    ?>
-                                </select>
-                                <label for="majorLevel">Major Level</label>
-                                <select id="majorLevel" name="majorLevel">
-                                    <option value="L1"<?php echo $vmfSel("majorLevel", "L1"); ?>>L1</option>
-                                    <option value="L2"<?php echo $vmfSel("majorLevel", "L2"); ?>>L2</option>
-                                    <option value="L3"<?php echo $vmfSel("majorLevel", "L3"); ?>>L3</option>
-                                    <option value="M1"<?php echo $vmfSel("majorLevel", "M1"); ?>>M1</option>
-                                </select> 
-                                <label for="majorSemester">Semester</label>
-                                <select id="majorSemester" name="majorSemester">
-                                    <option value="1"<?php echo $vmfSel("majorSemester", "1"); ?>>Semester 1</option>
-                                    <option value="2"<?php echo $vmfSel("majorSemester", "2"); ?>>Semester 2</option>
-                                </select>
-                                <label for="majorLang">Major Language</label>
-                                <select id="majorLang" name="majorLang">
-                                    <option value="E"<?php echo $vmfSel("majorLang", "E"); ?>>English</option>
-                                    <option value="F"<?php echo $vmfSel("majorLang", "F"); ?>>French</option>
-                                </select>
-                                <label for="majorYear">University Year</label>
-                                <select id="majorYear" name="majorYear">
-                                     <?php
-                                    foreach($years as $el){ 
-                                        $selectedYear = $vmfSel("majorYear", $el);
-                                        echo "<option value='".htmlspecialchars($el)."'{$selectedYear}>".htmlspecialchars($el)."</option>"; 
-                                    }
-                                    ?>
-                                </select>
-                                </search>
-                            </div>
-                            <?php
-                                if (!empty($_SESSION["view_major_error"])) {
-                                    echo '<p style="color:#b91c1c;font-weight:600;">' . htmlspecialchars($_SESSION["view_major_error"], ENT_QUOTES, "UTF-8") . '</p>';
-                                    unset($_SESSION["view_major_error"]);
-                                }
-                            ?>
-                            <input type="submit" id="findViewMajorBtn" class="btn" name="findView" value="Find">
-                            <input type="submit" id="deleteViewMajorBtn" class="btn" name="deleteView" value="Cancel"><br>
-                            <br><div class="table-container" style="<?php echo $viewMajorCoursesLoaded ? "" : "display: none;"; ?>">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Course Code</th>
-                                            <th>Course Name</th>
-                                            <th>Course Category</th>
-                                            <th>Credits</th>
-                                            <th>Professor name</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                        <div class="form-group">
+                            <div class="course-filter-grid">
+                                <div class="form-control">
+                                    <label for="majorName">Major Name</label>
+                                    <select id="majorName" name="major">
                                         <?php
-                                        if ($viewMajorCoursesLoaded && count($viewMajorCourses) === 0) {
-                                            echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, semester, and language).</td></tr>';
-                                        }
-                                        foreach ($viewMajorCourses as $r) {
-                                            $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
-                                            echo "<tr>";
-                                            echo "<td>" . $r["course_code"] . "</td>";
-                                            echo "<td>" . $r["course_name"]. "</td>";
-                                            echo "<td>" . $r["course_category"]. "</td>";
-                                            echo "<td>" . $r["course_credit_nb"] . "</td>";
-                                            echo "<td>" . $profName . "</td>";
-                                            echo "</tr>";
+                                            foreach ($_SESSION["majors"] as $id => $name) {
+                                                $selectedMajor = $vmfSel("major", $id);
+                                                echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                            }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="majorLevel">Major Level</label>
+                                    <select id="majorLevel" name="majorLevel">
+                                        <option value="L1"<?php echo $vmfSel("majorLevel", "L1"); ?>>L1</option>
+                                        <option value="L2"<?php echo $vmfSel("majorLevel", "L2"); ?>>L2</option>
+                                        <option value="L3"<?php echo $vmfSel("majorLevel", "L3"); ?>>L3</option>
+                                        <option value="M1"<?php echo $vmfSel("majorLevel", "M1"); ?>>M1</option>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="majorSemester">Semester</label>
+                                    <select id="majorSemester" name="majorSemester">
+                                        <option value="1"<?php echo $vmfSel("majorSemester", "1"); ?>>Semester 1</option>
+                                        <option value="2"<?php echo $vmfSel("majorSemester", "2"); ?>>Semester 2</option>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="majorLang">Major Language</label>
+                                    <select id="majorLang" name="majorLang">
+                                        <option value="E"<?php echo $vmfSel("majorLang", "E"); ?>>English</option>
+                                        <option value="F"<?php echo $vmfSel("majorLang", "F"); ?>>French</option>
+                                    </select>
+                                </div>
+                                <div class="form-control">
+                                    <label for="majorYear">University Year</label>
+                                    <select id="majorYear" name="majorYear">
+                                        <?php
+                                        foreach($years as $el){ 
+                                            $selectedYear = $vmfSel("majorYear", $el);
+                                            echo "<option value='".htmlspecialchars($el)."'{$selectedYear}>".htmlspecialchars($el)."</option>"; 
                                         }
                                         ?>
-                                    </tbody>
-                                </table>
+                                    </select>
+                                </div>
                             </div>
                         </div>
+                        <?php
+                            if (!empty($_SESSION["view_major_error"])) {
+                                echo '<p style="color:#b91c1c;font-weight:600;">' . htmlspecialchars($_SESSION["view_major_error"], ENT_QUOTES, "UTF-8") . '</p>';
+                                unset($_SESSION["view_major_error"]);
+                            }
+                        ?>
+                        <input type="submit" id="findViewMajorBtn" class="btn" name="findView" value="Find">
+                        <input type="submit" id="deleteViewMajorBtn" class="btn" name="deleteView" value="Cancel"><br>
+                        <br>
+                        <div class="table-container" style="<?= $viewMajorCoursesLoaded ? '' : 'display: none;'; ?>">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Course Category</th>
+                                        <th>Credits</th>
+                                        <th>Professor name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($viewMajorCoursesLoaded && count($viewMajorCourses) === 0) {
+                                        echo '<tr><td colspan="5" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, semester, and language).</td></tr>';
+                                    }
+                                    foreach ($viewMajorCourses as $r) {
+                                        $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
+                                        echo "<tr>";
+                                        echo "<td>" . $r["course_code"] . "</td>";
+                                        echo "<td>" . $r["course_name"] . "</td>";
+                                        echo "<td>" . $r["course_category"] . "</td>";
+                                        echo "<td>" . $r["course_credit_nb"] . "</td>";
+                                        echo "<td>" . $profName . "</td>";
+                                        echo "</tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </form>
-                </details>
+                </div>
+            <?php endif; ?>
         </section>
 
         <section id="content-correctors" class="tab-content">
-            <h1>Correctors</h1>
-        
-        <?php
-                    $correctorsLoaded = array_key_exists("insert_correctors_data", $_SESSION);
-                    $correctors = $_SESSION["insert_correctors_data"] ?? [];
-                    $icf = $_SESSION["insert_correctors_filter"] ?? [];
-                    $icfSel = function ($key, $value) use ($icf) {
-                        return isset($icf[$key]) && (string) $icf[$key] === (string) $value ? " selected" : "";
-                    };
-        ?>
-        <details id="insertCorrectorsDetails" class="dropdown-menu" <?php echo $correctorsLoaded ? 'open' : ''; ?>>
-                <summary>Insert Correctors</summary>
-                <div class="dropdown-content">
-                <form id="insertCorrectors" action="insertCorrectors.php" method="post">
-                         <div class="form-group">
-                            <search>
+            <h1>Correctors</h1><br>
+            <?php if ($correctorAction === 'insert'): ?>
+                <div class="course-action-page">
+                    <h2>Insert Correctors</h2>
+                    <?php
+                        $correctorsLoaded = array_key_exists("insert_correctors_data", $_SESSION);
+                        $correctors = $_SESSION["insert_correctors_data"] ?? [];
+                        $icf = $_SESSION["insert_correctors_filter"] ?? [];
+                        $icfSel = function ($key, $value) use ($icf) {
+                            return isset($icf[$key]) && (string) $icf[$key] === (string) $value ? " selected" : "";
+                        };
+                    ?>
+                    <form id="insertCorrectors" action="insertCorrectors.php" method="post">
+                        <div class="course-filter-grid">
+                            <div class="form-group">
                                 <label for="corrSession">Session</label>
                                 <select name="corrSession" id="corrSession">
                                     <option value="sem1"<?php echo $icfSel("corrSession", "sem1"); ?>>Semester 1</option>
                                     <option value="sem2"<?php echo $icfSel("corrSession", "sem2"); ?>>Semester 2</option>
                                     <option value="sess2"<?php echo $icfSel("corrSession", "sess2"); ?>>Session 2</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="corrMajor">Major</label>
                                 <select name="corrMajor" id="corrMajor">
                                     <option value="all"<?php echo $icfSel("corrMajor", "all"); ?>>All</option>
-                                    <?php
-                                        foreach ($_SESSION["majors"] as $id => $name) {
-                                            $selectedMajor = $icfSel("corrMajor", $id);
-                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
-                                        }
-                                    ?>
+                                    <?php foreach ($_SESSION["majors"] as $id => $name) {
+                                        $selectedMajor = $icfSel("corrMajor", $id);
+                                        echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                    } ?>
                                 </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="corrLevel">Level</label>
                                 <select name="corrLevel" id="corrLevel">
                                     <option value="all"<?php echo $icfSel("corrLevel", "all"); ?>>All</option>
@@ -611,264 +634,265 @@
                                     <option value="L3"<?php echo $icfSel("corrLevel", "L3"); ?>>L3</option>
                                     <option value="M1"<?php echo $icfSel("corrLevel", "M1"); ?>>M1</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="corrLang">Language</label>
                                 <select name="corrLang" id="corrLang">
                                     <option value="all"<?php echo $icfSel("corrLang", "all"); ?>>All</option>
                                     <option value="E"<?php echo $icfSel("corrLang", "E"); ?>>English</option>
                                     <option value="F"<?php echo $icfSel("corrLang", "F"); ?>>French</option>
                                 </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="corrYear">University Year</label>
                                 <select name="corrYear" id="corrYear">
-                                    <?php 
-                                    foreach ($years as $year) {
-                                            $selectedYear = $icfSel("corrYear", $year);
-                                            echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
-                                        }
-                                    ?>
+                                    <?php foreach ($years as $year) {
+                                        $selectedYear = $icfSel("corrYear", $year);
+                                        echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                    } ?>
                                 </select>
-                            </search><br>
-                    </div>
-                    
-                    <input type="submit" id="findButton" name="findBtn" class="btn" value="Find">
-                    <input type="button" id="cancelButton" name="cancelBtn" class="btn" value="Cancel"><br><br>
-                </form>
+                            </div>
+                        </div>
+                        <input type="submit" id="findButton" name="findBtn" class="btn" value="Find">
+                        <input type="button" id="cancelButton" name="cancelBtn" class="btn" value="Cancel">
+                    </form>
 
                     <?php if (isset($_SESSION["insert_correctors_error"])): ?>
-                        <p style="color: red; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_correctors_error"]); ?></p>
+                        <p style="color: red; margin-top: 10px"><?php echo htmlspecialchars($_SESSION["insert_correctors_error"]); ?></p>
                         <?php unset($_SESSION["insert_correctors_error"]); ?>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION["insert_correctors_success"])): ?>
-                        <p style="color: green; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_correctors_success"]); ?></p>
+                        <p style="color: green; margin-top: 10px"><?php echo htmlspecialchars($_SESSION["insert_correctors_success"]); ?></p>
                         <?php unset($_SESSION["insert_correctors_success"]); ?>
                     <?php endif; ?>
 
+                    <?php
+                        // Render correctors table (if loaded)
+                        $correctorsLoaded = $correctorsLoaded ?? array_key_exists("insert_correctors_data", $_SESSION);
+                        $correctors = $correctors ?? $_SESSION["insert_correctors_data"] ?? [];
+                    ?>
+                    <br>
                     <form id="correctorsForm" action="insertCorrectors.php" method="post">
-                     <div class="table-container" style="display: <?php echo $correctorsLoaded ? 'block' : 'none'; ?>;">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Course Code</th>
-                                            <th>Course Name</th>
-                                            <th>Major</th>
-                                            <th>Level</th>
-                                            <th>Language</th>
-                                            <th>First Corrector</th>
-                                            <th>Second Corrector</th>
-                                            <th>Third Corrector</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="correctorsTableBody">
-                                        <?php
-                                        if ($correctorsLoaded && count($correctors) === 0) {
-                                            echo '<tr><td colspan="8" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
-                                        } else {
-                                            foreach ($correctors as $r) {
-                                                $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
-                                                $courseCode = $r["course_code"];
-                                                $courseLang = $r["course_lang"];
-                                                $firstCorrectorId = isset($r["first_corrector_id"]) ? (string)$r["first_corrector_id"] : null;
-                                                $secondSelected = isset($r["second_corrector"]) ? (string)$r["second_corrector"] : "";
-                                                $thirdSelected = isset($r["third_corrector"]) ? (string)$r["third_corrector"] : "";
-                                                $mid = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
-                                                $midRaw = (string)($r["major_id"] ?? "");
-                                                $cc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
-                                                $cl = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
-                                                echo "<tr>";
-                                                echo "<td>" . $cc . "</td>";
-                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>"; 
-                                                echo "<td>" . $mid . "</td>"; 
-                                                echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
-                                                echo "<td>" . $cl . "</td>"; 
-                                                echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
-                                                echo "<td><select name='second_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]'   class='corrector-select'>";
-                                                if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
-                                                    $selectedName = $_SESSION["professors"][$secondSelected];
-                                                    echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
-                                                    echo "<option value=''>null</option>";
-                                                } else {
-                                                    echo "<option value='' selected>null</option>";
-                                                }
-                                                foreach ($_SESSION["professors"] as $id => $name) {
-                                                    $idStr = (string)$id;
-                                                    if ($idStr === $secondSelected || $idStr === $firstCorrectorId || $idStr === $thirdSelected) {
-                                                        continue;
-                                                    }
-                                                    echo "<option value='" . $idStr . "'>" . $name . "</option>";
-                                                }
-                                                echo "</select></td>";
-                                                echo "<td><select name='third_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]'   class='corrector-select'>";
-                                                if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
-                                                    $selectedName = $_SESSION["professors"][$thirdSelected];
-                                                    echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
-                                                    echo "<option value=''>null</option>";
-                                                } else {
-                                                    echo "<option value='' selected>null</option>";
-                                                }
-                                                foreach ($_SESSION["professors"] as $id => $name) {
-                                                    $idStr = (string)$id;
-                                                    if ($idStr === $thirdSelected || $idStr === $firstCorrectorId || $idStr === $secondSelected) {
-                                                        continue;
-                                                    }
-                                                    echo "<option value='" . $idStr . "'>" . $name . "</option>";
-                                                }
-                                                echo "</select></td>";
-                                                echo "</tr>";
+                        <div class="table-container" style="display: <?php echo $correctorsLoaded ? 'block' : 'none'; ?>;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Major</th>
+                                        <th>Level</th>
+                                        <th>Language</th>
+                                        <th>First Corrector</th>
+                                        <th>Second Corrector</th>
+                                        <th>Third Corrector</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="correctorsTableBody">
+                                    <?php
+                                    if ($correctorsLoaded && count($correctors) === 0) {
+                                        echo '<tr><td colspan="8" style="text-align:center;color:#64748b;">No courses match these filters (check major, level, session, and language).</td></tr>';
+                                    } else {
+                                        foreach ($correctors as $r) {
+                                            $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
+                                            $courseCode = $r["course_code"];
+                                            $courseLang = $r["course_lang"];
+                                            $firstCorrectorId = isset($r["first_corrector_id"]) ? (string)$r["first_corrector_id"] : null;
+                                            $secondSelected = isset($r["second_corrector"]) ? (string)$r["second_corrector"] : "";
+                                            $thirdSelected = isset($r["third_corrector"]) ? (string)$r["third_corrector"] : "";
+                                            $mid = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
+                                            $midRaw = (string)($r["major_id"] ?? "");
+                                            $cc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
+                                            $cl = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
+                                            echo "<tr>";
+                                            echo "<td>" . $cc . "</td>";
+                                            echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $mid . "</td>";
+                                            echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $cl . "</td>";
+                                            echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td><select name='second_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]' class='corrector-select'>";
+                                            if ($secondSelected !== "" && isset($_SESSION["professors"][$secondSelected])) {
+                                                $selectedName = $_SESSION["professors"][$secondSelected];
+                                                echo "<option value='" . $secondSelected . "' selected>" . $selectedName . "</option>";
+                                                echo "<option value=''>null</option>";
+                                            } else {
+                                                echo "<option value='' selected>null</option>";
                                             }
+                                            foreach ($_SESSION["professors"] as $id => $name) {
+                                                $idStr = (string)$id;
+                                                if ($idStr === $secondSelected || $idStr === $firstCorrectorId || $idStr === $thirdSelected) {
+                                                    continue;
+                                                }
+                                                echo "<option value='" . $idStr . "'>" . $name . "</option>";
+                                            }
+                                            echo "</select></td>";
+                                            echo "<td><select name='third_corrector[" . htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8") . "][" . htmlspecialchars($midRaw, ENT_QUOTES, "UTF-8") . "]' class='corrector-select'>";
+                                            if ($thirdSelected !== "" && isset($_SESSION["professors"][$thirdSelected])) {
+                                                $selectedName = $_SESSION["professors"][$thirdSelected];
+                                                echo "<option value='" . $thirdSelected . "' selected>" . $selectedName . "</option>";
+                                                echo "<option value=''>null</option>";
+                                            } else {
+                                                echo "<option value='' selected>null</option>";
+                                            }
+                                            foreach ($_SESSION["professors"] as $id => $name) {
+                                                $idStr = (string)$id;
+                                                if ($idStr === $thirdSelected || $idStr === $firstCorrectorId || $idStr === $secondSelected) {
+                                                    continue;
+                                                }
+                                                echo "<option value='" . $idStr . "'>" . $name . "</option>";
+                                            }
+                                            echo "</select></td>";
+                                            echo "</tr>";
                                         }
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div><br>
-                            <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" >
-                            </form>
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div><br>
+                        <input type="submit" id="applyCorr" class="btn" name="applyCorr" value="Apply Changes" >
+                    </form>
                 </div>
-        </details>
-                            
-                <?php 
-                    $numbersLoaded = array_key_exists("insert_numbers_data", $_SESSION);
-                    $numbersList = $_SESSION["insert_numbers_data"] ?? [];
-                    $inf = $_SESSION["insert_numbers_filter"] ?? [];
-                    $infSel = function ($key, $value) use ($inf) {
-                        return isset($inf[$key]) && (string) $inf[$key] === (string) $value ? " selected" : "";
-                    };
-                ?>
-                <details id="insertNumbersDetails" class="dropdown-menu" <?php echo $numbersLoaded ? 'open' : ''; ?>>
-                    <summary>Insert copies number of each corrector</summary>
-                    <div class="dropdown-content">
-                        <form id="insertNumbers" action="insertNumbers.php" method="post">
+            <?php elseif ($correctorAction === 'insert-numbers'): ?>
+                <div class="course-action-page">
+                    <h2>Insert copies number of each corrector</h2>
+                    <?php
+                        $numbersLoaded = array_key_exists("insert_numbers_data", $_SESSION);
+                        $numbersList = $_SESSION["insert_numbers_data"] ?? [];
+                        $inf = $_SESSION["insert_numbers_filter"] ?? [];
+                        $infSel = function ($key, $value) use ($inf) {
+                            return isset($inf[$key]) && (string) $inf[$key] === (string) $value ? " selected" : "";
+                        };
+                    ?>
+                    <form id="insertNumbers" action="insertNumbers.php" method="post">
+                        <div class="course-filter-grid">
                             <div class="form-group">
-                                <search>
-                                    <label for="numberSession">Session</label>
-                                    <select name="numberSession" id="numberSession">
-                                        <option value="sem1"<?php echo $infSel("numberSession", "sem1"); ?>>Semester 1</option>
-                                        <option value="sem2"<?php echo $infSel("numberSession", "sem2"); ?>>Semester 2</option>
-                                        <option value="sess2"<?php echo $infSel("numberSession", "sess2"); ?>>Session 2</option>
-                                    </select>
-                                    <label for="numberExam">Exam</label>
-                                    <select name="numberExam" id="numberExam">
-                                        <option value="P" <?php echo $infSel("numberExam", "P") ?>>Partial</option>
-                                        <option value="F" <?php echo $infSel("numberExam", "F") ?>>Final</option>
-                                    </select>
-                                    <label for="numberMajor">Major</label>
-                                    <select name="numberMajor" id="numberMajor">
-                                        <option value="all" <?php echo $infSel("numberMajor", "all"); ?> >All</option>
-                                        <?php
-                                            foreach ($_SESSION["majors"] as $id => $name) {
-                                                $selectedMajor = $infSel("numberMajor", $id);
-                                                echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
-                                            }
-                                        ?>
-                                    </select>
-                                    <label for="numberLevel">Level</label>
-                                    <select name="numberLevel" id="numberLevel">
-                                        <option value="all"<?php echo $infSel("numberLevel", "all"); ?>>All</option>
-                                        <option value="L1"<?php echo $infSel("numberLevel", "L1"); ?>>L1</option>
-                                        <option value="L2"<?php echo $infSel("numberLevel", "L2"); ?>>L2</option>
-                                        <option value="L3"<?php echo $infSel("numberLevel", "L3"); ?>>L3</option>
-                                        <option value="M1"<?php echo $infSel("numberLevel", "M1"); ?>>M1</option>
-                                    </select>
-                                    <label for="numberLang">Language</label>
-                                    <select name="numberLang" id="numberLang">
-                                        <option value="all"<?php echo $infSel("numberLang", "all"); ?>>All</option>
-                                        <option value="E"<?php echo $infSel("numberLang", "E"); ?>>English</option>
-                                        <option value="F"<?php echo $infSel("numberLang", "F"); ?>>French</option>
-                                    </select>
-                                    <label for="numberYear">University Year</label>
-                                    <select name="numberYear" id="numberYear">
-                                        <?php 
-                                        foreach ($years as $year) {
-                                                $selectedYear = $infSel("numberYear", $year);
-                                                echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
-                                            }
-                                        ?>
-                                    </select>
-                                </search><br>
+                                <label for="numberSession">Session</label>
+                                <select name="numberSession" id="numberSession">
+                                    <option value="sem1"<?php echo $infSel("numberSession", "sem1"); ?>>Semester 1</option>
+                                    <option value="sem2"<?php echo $infSel("numberSession", "sem2"); ?>>Semester 2</option>
+                                    <option value="sess2"<?php echo $infSel("numberSession", "sess2"); ?>>Session 2</option>
+                                </select>
                             </div>
-                            <input type="submit" id="findNumber" name="findNumber" class="btn" value="Find">
-                            <input type="button" id="cancelNumber" name="cancelNumber" class="btn" value="Cancel"><br><br>
-                        </form>
+                            <div class="form-group">
+                                <label for="numberExam">Exam</label>
+                                <select name="numberExam" id="numberExam">
+                                    <option value="P" <?php echo $infSel("numberExam", "P") ?>>Partial</option>
+                                    <option value="F" <?php echo $infSel("numberExam", "F") ?>>Final</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="numberMajor">Major</label>
+                                <select name="numberMajor" id="numberMajor">
+                                    <option value="all" <?php echo $infSel("numberMajor", "all"); ?> >All</option>
+                                    <?php foreach ($_SESSION["majors"] as $id => $name) {
+                                        $selectedMajor = $infSel("numberMajor", $id);
+                                        echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                    } ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="numberLevel">Level</label>
+                                <select name="numberLevel" id="numberLevel">
+                                    <option value="all"<?php echo $infSel("numberLevel", "all"); ?>>All</option>
+                                    <option value="L1"<?php echo $infSel("numberLevel", "L1"); ?>>L1</option>
+                                    <option value="L2"<?php echo $infSel("numberLevel", "L2"); ?>>L2</option>
+                                    <option value="L3"<?php echo $infSel("numberLevel", "L3"); ?>>L3</option>
+                                    <option value="M1"<?php echo $infSel("numberLevel", "M1"); ?>>M1</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="numberLang">Language</label>
+                                <select name="numberLang" id="numberLang">
+                                    <option value="all"<?php echo $infSel("numberLang", "all"); ?>>All</option>
+                                    <option value="E"<?php echo $infSel("numberLang", "E"); ?>>English</option>
+                                    <option value="F"<?php echo $infSel("numberLang", "F"); ?>>French</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="numberYear">University Year</label>
+                                <select name="numberYear" id="numberYear">
+                                    <?php foreach ($years as $year) {
+                                        $selectedYear = $infSel("numberYear", $year);
+                                        echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                    } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="submit" id="findNumber" name="findNumber" class="btn" value="Find">
+                        <input type="button" id="cancelNumber" name="cancelNumber" class="btn" value="Cancel">
+                    </form>
 
-                        <?php if (isset($_SESSION["insert_numbers_error"])): ?>
-                            <p style="color: red; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_numbers_error"]); ?></p>
-                            <?php unset($_SESSION["insert_numbers_error"]); ?>
-                        <?php endif; ?>
+                    <?php if (isset($_SESSION["insert_numbers_error"])): ?>
+                        <p style="color: red; margin-top: 10px"><?php echo htmlspecialchars($_SESSION["insert_numbers_error"]); ?></p>
+                        <?php unset($_SESSION["insert_numbers_error"]); ?>
+                    <?php endif; ?>
 
-                        <?php if (isset($_SESSION["insert_numbers_success"])): ?>
-                            <p style="color: green; margin-top: 10px;"><?php echo htmlspecialchars($_SESSION["insert_numbers_success"]); ?></p>
-                            <?php unset($_SESSION["insert_numbers_success"]); ?>
-                        <?php endif; ?>
-
-                        <form id="numbersForm" action="insertNumbers.php" method="post">
-                            <div class="table-container" style="display: <?php echo $numbersLoaded ? 'block' : 'none'; ?>;">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Course Code</th>
-                                            <th>Course Name</th>
-                                            <th>Major</th>
-                                            <th>Level</th>
-                                            <th>Language</th>
-                                            <th>First Corrector</th>
-                                            <th>1st Corr Copies</th>
-                                            <th>Second Corrector</th>
-                                            <th>2nd Corr Copies</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="numbersTableBody">
-                                        <?php
-                                        if ($numbersLoaded && count($numbersList) === 0) {
-                                            echo '<tr><td colspan="9" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
-                                        } else {
-                                            $isFinal = (($inf['numberSession'] ?? '') === 'sess2' || ($inf['numberExam'] ?? '') === 'F');
-                                            foreach ($numbersList as $r) {
-                                                $courseCode = $r["course_code"];
-                                                $courseLang = $r["course_lang"];
-                                                $majorId = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
-                                                $ccEsc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
-                                                $clEsc = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
-                                                $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
-                                                if ($profName === "") {
-                                                    $profName = $_SESSION["professors"][$r["prof_file_nb"]] ?? "Unknown";
-                                                }
-                                                $secondName = isset($r["second_corrector"]) ? ($_SESSION["professors"][$r["second_corrector"]] ?? "Unknown") : "None";
-                                                
-                                                $val1 = $isFinal ? $r['final_first_corrector'] : $r['partial_first_corrector'];
-                                                $val2 = $isFinal ? $r['final_second_corrector'] : $r['partial_second_corrector'];
-
-                                                echo "<tr>";
-                                                echo "<td>" . $ccEsc . "</td>";
-                                                echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>"; 
-                                                echo "<td>" . $majorId . "</td>"; 
-                                                echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>"; 
-                                                echo "<td>" . $clEsc . "</td>"; 
-                                                echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
-                                                echo "<td><input type='number' step='1' min='0' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
-                                                echo "<td>" . htmlspecialchars($secondName, ENT_QUOTES, "UTF-8") . "</td>";
-                                                echo "<td><input type='number' step='1' min='0' name='second_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val2 . "' class='number-input premium-number-input' ></td>";
-                                                echo "</tr>";
+                    <?php if (isset($_SESSION["insert_numbers_success"])): ?>
+                        <p style="color: green; margin-top: 10px"><?php echo htmlspecialchars($_SESSION["insert_numbers_success"]); ?></p>
+                        <?php unset($_SESSION["insert_numbers_success"]); ?>
+                    <?php endif; ?>
+                    <br>
+                    <form id="numbersForm" action="insertNumbers.php" method="post">
+                        <div class="table-container" style="display: <?php echo $numbersLoaded ? 'block' : 'none'; ?>;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Course Code</th>
+                                        <th>Course Name</th>
+                                        <th>Major</th>
+                                        <th>Level</th>
+                                        <th>Language</th>
+                                        <th>First Corrector</th>
+                                        <th>1st Corr Copies</th>
+                                        <th>Second Corrector</th>
+                                        <th>2nd Corr Copies</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="numbersTableBody">
+                                    <?php
+                                    if ($numbersLoaded && count($numbersList) === 0) {
+                                        echo '<tr><td colspan="9" style="text-align:center;color:#64748b;">No courses match these filters.</td></tr>';
+                                    } else {
+                                        $isFinal = (($inf['numberSession'] ?? '') === 'sess2' || ($inf['numberExam'] ?? '') === 'F');
+                                        foreach ($numbersList as $r) {
+                                            $courseCode = $r["course_code"];
+                                            $courseLang = $r["course_lang"];
+                                            $majorId = htmlspecialchars((string)($r["major_id"] ?? ""), ENT_QUOTES, "UTF-8");
+                                            $ccEsc = htmlspecialchars($courseCode, ENT_QUOTES, "UTF-8");
+                                            $clEsc = htmlspecialchars($courseLang, ENT_QUOTES, "UTF-8");
+                                            $profName = trim(($r["prof_first_name"] ?? "") . " " . ($r["prof_last_name"] ?? ""));
+                                            if ($profName === "") {
+                                                $profName = $_SESSION["professors"][$r["prof_file_nb"]] ?? "Unknown";
                                             }
+                                            $secondName = isset($r["second_corrector"]) ? ($_SESSION["professors"][$r["second_corrector"]] ?? "Unknown") : "None";
+
+                                            $val1 = $isFinal ? $r['final_first_corrector'] : $r['partial_first_corrector'];
+                                            $val2 = $isFinal ? $r['final_second_corrector'] : $r['partial_second_corrector'];
+
+                                            echo "<tr>";
+                                            echo "<td>" . $ccEsc . "</td>";
+                                            echo "<td>" . htmlspecialchars($r["course_name"] ?? "", ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $majorId . "</td>";
+                                            echo "<td>" . htmlspecialchars((string)($r["course_level"] ?? ""), ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td>" . $clEsc . "</td>";
+                                            echo "<td>" . htmlspecialchars($profName, ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td><input type='number' step='1' min='0' name='first_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val1 . "' class='number-input premium-number-input' ></td>";
+                                            echo "<td>" . htmlspecialchars($secondName, ENT_QUOTES, "UTF-8") . "</td>";
+                                            echo "<td><input type='number' step='1' min='0' name='second_numbers[" . $ccEsc . "][" . $clEsc . "][" . $majorId . "]' value='" . (int)$val2 . "' class='number-input premium-number-input' ></td>";
+                                            echo "</tr>";
                                         }
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div><br>
-                            <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" >
-                        </form>
-                    </div>
-                </details>
-                <?php
-                    $viewCorrectors = array_key_exists("view_correctors_data", $_SESSION);
-                    $correctorsList = $_SESSION["view_correctors_data"] ?? [];
-                    $corr = (is_array($correctorsList) && count($correctorsList) > 0) ? $correctorsList[0] : [];
-                    $vcf = $_SESSION["view_correctors_filter"] ?? [];
-                    $vcfSel = function ($key, $value) use ($vcf) {
-                        return isset($vcf[$key]) && (string) $vcf[$key] === (string) $value ? " selected" : "";
-                    };
-                    $viewCorrectorsLoaded = array_key_exists("view_correctors_loaded", $_SESSION);
-                ?>
-                <details class="dropdown-menu">
-                    <summary>Excel Format</summary>
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div><br>
+                        <input type="submit" id="applyNumbers" class="btn" name="applyNumbers" value="Apply Changes" >
+                    </form>
+                </div>
+            <?php elseif ($correctorAction === 'excel'): ?>
+                <div class="course-action-page">
+                    <h2>Excel Format</h2>
                     <?php
                         $eef = $_SESSION["excel_export_filter"] ?? [];
                         $eefSel = function ($key, $value) use ($eef) {
@@ -876,57 +900,60 @@
                         };
                     ?>
                     <form id="exportExcel" action="exportExcel.php" method="post">
-                        <div class="dropdown-content">
-                            <?php
-                                if (!empty($_SESSION["excel_export_error"])) {
-                                    echo '<p style="color:#b91c1c;font-weight:600;">' . htmlspecialchars($_SESSION["excel_export_error"], ENT_QUOTES, "UTF-8") . '</p>';
-                                    unset($_SESSION["excel_export_error"]);
-                                }
-                            ?>
+                        <div class="course-filter-grid">
                             <div class="form-group">
-                                <search>
-                                    <label for="session">Session</label>
-                                    <select id="session" name="sessionId">
-                                         <option value="sem1"<?php echo $eefSel("sessionId", "sem1"); ?>>Semester 1</option>
-                                        <option value="sem2"<?php echo $eefSel("sessionId", "sem2"); ?>>Semester 2</option>
-                                        <option value="sess2"<?php echo $eefSel("sessionId", "sess2"); ?>>Session 2</option>
-                                    </select>
-                                    <label for="excelMajor">Major</label>
-                                    <select id="excelMajor" name="excelMajor">
-                                        <option value="all" <?php echo $eefSel("excelMajor","all") ?>>All</option>
-                                        <?php foreach ($_SESSION["majors"] as $id => $name) {
-                                            $selectedMajor = $eefSel("excelMajor", $id);
-                                            echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
-                                        } ?>
-                                    </select>
-                                    <label for="excelLevel">Level</label>
-                                    <select name="excelLevel" id="excelLevel">
-                                        <option value="all" <?php echo $eefSel("excelLevel","all") ?>>All</option>
-                                        <option value="L1" <?php echo $eefSel("excelLevel","L1") ?>>L1</option>
-                                        <option value="L2" <?php echo $eefSel("excelLevel","L2") ?>>L2</option>
-                                        <option value="L3" <?php echo $eefSel("excelLevel","L3") ?>>L3</option>
-                                        <option value="M1" <?php echo $eefSel("excelLevel","M1") ?>>M1</option>
-                                    </select>
-                                    <label for="excelYear">University Year</label>
-                                    <select name="excelYear" id="excelYear">
-                                        <?php 
-                                        foreach ($years as $year) {
-                                                $selectedYear = $eefSel("excelYear", $year);
-                                                echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
-                                            }
-                                        ?>
-                                    </select>
-                                </search>
+                                <label for="session">Session</label>
+                                <select id="session" name="sessionId">
+                                    <option value="sem1"<?php echo $eefSel("sessionId", "sem1"); ?>>Semester 1</option>
+                                    <option value="sem2"<?php echo $eefSel("sessionId", "sem2"); ?>>Semester 2</option>
+                                    <option value="sess2"<?php echo $eefSel("sessionId", "sess2"); ?>>Session 2</option>
+                                </select>
                             </div>
-                            <label for="format">Choose the format</label>
-                            <input type="submit" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
-                            <input type="submit" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
-                            <input type="submit" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
-                            <input type="submit" id="format" class="btn" name="ed" value="اضبارة تصحيح مسابقات">
-                            <input type="submit" id="format" class="btn" name="cancelExcel" value="Cancel">
+                            <div class="form-group">
+                                <label for="excelMajor">Major</label>
+                                <select id="excelMajor" name="excelMajor">
+                                    <option value="all" <?php echo $eefSel("excelMajor","all") ?>>All</option>
+                                    <?php foreach ($_SESSION["majors"] as $id => $name) {
+                                        $selectedMajor = $eefSel("excelMajor", $id);
+                                        echo "<option value='" . $id . "'{$selectedMajor}>" . $name . "</option>";
+                                    } ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="excelLevel">Level</label>
+                                <select name="excelLevel" id="excelLevel">
+                                    <option value="all" <?php echo $eefSel("excelLevel","all") ?>>All</option>
+                                    <option value="L1" <?php echo $eefSel("excelLevel","L1") ?>>L1</option>
+                                    <option value="L2" <?php echo $eefSel("excelLevel","L2") ?>>L2</option>
+                                    <option value="L3" <?php echo $eefSel("excelLevel","L3") ?>>L3</option>
+                                    <option value="M1" <?php echo $eefSel("excelLevel","M1") ?>>M1</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="excelYear">University Year</label>
+                                <select name="excelYear" id="excelYear">
+                                    <?php foreach ($years as $year) {
+                                        $selectedYear = $eefSel("excelYear", $year);
+                                        echo "<option value='" . $year . "'{$selectedYear}>" . $year . "</option>";
+                                    } ?>
+                                </select>
+                            </div>
                         </div>
+                        <label for="format">Choose the format</label>
+                        <input type="submit" id="format" class="btn" name="tawzi3" value="توزيع اللجان الفاحصة">
+                        <input type="submit" id="format" class="btn" name="ta3in" value="تعيين اللجان الفاحصة">
+                        <input type="submit" id="format" class="btn" name="edbarat" value="مجموع اضبارات التصحيح">
+                        <input type="submit" id="format" class="btn" name="ed" value="اضبارة تصحيح مسابقات">
+                        <input type="submit" id="format" class="btn" name="cancelExcel" value="Cancel">
                     </form>
-                </details>
+                </div>
+            <?php else: ?>
+                <div class="course-action-list">
+                        <a href="AdminPage.php?tab=correctors&correctorAction=insert" class="course-action-card<?php echo $correctorAction === 'insert' ? ' active' : ''; ?>">Insert Correctors</a>
+                        <a href="AdminPage.php?tab=correctors&correctorAction=insert-numbers" class="course-action-card<?php echo $correctorAction === 'insert-numbers' ? ' active' : ''; ?>">Insert copies number of each corrector</a>
+                        <a href="AdminPage.php?tab=correctors&correctorAction=excel" class="course-action-card<?php echo $correctorAction === 'excel' ? ' active' : ''; ?>">Excel Format</a>
+                    </div>
+            <?php endif; ?>
         </section>
 
         <section id="content-edit-admins" class="tab-content">

@@ -96,11 +96,11 @@ function fetchCorrectorsRows(mysqli $conn, string $major, string $level, string 
     return $rows;
 }
 
-if (isset($_POST["cancelBtn"]) || isset($_GET["cancelBtn"])) {
+    if (isset($_POST["cancelBtn"]) || isset($_GET["cancelBtn"])) {
     unset($_SESSION["insert_correctors_data"], $_SESSION["insert_correctors_filter"], $_SESSION["insert_correctors_error"], $_SESSION["insert_correctors_success"]);
     if (isset($conn)) mysqli_close($conn);
     if (ob_get_length()) ob_end_clean();
-    header("Location: AdminPage.php?tab=correctors");
+    header("Location: AdminPage.php?tab=correctors&correctorAction=insert");
     exit;
 }
 
@@ -145,7 +145,7 @@ if (isset($_POST["findBtn"])) {
 
     mysqli_close($conn);
     ob_end_clean();
-    header("Location: AdminPage.php?tab=correctors");
+    header("Location: AdminPage.php?tab=correctors&correctorAction=insert");
     exit;
 }
 
@@ -247,7 +247,7 @@ if (isset($_POST["applyCorr"])) {
 
     mysqli_close($conn);
     ob_end_clean();
-    header("Location: AdminPage.php?tab=correctors");
+    header("Location: AdminPage.php?tab=correctors&correctorAction=insert");
     exit;
 }
 

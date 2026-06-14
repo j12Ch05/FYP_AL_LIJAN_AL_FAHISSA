@@ -124,5 +124,5 @@
     if (ob_get_length() !== false) {
         ob_end_clean();
     }
-    header("Location: AdminPage.php?tab=courses");
+    header("Location: AdminPage.php?tab=courses&courseAction=add");
     exit();

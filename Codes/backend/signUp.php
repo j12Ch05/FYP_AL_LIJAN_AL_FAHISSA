@@ -63,9 +63,9 @@
         }
 
         //Checking the email
-        if(!filter_var($email,FILTER_VALIDATE_EMAIL) || substr($email, -strlen($ulDomain)) != $ulDomain){
-            $errors[] = "Invalid email format";
-        }
+        // if(!filter_var($email,FILTER_VALIDATE_EMAIL) || substr($email, -strlen($ulDomain)) != $ulDomain){
+        //     $errors[] = "Invalid email format";
+        // }
         if(value_exists($conn,"prof_email",$email)){
             $errors[] = "This email is already used";
         }

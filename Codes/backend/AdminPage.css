@@ -64,6 +64,33 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
+/* Prevent default blue color on click/focus and remove tap highlight */
+.nav-item,
+.nav-item:link,
+.nav-item:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+.nav-item:active,
+.nav-item:focus {
+    color: inherit;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+}
+
+.nav-item:focus-visible {
+    outline: none;
+}
+
+/* Remove mobile tap highlight and inner focus for button-like elements */
+.nav-item,
+.sidebar-course-option,
+.course-action-card {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
 #tab-professors:checked ~ .sidebar .label-professors,
 #tab-uniyear:checked ~ .sidebar .label-uniyear,
 #tab-courses:checked ~ .sidebar .label-courses,
@@ -130,6 +157,29 @@ body {
     color: var(--text-muted);
     margin-bottom: 8px;
     font-weight: 600;
+}
+
+.course-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.form-control {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.form-control label {
+    margin-bottom: 6px;
+}
+
+.course-filter-grid .btn {
+    grid-column: span 1;
+    align-self: end;
+    white-space: nowrap;
 }
 
 .form-group input, .form-group select {
@@ -199,6 +249,89 @@ td {
     font-weight: 600;
 }
 
+.sidebar-submenu {
+    display: none;
+    margin: 12px 0 18px 0;
+    padding-left: 16px;
+}
+
+.sidebar-submenu.open {
+    display: block;
+}
+
+.sidebar-submenu .sidebar-course-option {
+    padding-left: 40px;
+}
+
+.sidebar-course-option,
+.sidebar-course-option:visited,
+.sidebar-course-option:active {
+    display: block;
+    padding: 15px 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sidebar-course-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-course-option.active {
+    background: white;
+    color: var(--primary-purple);
+}
+
+.course-main-message,
+.course-action-page {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.course-action-page h2 {
+    margin-bottom: 18px;
+}
+
+.course-action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.course-action-card,
+.course-action-card:visited,
+.course-action-card:hover,
+.course-action-card:active {
+    display: block;
+    width: 100%;
+    padding: 16px 18px;
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background 0.2s ease, transform 0.12s ease, border-color 0.2s ease;
+}
+
+.course-action-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateX(1px);
+    border-color: rgba(108, 99, 255, 0.35);
+}
+
+.course-action-card.active {
+    background: rgba(240, 249, 255, 0.95);
+    border-color: rgba(191, 219, 254, 1);
+    color: #111;
+}
+
 /* Buttons */
 .btn {
     background: linear-gradient(135deg, #7b61ff, #5a52d4);
@@ -234,13 +367,18 @@ input[type="radio"] {
     display: block;
 }
 
+
+
+/* Keep all sidebar tab labels white on selection (preserve sidebar gradient) */
 #tab-professors:checked ~ .sidebar .label-professors,
 #tab-uniyear:checked ~ .sidebar .label-uniyear,
 #tab-courses:checked ~ .sidebar .label-courses,
 #tab-correctors:checked ~ .sidebar .label-correctors,
 #tab-edit-admins:checked ~ .sidebar .label-edit-admins {
-    background: rgba(255, 255, 255, 0.2);
-    border-left: 4px solid white;
+    /* subtle white-transparent fill while keeping a white side indicator */
+    background: rgba(255,255,255,0.10) !important;
+    color: var(--white) !important;
+    border-left: 6px solid rgba(255,255,255,1) !important;
 }
 
 /* Dropdown menu styles */
@@ -335,6 +473,18 @@ input[type="radio"] {
 
 .dropdown-content .btn {
     margin-right: 10px;
+}
+
+@media (max-width: 900px) {
+    .course-action-list {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .course-action-list {
+        gap: 10px;
+    }
 }
 
 /* =============================================

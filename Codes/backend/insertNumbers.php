@@ -107,7 +107,7 @@
               $_SESSION["insert_numbers_success"]);
         if (isset($conn)) mysqli_close($conn);
         if (ob_get_length()) ob_end_clean();
-        header("Location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors&correctorAction=insert-numbers");
         exit;
     }
 
@@ -146,7 +146,7 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("Location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors&correctorAction=insert-numbers");
         exit;
     }
 
@@ -217,7 +217,7 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("Location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors&correctorAction=insert-numbers");
         exit;
     }
 
@@ -270,11 +270,11 @@
 
         mysqli_close($conn);
         ob_end_clean();
-        header("Location: AdminPage.php?tab=correctors");
+        header("Location: AdminPage.php?tab=correctors&correctorAction=insert-numbers");
         exit;
     }
 
     mysqli_close($conn);
     ob_end_clean();
-    header("Location: AdminPage.php?tab=correctors");
+    header("Location: AdminPage.php?tab=correctors&correctorAction=insert-numbers");
     exit;
